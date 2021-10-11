@@ -23,9 +23,11 @@ email: leonardohansa@protonmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   Material de tratamiento y análisis de datos para clases.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+url: "http://cursos.leonardohansa.com" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: l_hansa
 github_username:  lhansa
+
+favicon: "favicon.png"
 
 # Build settings
 # theme: minima
