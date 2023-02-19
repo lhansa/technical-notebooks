@@ -1,6 +1,6 @@
 ---
 title: "Diferencia de edad entre parejas sentimentales en películas"
-description: "Exploración de datos de películas"
+description: "Buenas diferencias de edades entre parejas en películas"
 description-meta: "Exploración de datos de películas"
 author: "Leonardo Hansa"
 date: "2023-02-19"
@@ -20,11 +20,12 @@ library(tidyverse)
 age_gaps <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-02-14/age_gaps.csv')
 ```
 
+Diferencia de edad en las 40 películas con más diferencia: 
+
 ```{r}
 #| label: df-plot-1
-#| fig-height: 30
 df_plot_1 <- age_gaps |> 
-  slice_max(age_difference, n = 50)
+  slice_max(age_difference, n = 40)
 
 ggplot(df_plot_1) + 
   geom_linerange(
@@ -37,25 +38,43 @@ ggplot(df_plot_1) +
   labs(x = "", y = "")
 ```
 
+Las décadas con mayor diferencia son las que menos muestra tienen.
+
+```{r}
+age_gaps |> 
+  mutate(decada = str_extract(as.character(release_year), "\\d\\d\\d"), 
+         decada = str_c(decada, "0")) |>
+  ggplot() + 
+  geom_boxplot(aes(x = decada, y = age_difference)) +
+  geom_jitter(aes(x = decada, y = age_difference), alpha = 0.3, width = 0.25) +
+  labs(x = "", y = "", 
+       title = "Distribución de la diferencia de edad entre personajes de películas, por década")
+```
+Selecciono las 40 películas con más diferencia relativa con respecto al actor más joven. 
+
 ```{r}
 #| label: plot-2
-df_plot_2 <- age_gaps |> 
-  sample_n(20) |> 
-  select(movie_name, actor_1_age, actor_2_age, age_difference) |> 
-  pivot_longer(
-    -c(movie_name, age_difference), 
-    names_to = "actor", 
-    values_to = "age"
-  )
+age_gaps_filtered <- age_gaps |> 
+  mutate(age_difference_rel = age_difference / actor_2_age) |> 
+  with_groups(movie_name, ~ filter(.x, n() == 1))
 
-ggplot(df_plot_2) + 
+ggplot(slice_max(age_gaps_filtered, age_difference_rel, n = 40), 
+       aes(x = reorder(movie_name, actor_1_age))) + 
   geom_point(aes(
-    x = reorder(movie_name, age_difference), 
-    y = age, 
-    col = actor)
-  ) + 
+    y = actor_1_age,
+    col = character_1_gender  
+  )) + 
+  geom_point(aes(
+    y = actor_2_age, 
+    col = character_2_gender  
+  )) + 
+  geom_linerange(aes(
+    ymin = actor_2_age, 
+    ymax = actor_1_age
+  )) + 
   coord_flip() + 
-  labs(x = "", y = "")
+  labs(x = "", y = "") + 
+  scale_color_discrete("Personaje")
 ```
 
 <!-- artists <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-01-17/artists.csv') -->

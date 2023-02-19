@@ -117,7 +117,7 @@ cookieconsent.run({
       <h1 class="title">Diferencia de edad entre parejas sentimentales en películas</h1>
                   <div>
         <div class="description">
-          Exploración de datos de películas
+          Buenas diferencias de edades entre parejas en películas
         </div>
       </div>
                           <div class="quarto-categories">
@@ -157,46 +157,26 @@ cookieconsent.run({
 
 
 
+<p>El <a href="https://github.com/rfordatascience/tidytuesday/blob/master/data/2023/2023-02-14/readme.md">tidytuesday</a> del 14 de febrero de 2023 trae datos de diferencias de edad entre parejas sentimentales en películas de Hollywood.</p>
 <div class="cell">
 
 </div>
+<p>Diferencia de edad en las 40 películas con más diferencia:</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/df-plot-1-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>Rows: 1,155
-Columns: 13
-$ movie_name         &lt;chr&gt; "Harold and Maude", "Venus", "The Quiet American", …
-$ release_year       &lt;dbl&gt; 1971, 2006, 2002, 1998, 2010, 1992, 2009, 1999, 199…
-$ director           &lt;chr&gt; "Hal Ashby", "Roger Michell", "Phillip Noyce", "Joe…
-$ age_difference     &lt;dbl&gt; 52, 50, 49, 45, 43, 42, 40, 39, 38, 38, 36, 36, 35,…
-$ couple_number      &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
-$ actor_1_name       &lt;chr&gt; "Ruth Gordon", "Peter O'Toole", "Michael Caine", "D…
-$ actor_2_name       &lt;chr&gt; "Bud Cort", "Jodie Whittaker", "Do Thi Hai Yen", "T…
-$ character_1_gender &lt;chr&gt; "woman", "man", "man", "man", "man", "man", "man", …
-$ character_2_gender &lt;chr&gt; "man", "woman", "woman", "woman", "man", "woman", "…
-$ actor_1_birthdate  &lt;date&gt; 1896-10-30, 1932-08-02, 1933-03-14, 1930-09-17, 19…
-$ actor_2_birthdate  &lt;date&gt; 1948-03-29, 1982-06-03, 1982-10-01, 1975-11-08, 19…
-$ actor_1_age        &lt;dbl&gt; 75, 74, 69, 68, 81, 59, 62, 69, 57, 77, 59, 56, 65,…
-$ actor_2_age        &lt;dbl&gt; 23, 24, 20, 23, 38, 17, 22, 30, 19, 39, 23, 20, 30,…</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>Rows: 40
-Columns: 4
-$ movie_name     &lt;chr&gt; "From Russia with Love", "From Russia with Love", "We W…
-$ age_difference &lt;dbl&gt; 11, 11, 2, 2, 1, 1, 26, 26, 25, 25, 6, 6, 21, 21, 3, 3,…
-$ actor          &lt;chr&gt; "actor_1_age", "actor_2_age", "actor_1_age", "actor_2_a…
-$ age            &lt;dbl&gt; 33, 22, 46, 44, 37, 36, 53, 27, 51, 26, 36, 30, 43, 22,…</code></pre>
-</div>
-</div>
+<p>Las décadas con mayor diferencia son las que menos muestra tienen.</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/plot-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Selecciono las 40 películas con más diferencia relativa con respecto al actor más joven.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/plot-2-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <!-- artists <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-01-17/artists.csv') -->
