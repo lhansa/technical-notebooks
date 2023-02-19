@@ -89,12 +89,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 <script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="../../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/cookie-consent/cookie-consent.js"></script>
+<link href="../../site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
 <script src="../../site_libs/quarto-html/quarto.js"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -124,22 +126,50 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   }
 }</script>
 
+<script type="text/javascript" charset="UTF-8">
+document.addEventListener('DOMContentLoaded', function () {
+cookieconsent.run({
+  "notice_banner_type":"simple",
+  "consent_type":"express",
+  "palette":"light",
+  "language":"en",
+  "page_load_consent_levels":["strictly-necessary"],
+  "notice_banner_reject_button_hide":false,
+  "preferences_center_close_button_hide":false,
+  "website_name":""
+  });
+});
+</script> 
+  
 
-<link rel="stylesheet" href="../../styles.css">
+
 </head>
 
 <body class="nav-fixed fullcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg navbar-dark ">
+    <nav class="navbar navbar-expand-md navbar-dark ">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container">
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Longitud sin anchura</span>
     </a>
   </div>
-          <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="dropdown-header">
+ <span class="menu-text">Cu-cu-trás</span></li>
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://leonardohansa.com">
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -353,9 +383,36 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       });
     }
   }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+    var links = window.document.querySelectorAll('a:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          // default icon
+          link.classList.add("external");
+      }
+    }
 });
 </script>
 </div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+      <div class="nav-footer-center">
+        <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+ Legal
+  </li>  
+</ul>
+      <div class="cookie-consent-footer"><a href="#" id="open_preferences_center">Cookies</a></div></div>
+  </div>
+</footer>
 
 
 

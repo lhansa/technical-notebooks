@@ -1,5 +1,7 @@
 ---
 title: "El sutil arte de que todo te importe una mierda"
+description: "Resumen del libro El sutil arte de que casi todo te importe una mierda"
+description-meta: "Resumen del libro El sutil arte de que casi todo te importe una mierda"
 author: "Leonardo Hansa"
 date: "2022-08-05"
 categories: [lecturas]

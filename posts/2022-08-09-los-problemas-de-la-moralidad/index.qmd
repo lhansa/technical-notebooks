@@ -1,5 +1,7 @@
 ---
 title: "Los peligros de la moralidad"
+description: "Resumen de Los peligros de la moralidad, de Pablo Malo"
+description-meta: "Resumen de Los peligros de la moralidad, de Pablo Malo"
 author: "Leonardo Hansa"
 date: "2022-08-09"
 categories: [lecturas]

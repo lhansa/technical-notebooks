@@ -1,5 +1,7 @@
 ---
 title: "Literatura y totalitarismo"
+description: "Párrafo de un ensayo de George Orwell"
+description-meta: "Párrafo de un ensayo de George Orwell"
 author: "Leonardo Hansa"
 date: "2020-05-24"
 categories: [lecturas]
