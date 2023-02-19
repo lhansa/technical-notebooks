@@ -24,8 +24,6 @@ website:
     type: express
     palette: light
     prefs-text: "Cookies"
-    
-    
   
 format:
   html:
@@ -40,6 +38,7 @@ format:
       echo: false
       message: false
       warning: false
+    lang: es
 
 
 
