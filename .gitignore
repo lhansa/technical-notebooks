@@ -2,7 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-_site/
 _freeze/
 .venv/
 .quarto/
