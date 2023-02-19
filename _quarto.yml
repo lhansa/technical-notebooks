@@ -25,6 +25,7 @@ website:
     palette: light
     prefs-text: "Cookies"
     
+    
   
 format:
   html:
@@ -32,7 +33,7 @@ format:
       - default
       - custom.scss
     toc: false
-    link-external-icon: true
+    link-external-icon: false
     link-external-newwindow: true
     linkcolor: "#800080"
     execute: 

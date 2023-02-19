@@ -8,12 +8,14 @@ $navbar-hl:             #333333 !default;
 $nav-link-hover-color:  #333333;
 $nav-tabs-border-color: #333333;
 $nav-tabs-border-width: 1;
+$border-width:                3px !default;
 
 /*-- scss:rules --*/
 h1, h2, h3, h4, h5, h6 {
   color: #800080;
 }
 
-.navbar-brand-container {
-  text-align: center;
+.navbar-title {
+  font-weight: bold;
+  font-size: 32px;
 }
