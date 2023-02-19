@@ -1,0 +1,45 @@
+---
+title: "Mi IPC es (incluso) más alto"
+author: "Leonardo Hansa"
+date: "2022-08-06"
+categories: [exploraciones]
+---
+
+No sé tú pero yo no consumo de todo. Si así fuera, entonces el IPC asociado a mis gastos sí sería el 10% del que hablan. 
+
+Pero a mí me afectan más unos grupos de consumo que otros. 
+
+Afortunadamente, no gasto en transporte. 
+
+Pobrecitos los que sí. 
+
+```{python}
+#| label: reading
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df_ipc_grupos = pd.read_csv('ipc-grupos-hist.csv')
+
+ultimo_mes = df_ipc_grupos.periodo.max()
+df_ipc_ultimo = (
+    df_ipc_grupos
+    .loc[df_ipc_grupos.periodo == ultimo_mes]
+)
+
+
+df_ipc_ultimo = df_ipc_ultimo.sort_values(by=['variacion_anual'], ascending=True)
+constant_line = float(df_ipc_ultimo['indice_general'].unique())
+
+ax = df_ipc_ultimo.plot.barh('grupos_ecoicop', 'variacion_anual', rot=0)
+ax.axvline(constant_line, color='red', linestyle='--')
+plt.title('IPC por grupos frente al índice general')
+
+txt = 'INE (junio 2022)'
+plt.figtext(0.5, 0.01, txt, wrap=True, horizontalalignment='center', fontsize=8)
+
+plt.show()
+```
+
+
+P.D. Hacer este gráfico con Python ha sido un suplicio :(
+

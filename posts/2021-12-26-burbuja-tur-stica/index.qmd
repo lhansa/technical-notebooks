@@ -1,0 +1,89 @@
+---
+title: "Burbuja turística"
+author: "Leonardo Hansa"
+date: "2021-12-26"
+categories: [exploraciones]
+---
+
+
+Te gusta viajar. Conoces otras culturas, comidas diferentes, desconectas. 
+
+Preparar la maleta, a veces, te estresa un poco. Pero también te hace ilusión. ¿Qué me llevo? Gran pregunta. 
+
+En el aeropuerto sacas tarjeta de embarque y documentación haga falta o no. A veces te la piden en un sitio, a veces en otro. Tú la sacas en todos y arreglado. 
+
+Te tienes que quitar las botas en el control. Y el cinturón. Sacas los líquidos, los pones en una bandeja. Y el móvil, a mano, que se vea. 
+
+Luego a hacer cola para embarcar. Hay gente que llega muy justa. Otros respetan a rajatabla lo de las dos horas de antelación. ¿Tú qué prefieres?
+
+Mira. Da igual. 
+
+¿Qué tal si mejor no te vas de viaje?
+
+Sí, no viajes. O a ver, viaja menos. 
+
+¿Sabes que lo de viajar se nos está yendo de las manos? Se viaja mucho. Será que se ha abaratado y ahora está al alcance de más personas. 
+
+Eso es bueno, ¿no? 
+
+No sé. No lo tengo tan claro. Así, sacado de contexto, que cada vez más gente pueda viajar sí parece bueno. ¿Pero es sostenible?
+
+Vas de viaje a un sitio paradisíaco. Como es paradisíaco, se pone de moda. Como se pone de moda, edifican de todo. Y deja de ser paradisíaco. Encuentras otro sitio paradisíaco. Pero se pone de moda. 
+
+Ya ves por dónde voy. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#| label: tourism-plot
+#| echo: false
+#| warning: false
+#| message: false
+library(tidyverse)
+library(janitor)
+
+url_tourism <- "https://data.un.org/_Docs/SYB/CSV/SYB64_176_202110_Tourist-Visitors%20Arrival%20and%20Expenditure.csv"
+
+df_tourism <- read_csv(url_tourism, 
+         skip = 1, 
+         col_types = cols(
+           `Tourism arrivals series type footnote` = col_character()
+         )) %>% 
+  clean_names() %>% 
+  rename(region_id = 1, region_name = 2)
+
+# Gasto en millones de dólares
+# llegadas en miles
+
+df_tourism <- df_tourism %>% 
+  select(region_id, region_name, year, series, value) %>% 
+  mutate(series = if_else(str_detect(series, "expend"), "gasto", "llegadas")) %>% 
+  pivot_wider(names_from = series, values_from = value)
+
+df_tourism <- df_tourism %>% 
+  arrange(region_name, year) %>% 
+  mutate(gasto_por_turista = gasto * 1e6 / (llegadas * 1000))
+
+paises_guays <- c("Spain", "Vietnam", "Thailand", 
+                  "United Arab Emirates", 
+                  "Cuba", "Kenya", "Italy")
+
+df_tourism %>% 
+  filter(region_name %in% paises_guays) %>% 
+  ggplot() + 
+  geom_col(aes(x = year, y = llegadas)) + 
+  facet_wrap(~ region_name, scales = "free") + 
+  labs(
+    title = "Llegadas de viajeros por año", 
+    caption = "Fuente: ONU", 
+    x = "", 
+    y = "Llegadas (miles)"
+  )
+
+```
+
+La selección de países es random. Los datos [son de la ONU](https://data.un.org/).
+
+No tengo ni idea de si hay una [burbuja turística](https://open.spotify.com/episode/3PqtbYCyDgE3lTH696q7EG?si=0fcdc474136f4bee). Pero sí parece que el turismo crece. El doble o el triple de turistas en 20 años en esos países. Si el turismo crece, se invertirá más en ese sector. Esto hará que el turismo tenga más relevancia en el PIB del país. 
+
+Ante una crisis, que se dependa principalmente de un sector, no es un buen plan. 
+
+Pero el camino es ese.

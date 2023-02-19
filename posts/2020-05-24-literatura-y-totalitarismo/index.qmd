@@ -1,0 +1,15 @@
+---
+title: "Literatura y totalitarismo"
+author: "Leonardo Hansa"
+date: "2020-05-24"
+categories: [lecturas]
+---
+
+«El totalitarismo ha abolido la libertad de pensamiento hasta unos límites inauditos en cualquier época anterior. Y es importante que comprendamos que este control del pensamiento no es solo de signo negativo, sino también positivo: no solo nos prohíbe expresas -e incluso tener- ciertos pensamientos; también nos dica lo que debemos pensar, crea una ideología para nosotros, trata de gobernar nuestra vida emocional al tiemo que establece un código de conducta. Y, en la medida de lo posible, nos aísla del mundo exterior, nos encierra en un universo artifical en el que carecemos de criterios con los que comparar. El Estado totalitario trata en todo caso de controlar los pensamientos y emociones de sus súbditos al menos de modo tan absoluto como controla sus acciones. 
+
+»La pregunta que nos preocupa es: ¿puede sobrevivir la literatura en una atmósfera semejante? [...]
+
+»Hay varias diferencias fundamentales entre el totalitarismo y todas las ortodoxias del pasado, tanto en Europa como en Oriente. La más importante es que las ortodoxias del pasado no cambiaban, o al menos no lo hacían rápidamente. En la Euripa medieval, la Iglesia dictaba lo que debíamos creer, pero al menos nos permitía conservar las mismas creencias desde el nacimiento hastal a muerte. No nos decía que creyésemos una cosa el lunes y otra distinta el martes. [...] Pues bien, con el totalitarismo ocurre exactamente lo contrario. La peculiaridad del Estado totalitario es que, si bien controla el pensamiento, no lo fija. Establece dogmas incuestionables y los modifica de un día para otro. Necesita dichos dogmas, pues precisa una obediencia absoluta por parte de sus súbditos, pero no puede evitar los cambios, que vienen dicatados por las necesidades de la política del poder. Se afirma infalible y, al mismo tiempo, ataca el propio concepto de verdad objetiva.»
+
+(George Orwell, 21 de mayo de 1941)
+

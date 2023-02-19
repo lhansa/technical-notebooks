@@ -1,0 +1,44 @@
+project:
+  type: website
+
+website:
+  title: "Longitud sin anchura"
+  favicon: favicon.png
+  navbar: 
+    background: "#ffffff"
+    search: false
+    pinned: true
+    left: 
+      - text: "Cu-cu-trás"
+      - href: "https://leonardohansa.com"
+    collapse: true
+    collapse-below: "md"
+  sidebar: false
+  page-navigation: false
+  page-footer: 
+    center : 
+      - text: "Legal"
+    border: false
+    
+  cookie-consent: 
+    type: express
+    palette: light
+    prefs-text: "Cookies"
+    
+  
+format:
+  html:
+    theme: 
+      - default
+      - custom.scss
+    toc: false
+    link-external-icon: true
+    link-external-newwindow: true
+    linkcolor: "#800080"
+    execute: 
+      echo: false
+      message: false
+      warning: false
+
+
+

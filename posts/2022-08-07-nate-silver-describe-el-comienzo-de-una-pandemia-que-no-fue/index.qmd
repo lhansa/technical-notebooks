@@ -1,0 +1,12 @@
+---
+title: "Nate Silver describe el comienzo de una pandemia que no fue"
+author: "Leonardo Hansa"
+date: "2021-08-07"
+categories: [lecturas]
+---
+
+En Fort Dix en enero de 1976 un soldado murió de una neumonía causada por la gripe porcina, la causante de la pandemia que asoló el mundo en 1918. En los EEUU esta gripe también se manifestó inicialmente en un fuerte y acabó con más de 600000 estadounidenses. El Secretario de Salud de Gerald Ford dio un millón como estimación de muertos si este nuevo brote se manifestaba tan letal como el del 18. Sabían que los equipos de investigación de vacunas necesitaban del orden de 6 meses para enfrentarse a nuevas cepas, pero el gobierno fue adelante con un plan de 200 millones de vacunaciones, el programa más grande desde la polio en el 50. El plan se aprobó con enorme mayoría en el Congreso; costaría 180 millones de dólares.
+
+Durante el verano aumentaron las dudas con el plan del gobierno. Si bien el verano es una época con pocos casos de gripes, en el del planeta era invierno y no se estaban reportando casos, sino de la variante A/Victoria, que era la habitual ese año. Tan solo había como casos confirmados los escasos 200 del fuerte Dix. Empezaron a llover las críticas contra el gobierno desde toda la prensa y ningún otro país había tomado medidas tan drásticas. En lugar de aceptar que habían sobrevalorado la amenaza, el gobierno de Ford apostó por una campaña de miedo en televisión.
+
+En agosto, el Congreso y la Casa Blanca accedieron a idemnizar a las farmas en el caso déficits por la manufacturación, lo que se interpretó como una falta de confianza. El programa comenzó en octubre, con menos intención de vacunación que la deseada. Al comienzo se dieron casos de fallecimientos entre gente mayor: no se le dio importancia porque, al fin y al cabo, eran mayores y había muchas causas posibles de la muerte. Pero empezaron a darse casos de Guillain-Barré, un síndrome causado por un desorden autoinmune que provoca parálisis. Suele afectar a uno por millón: entre los vacunados, la incidencia era 10 veces mayor. El programa de vacunación se canceló en diciembre. El brote de Fort Dix se quedó en eso: un brote que no salió de allí.
