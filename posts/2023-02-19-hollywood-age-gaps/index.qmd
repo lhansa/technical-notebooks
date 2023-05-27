@@ -16,7 +16,10 @@ El [tidytuesday](https://github.com/rfordatascience/tidytuesday/blob/master/data
 #| label: reading
 #| echo: false
 #| message: false
-library(tidyverse)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(stringr)
 age_gaps <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-02-14/age_gaps.csv')
 ```
 

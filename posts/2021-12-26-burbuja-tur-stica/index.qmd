@@ -39,7 +39,11 @@ Ya ves por dónde voy.
 #| echo: false
 #| warning: false
 #| message: false
-library(tidyverse)
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(stringr)
 library(janitor)
 
 url_tourism <- "https://data.un.org/_Docs/SYB/CSV/SYB64_176_202110_Tourist-Visitors%20Arrival%20and%20Expenditure.csv"
