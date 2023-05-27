@@ -1,0 +1,74 @@
+---
+title: "Cómo ser un estoico"
+description: "Notas de lectura del libro de Massimo Pigliucci"
+description-meta: "Resumen del libro Como ser un estoico"
+author: "Leonardo Hansa"
+date: "2023-05-27"
+categories: [lecturas]
+execute: 
+  echo: false
+---
+
+- Morimos cada día (Séneca)
+- Una filosofía de vida la necesitamos todos y todos la desarrollamos, de manera consciente o no.
+- Ataraxia : tranquilidad de la mente
+- Los hombres que realizaron estos descubrimientos antes que nosotros no son nuestros amos, sino nuestros guías. La verdad está abierta a todos, aún no ha sido monopolizada. Y quieres muchas para que la descubra la posteridad. (Séneca)
+- No te sientas avergonzado por aquellas cosas de las que no hay que avergonzarse (Crates, cínico)
+
+- Cicerón tradujo ethos (ética) por moralis (moralidad) 
+
+## La disciplina del deseo
+
+- Algunas cosas se pueden cambiar; otras, no
+- _Señor, concédeme serenidad para aceptar todo aquello que no puedo cambiar, fortaleza para cambiar lo que soy capaz de cambiar, y sabiduría para entender la diferencia._
+- Como se trata de ideas que en realidad han superado las pruebas del tiempo, seremos sabios si las adoptamos en nuestra vida.
+- Acertar en el blanco se puede escoger, pero no se puede desear (Cicerón)
+- Si sientes añoranza por un hijo o amigo, cuando no te es dado tenerlo, debes saber que añoras un higo en invierno
+- Podemos y debemos aprender del lado pero solo podemos actuar sobre el hic et nunc. La actitud correcta es obtener consuelo del conocimiento de que hiciste todo lo mejor para afrontar el pasado
+
+- Vive de acuerdo con la naturaleza.
+- Aristóteles: los seres humanos son animales que pueden racionalizar y políticos (viven en polis, comunidad). Para los estoicos, la vida humana consiste en la aplicación de la razón a la vida social.
+- el dilema del omnívoro.
+- Sócrates. Coherente con sus decisiones y sus puntos de vista, aceptó las consecuencias. Snowden huyó.
+- Epicteto: son unos locos los que creen que el mundo es blanco y negro, el bien frente al mal, donde siempre es posible diferenciar con claridad a los buenos de los malos. Ese no es el mundo en el que vivimos y suponer lo contrario es bastante peligroso y demuestra muy poca sabiduría.
+- Aristóteles: la eudaimonía la pueden alcanzar solo unos pocos, mediante pocos méritos propios. Los cínicos rechazan los prerrequisitos de Aristóteles y dicen que lo que hace falta es tener menos. Cínico= perruno
+- para los estoicos, la salud, la riqueza, la educación y la buena apariencia son indiferentes preferidos y lo opuesto son indiferentes dispreferidos.
+- Seneca: evita el dolor y busca la alegría. Salvo que ponga en peligro tu integridad
+- Todas las virtudes dependen de un rasgo subyacente: la sabiduría, porque siempre es una cualidad buena 
+- los estoicos añadieron cuatro virtudes:
+    + Sabiduría práctica: tomar decisiones que mejoran nuestra eudaimonía ( buena vida)
+    + valor: capacidad para actuar bien bajo circunstancias adversas
+    + templanza: controlar nuestros deseos, para no dejarnos llevar por excesos
+    + Justicia: tratar a los demás con dignidad y ecuanimidad
+- Tomás de Aquino añadió tres, por encima de las cuatro: fe, esperanza y caridad.
+- seis virtudes centrales entre cristianismo, confucionismo, hinduismo, judaísmo, taoísmo, Sócrates, Platón y Aristóteles: valor, justicia, humanidad, templanza, sabiduría, trascendencia
+- es racional ser negacionista de la evolución si partes como católico de que lo que dice la Biblia es la verdad
+- la disonancia cognitiva es una situación en la que eres consciente de que crees dos cosas que se contradicen. Eso nos desagrada, Epicteto decía que a nadie le gusta estar conscientemente equivocado
+- aumentar la disonancia en personas que están equivocadas es yn método para que busquen más información por sí mismas y solucionen si conflicto
+
+- estoicos como Catón o Stockdale tuvieron una vida muy difícil. Aplicar sus métodos a la tuya debería ser mucho más fácil.
+- sé consciente de tu capacidad de acción. Sé un agente, no un paciente
+- mantén la atención en tus capacidades, no en tus discapacidades
+
+- Raíces de la moralidad: escéptico, racionalista, empirista, intuicionista
+
+## La disciplina del consentimiento: Cómo reaccionar ante las situaciones
+- tengo que morir, ¿de verdad? Si es así entonces estoy muriendo: si es pronto Aires cenaré porque es la hora de cenar, y después, cuando llegue el momento, moriré. (Epicteto)
+- si nos asusta la muerte es por ignorancia. Cualquiera que estudia a otros seres es consciente de la muerte de estos
+- equirindón
+- según Aristóteles, tres tipos de amistad (filia): de utilidad, de placer, de los buenos.
+
+## Ejercicios espirituales prácticos
+1. Examina tus impresiones
+2. Recuerda las fugacidad d las cosas
+3. La cláusula de reserva
+4. Cómo puedes usar la virtud aquí y ahora?
+5. Haz una pausa y respira hondo
+6. Alteriza
+7. Habla poco y bien
+8. Elige bien la compañía
+9. Responde a los insultos con humor
+10. No hables demasiado de ti mismo
+11. Habla sin juzgar
+12. Reflexiona sobre tu día
+
