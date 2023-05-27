@@ -1,5 +1,5 @@
 ---
-title: "Holi"
+title: "Cacharreos que no llevan a ninguna parte"
 listing:
   contents: posts
   sort: "date desc"
@@ -8,7 +8,7 @@ listing:
   sort-ui: false
   filter-ui: false
   field-display-names: 
-    title: ""
+    title: "Los cacharreos"
 page-layout: full
 title-block-banner: false
 ---
