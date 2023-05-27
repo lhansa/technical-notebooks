@@ -11,12 +11,12 @@ website:
     left: 
       - text: "Cu-cu-trás"
       - href: "https://leonardohansa.com"
-    collapse: true
+    collapse: false
     collapse-below: "md"
   sidebar: false
   page-navigation: false
   page-footer: 
-    center : 
+    right : 
       - text: "Legal"
     border: false
     
