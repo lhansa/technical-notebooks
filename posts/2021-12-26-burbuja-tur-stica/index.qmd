@@ -5,6 +5,7 @@ description-meta: "Exploración de datos de turismo"
 author: "Leonardo Hansa"
 date: "2021-12-26"
 categories: [exploraciones]
+freeze: true
 ---
 
 
