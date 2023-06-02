@@ -1,0 +1,34 @@
+---
+title: "Juegos con la correlación de la felicidad"
+description: "Las causualidades de la felicidad. Cacharreos con datos de felicidad"
+description-meta: "Correlación con datos de felicidad"
+author: "Leonardo Hansa"
+date: "2023-06-01"
+categories: [datos]
+execute: 
+  echo: false
+---
+
+```{r}
+#| label: libs
+#| include: false
+library(dplyr)
+library(ggcorrplot)
+```
+
+```{r}
+#| label: datos
+#| include: false
+
+df_happy <- readr::read_rds("world_happiness_sugar.rds")
+glimpse(df_happy)
+```
+
+```{r}
+df_happy |> 
+  select(-country) |> 
+  cor() |> 
+  ggcorrplot()
+```
+
+
