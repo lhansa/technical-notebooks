@@ -1,5 +1,5 @@
 ---
-title: "Cacharreos sin objetivo"
+title: ""
 listing:
   contents: posts
   sort: "date desc"
@@ -18,4 +18,6 @@ title-block-banner: false
 Aquí puedes seguir las pruebas que hago, **cosa que no creo que te interese.**
 
 Lo que quizá sí te aporte sea mi newsletter. Puedes suscribirte en [leonardohansa.com.](https://leonardohansa.com)
+
+***
 
