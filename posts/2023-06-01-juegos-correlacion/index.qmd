@@ -7,28 +7,145 @@ date: "2023-06-01"
 categories: [datos]
 execute: 
   echo: false
+freeze: auto
 ---
+
 
 ```{r}
 #| label: libs
 #| include: false
 library(dplyr)
+library(tidyr)
+library(ggplot2)
 library(ggcorrplot)
+
+theme_set(theme_light())
 ```
+
+Estoy revisando material de Datacamp sobre estadística. 
+
+Tienen un conjunto de datos sobre felicidad:
 
 ```{r}
 #| label: datos
-#| include: false
+#| echo: false
 
 df_happy <- readr::read_rds("world_happiness_sugar.rds")
 glimpse(df_happy)
 ```
 
+Hay casos con valores faltantes en la columna de corrupción... 
+
+Sospechoso xD
+
 ```{r}
+#| label: corruption-na
+df_happy |> 
+  select(country, where(\(x) any(is.na(x)))) |> 
+  filter(if_any(everything(), \(x) is.na(x)))
+```
+
+Como no tengo ni idea de [dónde ha salido el dato,](https://worldhappiness.report/ed/2019/) no me voy a entretener ahora por una columna y seis filas. 
+
+Ahora voy con una cosa que vi en Datacamp que no me cuadra nada:
+
+```{r}
+#| label: correlation
 df_happy |> 
   select(-country) |> 
-  cor() |> 
-  ggcorrplot()
+  cor(use = "pairwise.complete.obs") |> 
+  ggcorrplot(colors = c("red", "white", "blue"))
 ```
+
+Vale, según esto, los siguientes factores tienen una relación negativa con el nivel de felicidad: 
+
+- **Apoyo social** --creo que se refiere a si tienes personas en tu entorno que podrían ayudarte si algo te pasara, no tanto al concepto de una Seguridad Social.
+- **Libertad.**
+- **Generosidad.**
+
+Me salto corrupción porque tiene valores más bajos que los demás --o sea, porque sí.
+
+Luego está relacionada positivamente: 
+
+- El PIB per cápita. 
+- La esperanza de vida. 
+- Y el consumo de azúcar xD WTF!
+
+
+```{r}
+#| label: distribution1
+ggplot(df_happy) + 
+  geom_histogram(aes(x = happiness_score), binwidth = 7) + 
+  labs(x = "Índice de felicidad", 
+       y = "", 
+       title = "Distribución del índice de felicidad")
+```
+
+
+## Azúcar
+
+Sí, salvo a los seguidores de Carlos Ríos, el azúcar suele dar felicidad --por lo menos un rato. 
+
+Pero ¿tanto como para que afecte al índice este?
+
+```{r}
+#| label: scatter
+df_happy |> 
+  select(country, happiness_score, grams_sugar_per_day) |> 
+  # mutate(label_aux = if_else(grams_sugar_per_day > 100, country, NA_character_)) |> 
+  ggplot() + 
+  geom_point(aes(x = grams_sugar_per_day, y = happiness_score)) + 
+  # geom_label(aes(x = grams_sugar_per_day, 
+  #                y = happiness_score, 
+  #                label = label_aux)) + 
+  labs(
+    x = "Azúcar al día (gramos)", 
+    y = "Índice de felicidad"
+  )
+  
+```
+¿Qué países consumen más azúcar?
+
+```{r}
+#| label: more-sugar
+
+top_sugar <- 20
+
+df_more_sugar <- df_happy |> 
+  select(country, grams_sugar_per_day) |> 
+  # arrange(desc(grams_sugar_per_day)) |> 
+  slice_max(grams_sugar_per_day, n = top_sugar)
+
+knitr::kable(df_more_sugar)
+```
+
+
+¿Y cómo son estos países frente a los demás?
+
+
+
+```{r}
+#| label: more-sugar-vs-less
+df_happy |> 
+  mutate(is_more_sugar = country %in% df_more_sugar$country, 
+         is_more_sugar = factor(is_more_sugar)) |> 
+  pivot_longer(-c(country, is_more_sugar), 
+               names_to = "metric") |>
+  ggplot() + 
+  geom_violin(aes(x = is_more_sugar, y = value)) + 
+  facet_wrap(~ metric, scales = "free_y", ncol = 4) + 
+  labs(
+    x = "Top consumo de azúcar", 
+    y = "Métrica"
+  )
+  
+```
+
+
+Chorrada enorme que me llama la atención: los `r top_sugar` países con más consumo de azúcar no alcanzan los valores máximos de generosidad ni de apoyo social. 
+
+## Índice
+
+Esto no tiene ni pies ni cabeza. El índice se supone que se calcula a partir de estas métricas. Voy a ver de qué va ese cómputo y vuelvo.
 
 

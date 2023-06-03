@@ -1,5 +1,5 @@
 ---
-title: "Cacharreos que no llevan a ninguna parte"
+title: "Cacharreos sin objetivo"
 listing:
   contents: posts
   sort: "date desc"
