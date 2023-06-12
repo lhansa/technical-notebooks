@@ -1,0 +1,56 @@
+---
+title: "Los hijos de padres altos son bajitos"
+description: "La regresión a la media aplicada a alturas de padres e hijos."
+description-meta: "Ejemplo de regresión a la media con datos de Pearson de padres e hijos."
+author: "Leonardo Hansa"
+date: "2023-06-12"
+categories: [datos]
+execute: 
+  echo: false
+freeze: auto
+---
+
+```{r}
+#| label: reading
+library(readr)
+
+df_heights <- read_tsv("Pearson.txt")
+names(df_heights) <- tolower(names(df_heights))
+
+head(df_heights)
+```
+
+
+```{r}
+library(ggplot2)
+theme_set(theme_light())
+
+ggplot(df_heights) + 
+  geom_point(aes(x = father, y = son))
+```
+El siguiente gráfico muestra qué es la regresión a la media.
+
+La línea verdosa cae sobre los puntos en los que la altura del padre y del hijo son iguales. O sea:
+
+- los puntos por encima de la línea son de hijos más altos que sus padres
+- los puntos por debajo, de hijos más bajitos que sus padres.
+
+¿Qué muestra la línea azul?
+
+```{r}
+ggplot(df_heights, aes(x = father, y = son)) + 
+  geom_point() +
+  geom_abline(color = "yellow4", linewidth = 1) + 
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+La línea azul muestra lo esperable según la recta de regresión. Podríamos decir que, en media, los padres de cierta altura tienen hijos de altura según indique la línea azul. 
+
+Pero la línea azul queda por encima de la línea verdosa en unos puntos y por debajo en otro. ¿Cómo interpretamos eso?
+
+Pues que, en media:
+
+- los padres bajitos tienen hijos más altos que ellos (la línea azul queda por encima de la verdosa en el lado izquierdo del gráfico). 
+- los padres altos tienen hijos más bajos que ellos (la línea azul queda por debajo de la verdosa en el lado derecho del gráfico).
+
+
