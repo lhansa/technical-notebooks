@@ -184,8 +184,6 @@ P <- ggplot(df_flips) +
   theme(legend.position = "none") + 
   labs(x = "Heads", y = "Probability of heads")
 
-P
-
 ggMarginal(P, margins = "y", type = "histogram", fill = "white")
 ```
 
