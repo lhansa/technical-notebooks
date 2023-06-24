@@ -1,0 +1,191 @@
+---
+title: "Cara o cruz, modo Bayes"
+description: "Experimentos estadísticos frecuentistas y bayesianos en lanzamiento de monedas."
+description-meta: "Experimentos estadísticos frecuentistas y bayesianos en lanzamiento de monedas."
+author: "Leonardo Hansa"
+date: "2023-06-24"
+categories: [datos]
+execute: 
+  echo: false
+freeze: auto
+---
+
+```{r}
+#| label: libs
+#| include: false
+library(ggplot2)
+library(ggExtra)
+theme_set(theme_light())
+```
+
+Tienes una moneda, aparentemente no trucada, y la lanzas **100 veces.**
+
+Esperarías que 50 veces saliera cara, ¿no? Más o menos.
+
+Pues sale **60 veces.**
+
+¿Sigues pensando que no está trucada?
+
+```{r}
+#| label: set-up
+flips <- 100
+heads <- 60
+
+N <- 10000
+```
+
+## El modo frecuentista
+
+Puedes plantear el problema así: 
+
+- Realizas el experimento 10.000 veces. 
+- O sea, lanzas la moneda 100 veces y cuentas, las caras; lo haces otra vez; y otra... y así 10.000 veces.
+
+¿Cuántas de esas veces has obtenido por lo menos 60 caras?
+
+Las que marco en el gráfico:
+
+```{r}
+#| label: frequentist
+# P(data | p=0.5)
+
+random_flips <- rbinom(N, flips, 0.5)
+
+ggplot() + 
+  geom_histogram(aes(x = random_flips, fill = random_flips>=60), 
+                 binwidth = 1) + 
+  scale_fill_discrete("more than 60")
+```
+
+Esa área es el p-valor de este test: 
+
+```{r}
+#| label: test
+#| echo: true
+binom.test(heads, flips, alternative = "greater")
+```
+
+
+## ¿Qué hay mal aquí?
+
+Lo malo de esto es que ese planteamiento te da la probabilidad de tus datos, en el supuesto de que la moneda no esté trucada (muy baja, por cierto). 
+
+Pero es que tú no quieres eso. 
+
+Tú ya lanzaste la moneda 100 veces, y salió cara 60. No quieres la probabilidad de que eso ocurra... ¡porque eso ya ha ocurrido!
+
+Lo que quieres saber es si es probable o no que la moneda esté trucada. 
+
+Si no lo está, la probabilidad de obtener cara es 0,5. 
+
+Ahora bien, dado que has obtenido cara 60 veces de 100, ¿cuál es probabilidad real de obtener cara en esa moneda?
+
+## El modo bayesiano
+
+### Priori
+Supón que no tienes ni idea de si la moneda está trucada o no. O sea, la probabilida de obtener cara va entre 0 y 1. 
+
+Sí, normalmente es 0,5, pero como ahora no sabes nada de la moneda, vas a suponer que puedes obtener cara siempre, o nunca, o pocas veces, o muchas... pues eso, cualquier número entre 0 y 1.
+
+El siguiente gráfico es una aproximación a cómo expresamos eso visualmente. La idea es que la probabilidad de obtener cara sigue una distribución uniforme entre 0 y 1. 
+
+Eso es tu **información a priori**: no tienes ni idea.
+
+```{r}
+#| label: priori
+# P(p|data)
+
+p_prioris <- runif(N, 0, 1)
+ggplot() + geom_histogram(aes(x = p_prioris)) 
+```
+
+### Modelo generativo
+
+Ahora vas a simular varias situaciones de lanzamientos de la moneda 100 veces. Pero en cada experimento, la probabilidad de obtener cara varía, según la distribución uniforme que has asumido antes. 
+
+Esta es la distribución del número de caras que obtienes en este caso: 
+
+```{r}
+#| label: gen-mod
+# I run N experiments of flipping 100 coins under different
+# p conditions
+some_experiments <- rbinom(N, size = flips, prob = p_prioris)
+
+ggplot() + geom_histogram(aes(x = some_experiments)) 
+```
+
+
+Visto así, parece poca cosa, pero ya tienes la información suficiente para tener mejor idea de la probabilidad de obtener cara.
+
+### Posteriori
+
+Primero, construyes una tabla en la que tienes el número de caras obtenido en función de la probabilidad de obtener cara.
+
+```{r}
+#| label: dataframe
+df_flips <- data.frame(
+  p_priori = p_prioris, 
+  number_of_heads = some_experiments
+)
+
+
+head(df_flips)
+```
+
+
+En esa tabla podemos quedarnos solo con los casos en los que obtienes 60 caras. Y en esos casos observas la probabilidad de obtener cara. 
+
+Esa probabilidad sigue esta distribución: 
+
+```{r}
+#| label: posteriori1
+df_flips_60 <- subset(df_flips, number_of_heads == 60)
+
+ggplot(df_flips_60) +
+  geom_histogram(aes(x = p_priori), bins = 7)
+
+```
+
+Si prefieres números: 
+
+
+```{r}
+#| label: posteriori2
+posteriori <- df_flips_60$p_priori
+
+summary(posteriori)
+```
+
+Esos números ya no siguen la distribución uniforme a priori de antes, en la que indicabas que no sabías nada de la moneda. 
+
+Ahora ya sabes entre qué números puede variar esa probabilidad.
+
+### Datos
+
+Esos valores a posteriori los hemos calculado porque en tu experimento inicial conseguiste 60 caras. 
+
+Pero si tus datos fueran otros, tu modelo generativo te permite obtener el posteriori de nuevo. 
+
+Solo tienes que moverte entre los resultados. 
+
+Aquí tienes, visualmente, en qué consiste la creación de los posteriori, dados los datos:
+
+```{r}
+#| label: marginal
+df_flips$heads60 <- ifelse(df_flips$number_of_heads == 60, 60, NA)
+
+df_flips$heads60_aux <- df_flips$number_of_heads == 60
+
+P <- ggplot(df_flips) + 
+  geom_point(aes(x = heads60, y = p_priori)) +
+  geom_point(aes(x = number_of_heads, y = p_priori, col = as.factor(heads60_aux)), 
+             alpha = 0.4)  + 
+  scale_color_manual(values = c("#800080", "yellow")) + 
+  theme(legend.position = "none") + 
+  labs(x = "Heads", y = "Probability of heads")
+
+P
+
+ggMarginal(P, margins = "y", type = "histogram", fill = "white")
+```
+
