@@ -8,6 +8,9 @@ website:
     background: "#ffffff"
     search: false
     pinned: true
+    left: 
+      - text: "Cu-cu-trás"
+      - href: "https://leonardohansa.com"
     collapse: false
     collapse-below: "md"
   sidebar: false

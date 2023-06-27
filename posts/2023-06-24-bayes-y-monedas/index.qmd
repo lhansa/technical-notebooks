@@ -1,5 +1,5 @@
 ---
-title: "Cara o cruz, modo Bayes"
+title: "Cara o cruz, modo Bayes (I)"
 description: "Experimentos estadísticos frecuentistas y bayesianos en lanzamiento de monedas."
 description-meta: "Experimentos estadísticos frecuentistas y bayesianos en lanzamiento de monedas."
 author: "Leonardo Hansa"
