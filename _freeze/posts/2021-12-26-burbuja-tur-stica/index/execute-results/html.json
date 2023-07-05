@@ -1,0 +1,16 @@
+{
+  "hash": "36912e9fe7de22d825ebe65d4282820c",
+  "result": {
+    "markdown": "---\ntitle: \"Burbuja turística\"\nauthor: \"Leonardo Hansa\"\ndate: \"2021-12-26\"\ncategories: [exploraciones]\n---\n\n\n\nTe gusta viajar. Conoces otras culturas, comidas diferentes, desconectas. \n\nPreparar la maleta, a veces, te estresa un poco. Pero también te hace ilusión. ¿Qué me llevo? Gran pregunta. \n\nEn el aeropuerto sacas tarjeta de embarque y documentación haga falta o no. A veces te la piden en un sitio, a veces en otro. Tú la sacas en todos y arreglado. \n\nTe tienes que quitar las botas en el control. Y el cinturón. Sacas los líquidos, los pones en una bandeja. Y el móvil, a mano, que se vea. \n\nLuego a hacer cola para embarcar. Hay gente que llega muy justa. Otros respetan a rajatabla lo de las dos horas de antelación. ¿Tú qué prefieres?\n\nMira. Da igual. \n\n¿Qué tal si mejor no te vas de viaje?\n\nSí, no viajes. O a ver, viaja menos. \n\n¿Sabes que lo de viajar se nos está yendo de las manos? Se viaja mucho. Será que se ha abaratado y ahora está al alcance de más personas. \n\nEso es bueno, ¿no? \n\nNo sé. No lo tengo tan claro. Así, sacado de contexto, que cada vez más gente pueda viajar sí parece bueno. ¿Pero es sostenible?\n\nVas de viaje a un sitio paradisíaco. Como es paradisíaco, se pone de moda. Como se pone de moda, edifican de todo. Y deja de ser paradisíaco. Encuentras otro sitio paradisíaco. Pero se pone de moda. \n\nYa ves por dónde voy. \n\n\n::: {.cell}\n::: {.cell-output-display}\n![](index_files/figure-html/tourism-plot-1.png){width=672}\n:::\n:::\n\n\nLa selección de países es random. Los datos [son de la ONU](https://data.un.org/).\n\nNo tengo ni idea de si hay una [burbuja turística](https://open.spotify.com/episode/3PqtbYCyDgE3lTH696q7EG?si=0fcdc474136f4bee). Pero sí parece que el turismo crece. El doble o el triple de turistas en 20 años en esos países. Si el turismo crece, se invertirá más en ese sector. Esto hará que el turismo tenga más relevancia en el PIB del país. \n\nAnte una crisis, que se dependa principalmente de un sector, no es un buen plan. \n\nPero el camino es ese.",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
