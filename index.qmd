@@ -13,11 +13,3 @@ page-layout: full
 title-block-banner: false
 ---
 
-¿Alguna vez te apetece cacharrear con cosas? Pues eso verás aquí. Mis cacharreos. 
-
-Aquí puedes seguir las pruebas que hago, **cosa que no creo que te interese.**
-
-Lo que quizá sí te aporte sea mi newsletter. Puedes suscribirte en [leonardohansa.com.](https://leonardohansa.com)
-
-***
-
