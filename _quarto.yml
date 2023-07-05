@@ -11,6 +11,7 @@ website:
     left: 
       - text: "Cu-cu-trás"
       - href: "https://leonardohansa.com"
+      - icon : "balloon-heart"
     collapse: false
     collapse-below: "md"
   sidebar: false
