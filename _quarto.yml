@@ -40,3 +40,6 @@ format:
       message: false
       warning: false
     lang: es
+    
+execute: 
+  freeze: true
