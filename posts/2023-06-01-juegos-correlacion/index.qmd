@@ -63,6 +63,8 @@ Vale, según esto, los siguientes factores tienen una relación negativa con el 
 - **Libertad.**
 - **Generosidad.**
 
+Creo que estos tres valores son mejores con valores bajos, porque si no, no tiene sentido. 
+
 Me salto corrupción porque tiene valores más bajos que los demás --o sea, porque sí.
 
 Luego está relacionada positivamente: 
@@ -142,10 +144,31 @@ df_happy |>
 ```
 
 
-Chorrada enorme que me llama la atención: los `r top_sugar` países con más consumo de azúcar no alcanzan los valores máximos de generosidad ni de apoyo social. 
+Chorrada enorme que me llama la atención: los `r top_sugar` países con más consumo de azúcar tienden a mayores valores de generosidad ni de apoyo social. 
 
 ## Índice
 
-Esto no tiene ni pies ni cabeza. El índice se supone que se calcula a partir de estas métricas. Voy a ver de qué va ese cómputo y vuelvo.
+~~Esto no tiene ni pies ni cabeza. El índice se supone que se calcula a partir de estas métricas. Voy a ver de qué va ese cómputo y vuelvo.~~
+
+***
+
+_(Edición en 15/07/2023)_
+
+```{r}
+#| label: corr-happiness
+df_happy |> 
+  pivot_longer(-c(country, happiness_score)) |> 
+  ggplot(aes(x = value, y = happiness_score)) + 
+  geom_point() + 
+  geom_smooth(method = "loess") + 
+  facet_wrap(~ name, scales = "free") + 
+  labs(x = "", y = "Happiness Score")
+```
+
+Me gusta lo de la corrupción: parece que, en niveles de poca corrupción, un poquito más de corrupción baja el índice de felicidad, pero a partir de cierto valor (aprox 50), ya da igual todo y la gente pasa. 
+
+Aunque tampoco tengo claro que la corrupción sea muy relevante aquí, porque yo solo veo una nube de puntos (aunque la línea marque cierta tendencia en los valores inferiores). 
+
+
 
 
