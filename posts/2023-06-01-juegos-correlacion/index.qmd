@@ -83,7 +83,6 @@ ggplot(df_happy) +
        title = "Distribución del índice de felicidad")
 ```
 
-
 ## Azúcar
 
 Sí, salvo a los seguidores de Carlos Ríos, el azúcar suele dar felicidad --por lo menos un rato. 
