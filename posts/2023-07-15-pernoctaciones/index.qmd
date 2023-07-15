@@ -1,0 +1,79 @@
+---
+title: "Pernoctaciones"
+description: "Análisis de la evolución de pernoctaciones por CCAA"
+description-meta: "Análisis de la evolución de pernoctaciones por CCAA"
+author: "Leonardo Hansa"
+date: "2023-07-15"
+categories: [datos]
+execute: 
+  echo: false
+freeze: auto
+---
+
+Me preocupa el turismo: viajamos demasiado. 
+
+```{r}
+#| label: libs
+library(httr)
+library(purrr)
+library(tibble)
+library(stringr)
+library(dplyr)
+library(ggplot2)
+```
+
+
+```{r}
+#| label: extract
+url <-  "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/2941?nult=120"
+datos <- GET(url)
+datos <- content(datos, "parsed")
+```
+
+```{r}
+#| label: process
+index_pernoctaciones <- str_which(map_chr(datos, "Nombre"), "Pernoctaciones")
+
+df_pernoctaciones <- map_dfr(index_pernoctaciones, function(i) {
+  
+  df <- map_dfr(datos[[i]]$Data, function(x){
+    fecha <- paste(
+      x$Anyo, 
+      sprintf("%02d", x$FK_Periodo), 
+      "01"
+    )
+    
+    tibble::tibble(mes = as.Date(fecha, format = "%Y %m %d"), 
+           pernoctaciones = x$Valor)
+    
+  })
+  
+  df$serie <- datos[[i]]$Nombre
+  
+  return(df)
+  
+})
+
+df_pernoctaciones <- df_pernoctaciones |> 
+  filter(serie != "Nacional. Pernoctaciones. Total categorías. Total.") |> 
+  distinct(serie, mes, pernoctaciones) |> 
+  filter(str_detect(serie, "Residentes", negate = TRUE)) |> 
+  mutate(comunidad = str_extract(serie, "^(.*?)\\."), 
+         comunidad = str_remove(comunidad, "\\."))
+```
+
+
+
+```{r}
+#| label: plot
+
+df_pernoctaciones |> 
+  filter(mes < as.Date("2023-01-01")) |> 
+  ggplot(aes(x = mes, y = pernoctaciones)) + 
+  geom_line() + 
+  geom_smooth(method = "loess") + 
+  facet_wrap(~ comunidad, scales = "free")
+```
+
+La pandemia parecía haber frenado el ritmo, pero la tendencia vuelve a ser creciente en sitios como Madrid, Canarias, el País Vasco...
+

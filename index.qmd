@@ -3,7 +3,9 @@ title: ""
 listing:
   contents: posts
   sort: "date desc"
-  type: default
+  type: table
+  fields: [title, date, description]
+  date-format: medium
   categories: false
   sort-ui: false
   filter-ui: false
