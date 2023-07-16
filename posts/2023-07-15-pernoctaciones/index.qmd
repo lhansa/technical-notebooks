@@ -14,7 +14,7 @@ Me preocupa el turismo: viajamos demasiado.
 
 ```{r}
 #| label: libs
-library(httr)
+# library(httr)
 library(purrr)
 library(tibble)
 library(stringr)
@@ -25,9 +25,11 @@ library(ggplot2)
 
 ```{r}
 #| label: extract
-url <-  "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/2941?nult=120"
-datos <- GET(url)
-datos <- content(datos, "parsed")
+# url <-  "https://servicios.ine.es/wstempus/js/ES/DATOS_TABLA/2941?nult=120"
+# datos <- GET(url)
+# datos <- content(datos, "parsed")
+# saveRDS(datos, "ine-pernoctaciones.rds")
+datos <- readRDS("ine-pernoctaciones.rds")
 ```
 
 ```{r}
