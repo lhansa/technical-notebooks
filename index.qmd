@@ -10,7 +10,7 @@ listing:
   sort-ui: false
   filter-ui: false
   field-display-names: 
-    title: "Los cacharreos"
+    title: "Cacharreos"
 page-layout: full
 title-block-banner: false
 ---

@@ -1,0 +1,53 @@
+---
+title: "Matrimonios y nacimientos"
+description: "Evolución anual de matrimonios, nacimientos y defunciones en España. Los matrimonios están decreciendo. ¿Será porque la institución del matrimonio está caduca? ¿Será que ya no aporta nada? ¿O sí aporta pero los jóvenes no le vemos interés, ignorantes nosotros?"
+description-meta: "Análisis de la evolución de matrimonios y nacimientos y muertes"
+author: "Leonardo Hansa"
+date: "2023-07-16"
+categories: [datos]
+execute: 
+  echo: false
+freeze: auto
+---
+
+Estoy muy preocupado por el Matrimonio: **se está viniendo abajo.**
+
+A ver, se sigue casando mucha gente. 
+
+Pero con los años la tendencia decrece.
+
+```{r}
+#| label: libs
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+```{r}
+#| label: reading
+df <- read_csv("matrimonios.csv", skip = 6, col_names = FALSE, 
+               locale = locale(grouping_mark = "."))
+df <- select(df, year = X1, nacimientos = X4, matrimonios = X6, defunciones = X8)
+
+knitr::kable(head(df, 10))
+```
+
+```{r}
+#| label: evolucion
+ggplot2::theme_set(theme_light())
+df |> 
+  pivot_longer(-year) |> 
+  ggplot(aes(x = as.numeric(year), y = value)) + 
+  geom_col(fill = "#800080") + 
+  facet_grid(name ~ ., scales = "free") + 
+  labs(x = "", y = "Valor", 
+       title = "Evolución de nacimientos, matrimonios y defunciones", 
+       caption = "Fuente: INE. Elaboración: longitudsinanchura.com") + 
+  scale_y_continuous(labels = scales::scientific)
+```
+
+Cada vez muere más gente, eso sí que sube, pero imagino que ayuda que cada vez seamos más (si cada vez nacemos menos, imagino que se debe a la inmigración, aunque eso no lo he mirado): 
+
+
+<script type="text/javascript">var script = document.createElement('script');function lastNodo(obj){if (obj.children.length>0)return lastNodo(obj.children[obj.children.length-1]);else return obj;}script.setAttribute('type', 'text/javascript');script.setAttribute('src', 'https://www.ine.es/menus/plantillas/jaxiT3/js/widget.js');script.dataPost='t=56934&ratio=0.9&nocab=1&btnWidgetGrafico=&p_widget_color=559B98&rows=p_per&columns=113325&columns=113326&columns=p_oper&oper=450&cri113325=6275891&cri113326=6276005&periodo=20~2023&periodo=19~2023&periodo=22~2022&periodo=21~2022&periodo=20~2022&periodo=19~2022&periodo=22~2021&periodo=21~2021&periodo=20~2021&periodo=19~2021&periodo=22~2020&periodo=21~2020&periodo=20~2020&periodo=19~2020&periodo=22~2019&periodo=21~2019&periodo=20~2019&periodo=19~2019&periodo=22~2018&periodo=21~2018&periodo=20~2018&periodo=19~2018&periodo=22~2017&periodo=21~2017&periodo=20~2017&periodo=19~2017&periodo=22~2016&periodo=21~2016&periodo=20~2016&periodo=19~2016&periodo=22~2015&periodo=21~2015&periodo=20~2015&periodo=19~2015&periodo=22~2014&periodo=21~2014&periodo=20~2014&periodo=19~2014&periodo=22~2013&periodo=21~2013&periodo=20~2013&periodo=19~2013&periodo=22~2012&periodo=21~2012&periodo=20~2012&periodo=19~2012&periodo=22~2011&periodo=21~2011&periodo=20~2011&periodo=19~2011&periodo=22~2010&periodo=21~2010&periodo=20~2010&periodo=19~2010&periodo=22~2009&periodo=21~2009&periodo=20~2009&periodo=19~2009&periodo=22~2008&periodo=21~2008&periodo=20~2008&periodo=19~2008&periodo=22~2007&periodo=21~2007&periodo=20~2007&periodo=19~2007&periodo=22~2006&periodo=21~2006&periodo=20~2006&periodo=19~2006&periodo=22~2005&periodo=21~2005&periodo=20~2005&periodo=19~2005&periodo=22~2004&periodo=21~2004&periodo=20~2004&periodo=19~2004&periodo=22~2003&periodo=21~2003&periodo=20~2003&periodo=19~2003&periodo=22~2002&periodo=21~2002&periodo=20~2002&periodo=19~2002&columnas_grafico=per&ejeHorizontal=per&tipoGrafico=lineas&L=0&p_widgetFormGrafico=1&w_legend=false&w_contorno_col=800080&w_titulo=true&w_ancho_widget=&w_alto_widget=';script.padre=lastNodo(document.getElementsByTagName('body')[0]);script.onload = function(event){var aux=this.padre;this.padre=null;if (aux!=null)PintaWidgetGrafica(aux,this.dataPost);};script.onreadystatechange = function () {if (this.readyState === 'complete' || this.readyState === 'loaded') {var aux=this.padre;this.padre=null;if (aux!=null)PintaWidgetGrafica(aux,this.dataPost);}};document.head.appendChild(script);</script>

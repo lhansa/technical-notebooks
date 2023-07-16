@@ -10,3 +10,12 @@ df_pernoctaciones |>
        caption = "Fuente: INE. Elaboración: longitudsinanchura.com") + 
   theme_light()
   
+
+df |> 
+  select(year, matrimonios) |> 
+  ggplot(aes(x = as.numeric(year), y = matrimonios)) + 
+  geom_col(fill = "#800080") +
+  labs(x = "", y = "Matrimonios", 
+       title = "Evolución de matrimonios en España", 
+       caption = "Fuente: INE. Elaboración: longitudsinanchura.com") + 
+  scale_y_continuous(labels = scales::scientific)
