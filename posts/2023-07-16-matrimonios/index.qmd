@@ -30,14 +30,17 @@ df <- read_csv("matrimonios.csv", skip = 6, col_names = FALSE,
                locale = locale(grouping_mark = "."))
 df <- select(df, year = X1, nacimientos = X4, matrimonios = X6, defunciones = X8)
 
-knitr::kable(head(df, 10))
+knitr::kable(head(df, 10), )
 ```
+
+_(Ni idea de por qué faltan datos en 2019)_
 
 ```{r}
 #| label: evolucion
 ggplot2::theme_set(theme_light())
 df |> 
   pivot_longer(-year) |> 
+  mutate(name = factor(name, levels = c("nacimientos", "matrimonios", "defunciones"))) |> 
   ggplot(aes(x = as.numeric(year), y = value)) + 
   geom_col(fill = "#800080") + 
   facet_grid(name ~ ., scales = "free") + 
