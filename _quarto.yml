@@ -20,11 +20,12 @@ website:
     right : 
       - text: "Legal"
     border: false
-    
   cookie-consent: 
     type: express
     palette: light
     prefs-text: "Cookies"
+  site-url: 'https://longitudsinanchura.com'
+  site-path: '/'
   
 format:
   html:

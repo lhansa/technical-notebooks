@@ -186,4 +186,20 @@ P <- ggplot(df_flips) +
 
 ggMarginal(P, margins = "y", type = "histogram", fill = "white")
 ```
+```{r}
+#| label: teorema
+#| include: false
+
+ggplot(df_flips_60) +
+  geom_histogram(aes(x = p_priori), fill = "#800080", bins = 7) + 
+  labs(x = "Probabilidad de cara", y = "Experimentos con 60 caras")
+
+p_d_50 <- 0.02
+p_d <- 1 / flips
+p_50 <- mean(df_flips$p_priori > 0.49 & df_flips$p_priori < 0.51)
+
+p_50_d <- p_d_50 * p_50 / p_d
+p_50_d
+
+```
 
