@@ -1,0 +1,70 @@
+---
+title: "Personas centenarias [tidytuesday]"
+description: "Exploración de datos de personas centenarias, con datos del tidytuesday de 2023-05-30"
+description-meta: "Tidytueday - Centenarians"
+author: "Leonardo Hansa"
+date: "2023-07-21"
+categories: [datos]
+execute: 
+  echo: false
+freeze: auto
+---
+
+Exploración de datos del [tidytuesday del 30 de mayo de 2023.](https://github.com/rfordatascience/tidytuesday/blob/master/data/2023/2023-05-30/readme.md)
+
+```{r}
+#| label: libs
+library(dplyr)
+library(ggplot2)
+
+theme_set(theme_light())
+```
+
+
+```{r}
+#| label: data
+centenarians <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-05-30/centenarians.csv')
+
+centenarians <- centenarians |> 
+  mutate(birth_year = format(birth_date, format = "%Y"), 
+         death_year = format(death_date, format = "%Y"))
+```
+
+Sitúo por año de nacimiento a los centenarios. Habrá en los años más recientes, seguramente porque la población era mayor (en un periodo tan breve, no creo que los avances médicos supusieran tanta diferencia). 
+
+```{r}
+#| label: per-year
+centenarians |> 
+  count(birth_year) |> 
+  mutate(birth_year = factor(birth_year, levels = sort(birth_year, decreasing = TRUE))) |> 
+  ggplot(aes(x = birth_year, y = n)) +
+  geom_col(fill = "#800080") +
+  labs(x = "Año de nacimiento", y = "Número de nacimientos de personas centenarias", 
+       title = "Nacimientos por año de personas que serían centenarias") + 
+  coord_flip()
+```
+
+## ¿Cómo varía en función de las variables que hay? 
+
+No tengo a mano los datos de población de los países pero me vale esto para hacerme una idea. 
+
+```{r}
+#| label: per-country
+centenarians |> 
+  count(place_of_death_or_residence, sort = TRUE) |>
+  mutate(place_of_death_or_residence = forcats::as_factor(place_of_death_or_residence)) |> 
+  ggplot(aes(x = reorder(place_of_death_or_residence, n), y = n)) + 
+  geom_col(fill = "#800080") + 
+  labs(x = "País de fallecimiento o residencia (si sigue vivo)", y = "Centenarios", title = "Distribución del país de residencia o fallecimiento") + 
+  coord_flip()
+```
+
+No hay diferencia entre chico/chica:
+
+```{r}
+centenarians |> 
+  count(gender) |> 
+  knitr::kable(col.names = c("Género", "Personas"))
+```
+
+

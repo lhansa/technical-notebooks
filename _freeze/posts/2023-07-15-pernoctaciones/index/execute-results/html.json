@@ -1,5 +1,5 @@
 {
-  "hash": "236bfb0b2c988834b35e4856299486d7",
+  "hash": "8a11f6494a7ab043c2d097cb95199b55",
   "result": {
     "markdown": "---\ntitle: \"Pernoctaciones\"\ndescription: \"Análisis de la evolución de pernoctaciones por CCAA\"\ndescription-meta: \"Análisis de la evolución de pernoctaciones por CCAA\"\nauthor: \"Leonardo Hansa\"\ndate: \"2023-07-15\"\ncategories: [datos]\nexecute: \n  echo: false\nfreeze: auto\n---\n\n\nMe preocupa el turismo: viajamos demasiado. \n\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n::: {.cell-output-display}\n![](index_files/figure-html/plot-1.png){width=672}\n:::\n:::\n\n\nLa pandemia parecía haber frenado el ritmo, pero la tendencia vuelve a ser creciente en sitios como Madrid, Canarias, el País Vasco...\n\n",
     "supporting": [
