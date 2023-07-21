@@ -132,7 +132,7 @@ df_sample_means <- purrr::map_dfr(c(5, 100, 500, 1000), function(sample_size) {
   medias <- replicate(
     n = 1000, 
     {
-      mean(sample(diamonds$depth, size = sample_size, replace = TRUE))
+      mean(sample(diamonds$depth, size = sample_size, replace = FALSE))
   }
   )
   
