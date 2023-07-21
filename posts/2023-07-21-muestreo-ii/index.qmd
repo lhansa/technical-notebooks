@@ -109,3 +109,52 @@ ggplot() +
   geom_bar(aes(x = simulacion_sumas), fill = "#800080") + 
   labs(x = "Suma", y = "Casos", title = "Simulación con 10.000 repeticiones y 100 dados")
 ```
+## Teorema central del límite
+
+Imagina que fijas un tamaño muestral. Y para ese tamaño muestral, replicas muchas veces un experimento. 
+
+El experimento va a consistir en calcular la media de la profundidad de unos [diamantes.](https://ggplot2.tidyverse.org/reference/diamonds.html) 
+
+```{r}
+#| label: global-avg
+diamonds <- ggplot2::diamonds
+
+depth_mean <- mean(diamonds$depth)
+```
+
+La media de toda la muestra es `r depth_mean`.
+
+En el siguiente gráfico tienes la distribución de la media muestral cuando el tamaño muestral es 5, 100, 500 y 1.000 (el total de la muestra es superior a 50.000). 
+
+```{r}
+#| label: diamonds-sample-mean
+df_sample_means <- purrr::map_dfr(c(5, 100, 500, 1000), function(sample_size) {
+  medias <- replicate(
+    n = 1000, 
+    {
+      mean(sample(diamonds$depth, size = sample_size, replace = TRUE))
+  }
+  )
+  
+  tibble(sample_size, medias)
+  
+})
+  
+```
+
+```{r}
+#| label: diamonds-sample-mean-plot
+ggplot(df_sample_means) +
+  geom_histogram(aes(x = medias), fill = "#800080") + 
+  geom_vline(xintercept = depth_mean, col = "#333333", linetype = 2) + 
+  facet_grid(. ~ sample_size) + 
+  labs(x = "Media muestral", y = "Casos", title = "Distribución de la media muestral según el tamaño muestral")
+
+```
+
+Lo interesante de este gráfico es que puedes ver cómo, a medida que aumenta el tamaño muestral, los cálculos de la media con ese tamaño son cada vez más estables. La línea vertical es la media _poblacional_ y puedes ver que las colas son cada vez menos pesadas (más _normales_).
+
+
+
+
+
