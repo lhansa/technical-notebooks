@@ -205,4 +205,4 @@ df_medias |>
 ```
 
 
-[En unos días](https://longitudsinanchura.com/posts/2023-06-24-muestreo) te escribo sobre cómo aproximar esto cuando no tienes acceso a la media poblacional, pero que puedas valorar si tu muestra es adecuada o no.
+[En unos días](https://longitudsinanchura.com/posts/2023-07-21-muestreo-ii) te escribo sobre cómo aproximar esto cuando no tienes acceso a la media poblacional, pero que puedas valorar si tu muestra es adecuada o no.
