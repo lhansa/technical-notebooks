@@ -1,0 +1,50 @@
+---
+title: "Muertes de humanos causadas por otros animales"
+description: "Exploración de muertes de humanos anuales causadas por otros animales."
+description-meta: "Número de muertes de humanos por animales"
+author: "Leonardo Hansa"
+date: "2023-08-14"
+categories: [datos]
+execute: 
+  echo: false
+freeze: auto
+---
+
+Siempre me ha fascinado el dato que te voy a enseñar ahora. 
+
+**¿Cuál es el animal que más humanos mata al año?**
+
+Hay gente que se come el coco sin llegar a nada. Otros dicen que el humano. 
+
+Pero no. 
+
+El gráfico siguiente además ayudar a desmitificar peligros, como los tiburones.
+
+**Observación.** No consigo encontrar la fuente original de los datos. No es el único sitio donde lo he visto y me gusta la idea general, pero los números quizá no sean fiables (y la traducciones menos todavía, porque esas las he hecho yo, así que eso sí que no xD)
+
+```{r}
+#| label: everything
+datos <- data.frame(
+  causa = c("tiburón", "lobos", "medusas", "tigres", "abejas/avispas", "leones", "elefantes", "hipopótamos", "cocodrilos", "tenias", "lombrices intestinales", "mosca tse-tsé", "escorpiones", "caracoles de agua dulce", "vinchuca", "perros", "moscas de la arena", "serpientes", "humanos", "mosquitos"), 
+  muertes = c(6, 10, 40, 50, 60, 100, 100, 500, 1000, 1600, 2700, 3500, 3500, 4400, 8000, 17400, 24200, 60000, 580000, 830000)  
+)
+
+datos$muertes_text <- scales::comma(datos$muertes, big.mark = ".")
+
+library(ggplot2)
+
+theme_set(theme_light())
+
+ggplot(datos, aes(x = reorder(causa, muertes), y = muertes)) + 
+  geom_col(fill= "#800080") +
+  geom_text(aes(label = muertes_text), 
+            size = 3, nudge_y = 30000) +
+  scale_y_continuous(labels = \(x) scales::comma(x, big.mark = ".")) + 
+  labs(x = "Animal causante de la muerte", y = "Muertes", 
+       title = "Muertes humanas anuales", 
+       caption = "Fuente: CBS News") + 
+  coord_flip()
+```
+
+
+La fuente es [esta.](https://www.cbsnews.com/pictures/the-20-deadliest-animals-on-earth-ranked/)
