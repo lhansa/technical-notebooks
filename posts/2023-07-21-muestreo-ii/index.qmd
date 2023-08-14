@@ -1,0 +1,165 @@
+---
+title: "Muestreo (II)"
+description: "Repaso a más conceptos introductorios al muestreo estadístico"
+description-meta: "Explicación de conceptos sobre muestreo (sampling) estadístico"
+author: "Leonardo Hansa"
+date: "2023-07-21"
+categories: [datos]
+execute: 
+  echo: false
+freeze: auto
+---
+
+[Hace unos días](https://longitudsinanchura.com/posts/2023-07-18-muestreo/) cacharreaba con algunos conceptos sobre el muestro. 
+
+Hoy verás conceptos sobre distribuciones de un estadístico de una muestra. 
+
+
+## Distribución muestral exacta
+
+Imagina que tienes cuatro dados y los lanzas. El primer dado puede sacar uno de seis posibles valores; el segundo, igual; y así... Es decir, el primero puede sacar 6 valores, el segundo, otros 6... Matemáticamente: 
+
+$$6 \times 6 \times 6 \times 6 = 6 ^ 4 = 6 ^ {\mbox{dados}}$$
+
+Lanzas una vez y calculas la suma de las caras que ves sobre la mesa (un juego de dados típicos es apostar a la suma de las caras tras lanzar dos dados). Lanzas otra vez y calculas la suma de nuevo. Y así...
+
+```{r}
+#| label = libs
+library(dplyr)
+library(ggplot2)
+
+theme_set(theme_light())
+```
+
+```{r}
+#| label: generate
+df_lanzamientos <- tidyr::expand_grid(
+  dado1 = 1:6, 
+  dado2 = 1:6, 
+  dado3 = 1:6, 
+  dado4 = 1:6 
+) |> 
+  mutate(suma_lanzamiento = (dado1 + dado2 + dado3 + dado4))
+
+ggplot(df_lanzamientos, aes(x = factor(suma_lanzamiento))) + 
+  geom_bar(fill = "#800080") + 
+  labs(x = "Suma", y = "Casos", title = "Distribución exacta de la suma con 4 dados")
+```
+
+Este, con 4 dados, es un caso razonablemente pequeño y has podido calcular todos los resultados posibles. Concretamente, ese gráfico representa la distribución exacta de la suma de lanzar 4 dados.
+
+En el gráfico puedes ver que el resultado con más casos favorables es 14, con 146 repeticiones. 
+
+**¿Pero qué ocurre si tienes más dados?**
+
+## Simulación de la distribución muestral 
+
+En el curso de Datacamp de donde estoy sacando estas ideas dicen que, si tiras 100 dados, tienes tantas combinaciones posibles como átomos hay en el universo: `r 6 ^ 100` 
+
+Cuando no puedes replicar la distribución exacta porque el número de casos es enorme, o porque no tienes acceso a toda la población (bien por tecnología, bien por coste, ...), necesitas una aproximación a esa distribución. 
+
+Por ejemplo, si en el caso de 4 dados no pudiéramos replicar todos los lanzamientos, podríamos buscar una aproximación mediante algunos lanzamientos. En el gráfico anterior están los `r 6 ^ 4` casos posibles. Vamos a ver cómo queda esa distribución si lo aproximamos con 750 simulaciones. 
+
+```{r}
+#| label: sim750
+simulacion_sumas <- replicate(
+  n = 750, 
+  {
+    sum(sample(1:6, size = 4, replace = TRUE))
+  }
+)
+
+ggplot() + 
+  geom_bar(aes(x = simulacion_sumas), fill = "#800080") + 
+  labs(x = "Suma", y = "Casos", title = "Simulación con 750 repeticiones y 4 dados")
+```
+
+No es igual pero la forma es parecida. **Una nota importante:** en este caso estamos simulando, o sea, no estamos tomando los resultados posibles reales, sino que estamos haciendo como que tiramos los dados y apuntamos la suma. Es decir, como no es el caso teórico, incluso aunque repitiéramos la simulación tantas veces como casos posibles hay, nada garantiza que vayamos a obtener la distribución exacta de antes. 
+
+
+```{r}
+#| label: sim1296
+simulacion_sumas <- replicate(
+  n = 1296, 
+  {
+    sum(sample(1:6, size = 4, replace = TRUE))
+  }
+)
+
+ggplot() + 
+  geom_bar(aes(x = simulacion_sumas), fill = "#800080") + 
+  labs(x = "Suma", y = "Casos", title = "Simulación con 1296 repeticiones y 4 dados")
+```
+### Y esto, ¿para qué sirve?
+
+_Oye, Leo, pero yo ya he calculado la distribución exacta. ¿Para qué quiero esta aproximación?_
+
+Como esa aproximación se parece a la distribución exacta, cuando no puedes acceder a la exacta, puedes usar esta: 
+
+```{r}
+#| label: sim10000
+simulacion_sumas <- replicate(
+  n = 10000, 
+  {
+    sum(sample(1:6, size = 100, replace = TRUE))
+  }
+)
+
+ggplot() + 
+  geom_bar(aes(x = simulacion_sumas), fill = "#800080") + 
+  labs(x = "Suma", y = "Casos", title = "Simulación con 10.000 repeticiones y 100 dados")
+```
+## Teorema central del límite
+
+Imagina que fijas un tamaño muestral. Y para ese tamaño muestral, replicas muchas veces un experimento. 
+
+El experimento va a consistir en calcular la media de la profundidad de unos [diamantes.](https://ggplot2.tidyverse.org/reference/diamonds.html) 
+
+```{r}
+#| label: global-avg
+diamonds <- ggplot2::diamonds
+
+depth_mean <- mean(diamonds$depth)
+```
+
+La media de toda la muestra es `r depth_mean`.
+
+En el siguiente gráfico tienes la distribución de la media muestral cuando el tamaño muestral es 5, 100, 500 y 1.000 (el total de la muestra es superior a 50.000). 
+
+```{r}
+#| label: diamonds-sample-mean
+df_sample_means <- purrr::map_dfr(c(5, 100, 500, 1000), function(sample_size) {
+  medias <- replicate(
+    n = 1000, 
+    {
+      mean(sample(diamonds$depth, size = sample_size, replace = FALSE))
+  }
+  )
+  
+  tibble(sample_size, medias)
+  
+})
+  
+```
+
+```{r}
+#| label: diamonds-sample-mean-plot
+ggplot(df_sample_means) +
+  geom_histogram(aes(x = medias), fill = "#800080") + 
+  geom_vline(xintercept = depth_mean, col = "#333333", linetype = 2) + 
+  facet_grid(. ~ sample_size) + 
+  labs(x = "Media muestral", y = "Casos", title = "Distribución de la media muestral según el tamaño muestral")
+
+```
+
+Lo interesante de este gráfico es que puedes ver cómo, a medida que aumenta el tamaño muestral, los cálculos de la media con ese tamaño son cada vez más estables. La línea vertical es la media _poblacional_ y puedes ver que las colas son cada vez menos pesadas (más _normales_).
+
+
+***
+
+Pero realmente he hablado de estadístico poblacional cuando realmente estoy trabajando con una muestra (aunque tenga 50.000 diamantes, eso no es toda la población de la muestra). 
+
+La solución a este problema te lo cuento el próximo día.
+
+
+
