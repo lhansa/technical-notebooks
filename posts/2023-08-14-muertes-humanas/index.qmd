@@ -46,5 +46,12 @@ ggplot(datos, aes(x = reorder(causa, muertes), y = muertes)) +
   coord_flip()
 ```
 
+Hay 5 ideas que me encantan de esto:
+
+- Los insectos matan a mazo, mazo de humanos. 
+- Los tiburones, mal vistos por películas, no suponen mucho problema. 
+- Los humanos matamos mucho, pero no somos lo peor (casi sí). 
+- Los perros, ellos tan amigos, pero cuidado con ellos. 
+- ¿Algo parecido a regla de Pareto?
 
 La fuente es [esta.](https://www.cbsnews.com/pictures/the-20-deadliest-animals-on-earth-ranked/)
