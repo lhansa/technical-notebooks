@@ -1,0 +1,39 @@
+---
+title: "Cómo jugar a la ruleta sin perder dinero"
+description: "Simulación de experimentos del juego de la ruleta en un casino"
+description-meta: "Simulación de juegos con la ruleta de un casino. Montecarlo"
+author: "Leonardo Hansa"
+date: "2023-08-15"
+categories: [datos]
+execute: 
+  echo: false
+freeze: auto
+draft: true
+---
+
+```{python}
+def get_color_for_number(num):
+    if num == 0 or num == 37:  # En nuestra representación, 37 será el 00
+        return 'green'
+    if ((1 <= num <= 10) or (19 <= num <= 28)):
+        return 'red' if num % 2 == 1 else 'black'
+    else:
+        return 'black' if num % 2 == 1 else 'red'
+
+roulette = {i if i != 37 else '00': get_color_for_number(i) for i in range(38)}
+
+def spin_roulette(roulette_dict):
+    number = random.choice(list(roulette_dict.keys()))
+    return number, roulette_dict[number]
+
+import random
+number, color = spin_roulette(roulette)
+
+def simulate_spins(n):
+    for _ in range(n):
+        number, color = spin_roulette(roulette)
+
+```
+
+
+
