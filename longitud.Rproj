@@ -13,5 +13,5 @@ RnwWeave: Sweave
 LaTeX: pdfLaTeX
 
 PythonType: virtualenv
-PythonVersion: 3.10.12
-PythonPath: .venv/bin/python
+PythonVersion: 3.10.9
+PythonPath: .venv/Scripts/python.exe

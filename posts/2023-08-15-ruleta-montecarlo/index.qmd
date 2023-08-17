@@ -12,6 +12,14 @@ draft: true
 ---
 
 ```{python}
+#| label: libs
+import random
+import matplotlib.pyplot as plt
+import pandas as pd
+```
+
+```{python}
+#| label: roulette-functions
 def get_color_for_number(num):
     if num == 0 or num == 37:  # En nuestra representación, 37 será el 00
         return 'green'
@@ -20,20 +28,155 @@ def get_color_for_number(num):
     else:
         return 'black' if num % 2 == 1 else 'red'
 
-roulette = {i if i != 37 else '00': get_color_for_number(i) for i in range(38)}
 
 def spin_roulette(roulette_dict):
     number = random.choice(list(roulette_dict.keys()))
     return number, roulette_dict[number]
 
-import random
-number, color = spin_roulette(roulette)
+```
 
-def simulate_spins(n):
-    for _ in range(n):
+```{python}
+#| label: simulate-function
+def simulate_spins(bet_amount, max_amount, bet_color, roulette):
+    """
+    Simulate a sequence of spins in a roulette game using a betting strategy.
+    
+    Parameters:
+    - bet_amount: The initial amount to bet.
+    - max_amount: Maximum amount to be spent before stopping.
+    - bet_color: The color to bet on (e.g., 'red' or 'black').
+    - roulette: The roulette representation, as a dict of {number: color}.
+
+    Returns:
+    A dictionary with:
+    - bet: Number of bets made.
+    - spent: Total amount spent.
+    - returned: Total amount returned if won, otherwise 0.
+    """
+    
+    total_spent = bet_amount
+    current_bet = bet_amount
+
+    for i in range(1000):  # number of iterations limited to 1000 for now
         number, color = spin_roulette(roulette)
 
+        if color == bet_color:
+            return {
+                'bet': i + 1,
+                'spent': total_spent,
+                'returned': current_bet * 2, 
+                'profit': current_bet * 2 - total_spent
+            }
+
+        # Check if the next bet would exceed the max_amount
+        if (total_spent + current_bet * 2) > max_amount:
+          return {
+                'bet': i + 1,
+                'spent': total_spent,
+                'returned': 0, 
+                'profit': 0 - total_spent
+          }
+            
+        current_bet *= 2
+        total_spent += current_bet
+        
+        
+    return {
+        'bet': i + 1,
+        'spent': total_spent - current_bet,
+        'returned': 0, 
+        'profit': 0 - (total_spent - current_bet)
+    }
+    
+    
+def run_simulations(k, bet_amount, max_amount, bet_color, roulette):
+    """
+    Execute simulate_spins k times and collect the results.
+
+    Returns:
+    A list of dictionaries with the results of each simulation.
+    """
+    results = []
+    for _ in range(k):
+        result = simulate_spins(bet_amount, max_amount, bet_color, roulette)
+        results.append(result)
+    return results
 ```
+
+```{python}
+#| label: results
+def plot_histogram(results):
+    """
+    Plot a histogram of the 'returned' values from the simulation results.
+    """
+    # Extract 'returned' values from the results
+    returned_values = [res['profit'] for res in results]
+
+    # Create a histogram
+    plt.hist(returned_values, bins=30, edgecolor='black', alpha=0.7)
+    plt.title('Distribution of Returned Values')
+    plt.xlabel('Returned Value')
+    plt.ylabel('Number of Occurrences')
+    plt.show()
+    
+def frequency_table(results):
+    """
+    Create a frequency table from the 'returned' values in the simulation results.
+
+    Returns:
+    A DataFrame showing the unique returned values and their frequencies.
+    """
+    
+    # Extract 'returned' values from the results
+    returned_values = [res['profit'] for res in results]
+    
+    # Create a DataFrame from the returned values
+    df = pd.DataFrame(returned_values, columns=['Returned Value'])
+
+    # Compute the frequency table
+    freq_table = df['Returned Value'].value_counts().reset_index()
+    freq_table.columns = ['Returned Value', 'Frequency']
+    
+    # Sort by 'Returned Value'
+    freq_table = freq_table.sort_values(by='Returned Value').reset_index(drop=True)
+
+    return freq_table
+
+```
+
+
+```{python}
+#| label: simulation-1000
+
+# Define the roulette
+roulette = {i if i != 37 else '00': get_color_for_number(i) for i in range(38)}
+
+# Number of simulations
+k = 1000
+
+# Execute simulations
+results = run_simulations(k, 10, 1000, 'red', roulette)
+
+# Plot the histogram
+plot_histogram(results)
+```
+
+```{python}
+#| label: simulation-Inf
+
+# Number of simulations
+k = 1000
+
+# Execute simulations
+results = run_simulations(k, 10, float('inf'), 'red', roulette)
+
+# Plot the histogram
+frequency_table(results)
+```
+
+
+
+
 
 
 
