@@ -1,0 +1,17 @@
+---
+title: "Cómo visualizar cualquier conjunto de datos en 2 dimensiones"
+description: "Uso de t-SNE para visualizar en 2 dimensiones un conjunto de datos, independientemente de cuántas variables tenga "
+description-meta: "Uso de t-SNE para visualizar en 2 dimensiones"
+author: "Leonardo Hansa"
+date: "2023-09-30"
+categories: [datos]
+execute: 
+  echo: false
+freeze: auto
+draft: true
+---
+
+```{r}
+df <- keras::dataset_mnist()$train$x
+```
+
