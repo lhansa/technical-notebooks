@@ -1,0 +1,91 @@
+---
+title: "¿Existe la suerte?"
+description: "Notas sobre el libro Existe la suerte de Nassim Taleb"
+description-meta: "Notas sobre Existe la suerte o Fooled by randomness de Nassim Taleb"
+author: "Leonardo Hansa"
+date: "2023-09-28"
+categories: [lecturas]
+---
+
+
+- **Probabilidad:** falta de certidumbre en nuestro conocimiento y el desarrollo de métodos para lidiar con nuestra ignorancia. 
+en el mundo real muchas veces tienes que averiguar el problema más que la solución. 
+- De la misma forma que un antepasado se rescaba la nariz y veía llover, pensaba que el rascarse la nariz inducía lluvia, acualmente ligamos la prosperidad económica a un recorte de los bancos centrales.
+- Presentamos conjeturas como verdades porque no manejamos bien las probabilidades.
+- Lo que obtienes por suerte es fácil que te desaparezca por azar. Lo que obtienes sin la cción de la suerte es más robusto a la incertidumbre. 
+- Dos problemas ante un estado: 
+    + Los cisnes negros.
+    + La simetría (de poco sirven muchos éxitos si un fracaso te lo quita todo)
+
+ 
+- Experimento s xix. Paciente amnésica, hay que presentarse cada 15 minutos. Un día, estrechan la mano con una chincheta. Al día siguiente, la paciente no recuerda al interlocutor pero retira la mano de manera instintiva.
+- Nos fijamos en los éxitos (como tecnologías que han cambiado nuestra vida) pero no en los fracasos (como patentes que se han quedado en el olvido)
+- El ratio de información no verificada frente a la verificada aumenta.
+    + Misma idea de _la señal y el ruido_ de Nate Silver.
+- En la Italia renacentista, las aseguradoras cobraban la misma tasa a un varón de 20 años que a uno de 50, porque su vida extra esperada era la misma (alguien que sobrepasaba los 40 había demostrado resistencia a muchos obstáculos y posiblemente ya llegaría a viejo).
+- Lo que uno observa en los mercados financieros es, en el mejor de los casos, varianza más retornos, no solo retornos.
+- Centrarse en la aleatoriedad, en el corto plazo, desgasta, quema, frustra y deprime, por la constante exposición a sus golpes de dolor.
+- my problem is that I'm not rational and I'm extremely prone to drown in randomness and to incur emotional torture. My only advantage in life is that i know some of my weaknesses, mostly that I'm incapable of taming my emotions facing news and incapable of seeing a performance with a clear head. Silence is far better.
+
+
+
+- Fashionable nonsense, by alan sokal
+- _and such a crowd_ (y esta banda)
+- si lo siguiente se parece a un discurso de un mandamás de tu empresa, búscate otro trabajo:
+
+> We look after our customer's interests/the road ahead / our assets are our people / creation of shareholder value / our vision / our expertise lies in / we provide interactive solutions / we position ourselves in this market / how to serve our customers better / short- term pain for long-term gain/we will be rewarded in the long run / we play from our strength and improve our weaknesses / courage and determination will prevail / we are committed to innovation and technology / a happy employee is a productive employee / commitment to excellence / strategic plan / our work ethics.
+
+
+- Le preguntaron en un evento si creía que el mercado iba a subir o bajar en la próxima semana. Dijo que subiría. Y respondieron que entonces por qué estaba en corto. Por asimetría. Él creía que había mucha probabilidad de que subiera (pero muy poco, solo un 1%). - Pero había una probabilidad de 30% de bajar 10%. Con todo, el resultado esperado era una bajada.
+- we could either be too lax or too stringent in accepting past information as a prediction of the future. I need a lot more than data. My major reason is the rare event, but i have plenty of others.
+- la historia nos enseña que cosas que nunca han ocurrido ocurren.
+- Tiendes a ser más sensible a la presencia o ausencia de un estímulo que a la variación en su magnitud. Esto implica (en mercados financieros) que una pérdida es al principio solo una pérdida, con drásticas consecuencias a la larga 
+- Emocionalmente, prefieres muchas ganancias y pocas pérdidas, aunque en magnitud eso no tenga que ser bueno.
+- En ciencia, puedes estar haciendo experimentos fallidos muchas veces, hasta que una por fin sale un resultado exitoso.
+- La serie temporal de éxito puede parecer plana con un pico al final, pero se puede ver como una probabilidad acumulada (relación con James Clear)
+- Esto mismo se puede aplicar al mercado editorial, a entrenamiento físico (basado en el ritmo de cazadores recolectores del paleolítico) o inversión para aprovechar crisis.
+- La estadística nos falla cuando tenemos distribuciones asimétricas: imagina una urna con bolas rojas y negras, pero en la que sacar bola roja tiene una probabilidad muy muy baja. Si quiero saber si hay bolas rojas y mi método consiste en ir sacando bolas (por probabilidad, serán casi siempre negras), el aumentar el tamaño muestral no me ayuda a estar más seguro de si hay bolas rojas o no si siempre saco bolas negras. Y si saco una roja, aumentar el tamaño muestral tampoco me aporta más información.
+- Lo importante de esto es que aumentar progresivamente el tamaño muestral no garantiza que aumente la información
+- Robert Lucas: si la gente fuera racional, entonces aplicarían es razón para entender patrones del pasado y adaptarse, de forma que la información pasada seria inutil para predecir el futuro.
+
+
+- Aprende a gestionar la aleatoriedad manteniendo una mente abierta y cambiando de opinión sin que te dé vergüenza.
+- Usaré la estadística cuando me beneficie y la evitaré cuando me perjudique. Aprenderé del pasado pero sin caer en sus peligros. Por ello usaré la estadística para hacer apuestas agresivas (estadísticamente, qué probabilidad hay de que algo poco probable pero beneficioso ocurra) pero no la usaré para protegerme frente a riesgos (que algo malo históricamente nunca haya ocurrido no significa que no vaya a ocurrir).
+- El coste de estar equivocado en una apuesta tiene que ser asumible y estar limitado.
+
+ 
+- Si juntas a infinitos monos frente a un teclado, alguno acabará tecleando la Iliada. Ahora bien, ¿cuál es la probabilidad de que ese mono esceiba a continuación la Odisea? Dicho de otra forma, ¿hasta qué punto el rendimiento pasado es un buen indicador del rendimiento futuro?
+- De cara a valorar una empresa, si tienes muchas empresas, es probable que alguna lo esté haciendo bien por casualidad, no por capacidad. ¿Cómo sabes cuál es para no invertir en ella?
+y en inversiones, ves a inversores que les sale bien su inversión, pero ¿cómo sabes que no es por casualidad? Además, solo ves a los buenos. Los fracasados están escondidos y no conoces la probabilidad de ser bueno.
+- El sesgo del superviviente es habitual porque estamos acostumbrados a aprovechar la información que tenemos delante de nosotros e ignorar la que no vemos.
+
+ 
+- Nadie acepta la aleatoriedad en su éxito; solo en su fracaso.
+
+ 
+- Si la nariz de Cleopatra hubiera sido distinta el mundo sería totalmente diferente (porque Julio César quedó prendado por su nariz). - (Pascal, ejemplo de caos)
+- what has gone wrong with the development of economics as a science? Answer: there was a bunch of inteligent people who felt compelled to use mathematics just to tell themselves that they were rigorous in their thinking, that theirs was a science.
+- El camino hacia el éxito no tiene por qué depender de la suerte, sino de la constancia. La constancia en un camino sin frutos es la que acaba llevándote al evento raro, al momento en que ves que has avanzado y progresado. El camino hacia el éxito puede no ser alestorio, pero muy poca gente tiene la entereza de seguirlo hasta el final. Aquellos que dan el paso extra son los recompensados.
+- Me estoy dando cuenta del efecto no lineal tras el éxito en cualquier campo. Es mejor tener unos pocos entusiastas de tu trabajo que muchos seguidores a los que les pareces bien. Mejor ser amado por una docena que gustar a cientos.
+ 
+- El valor esperado es aquel en el que si te quieres ir de vacaciones a París o al Caribe, puedes imaginarte a la vez tumbado en una playa paridisíaca visitando el museo de Orsay. O sea, algo imposible pero que se usa una y otra vez para cuantificar escenarios.
+las reglas tienen su utilidad. No las seguimos porque sean correctas, sino porque nos ahorran tiempo y esfuerzo (por ejemplo, salir corriendo cuando ves algo que pueda ser un depredador, lo sea o no lo sea).
+- Sesgos cognitivos: si vemos un número, tendemos a anclarnos a él en nuestras estimaciones.
+Las emociones son atajos para tomar decisiones. Una decisión puramente matemática requeriría tiempo infinito por la cantidad de información que hay que procesar.
+- Si estás pensando en equipaje para un viaje, la varianza en la temperatura puede condicionarte más que el valor esperado.
+
+- No soy tan inteligente ni tan fuerte como para controlar mis emociones. Es más, las necesito para tomar decisiones y ejecutarlas.
+- Si mides una mesa con una regla de cuya precisión no te fías, obtienes más información de la regla que de la mesa. Si lees una valoración de un usuario al que no conoces, obtienes más información del usuario que del contenido revisado.
+tratado sobre la risa, henri Bergson 
+- A los 25, ignoraba totalmente la ciencia del comportamiento. Me habían hecho creer erróneamente en mi juventud que mis supersticiones eran culturales, y que por ello podía deshacerme de ellas mediante el uso del raciocinio.
+
+
+- La ciencia está bien; los científicos son humanos. Un científico puede tener que actuar como un picapleitos defensor de una causa sin sentido en lugar de limitarse a buscar la verdad.
+
+- No culpes a otros por tu destino (incluso aunque tengan algo de culpa).
+- Lo único de ti sobre lo que no tiene control la suerte es tu comportamiento.
+- Cuanto más asciendes profesionalmente, más te pagan. Esto puede estar justificado, ya que tiene sentido pagar a un trabajador acorde a su contribución. Sin embargo, cuanto más asciendes, la evidencia de esta contribución disminuye.
+- Un empleado en un nivel bajo en la jerarquía (un perfil técnico) se le evalúa tanto por sus resultados como por su metodología. A medida que asciende, se le evalúa más por resultados. En niveles altos, cómo llegar a buenos resultados da igual, con tal de que se llegue a buenos resultados. Pero el jefe de una gran compañía se puede enfrentar a unas cuantas grandes decisiones cuyo método no se puede repetir (porque las circunstancias del mercado y de la empresa no se repitan). Así, "ser CEO" puede no requerir unas habilidades especiales para conseguir buenos resultados, ya que estos dependen en gran medida de que la empresa esté en las circunstancias adecuadas. Y lo que requiere realmente es tener el carisma y las habilidades sociales correspondientes para caer bien, sin más.
+- Si algo se rige por normas aleatorias, viene a funcionarte de la misma forma que si no lo conocieras.
+- Valoramos lo visible, lo asentado, lo personal, lo narrado, lo medible, lo tangible; desdeñamos lo abstracto.
+
