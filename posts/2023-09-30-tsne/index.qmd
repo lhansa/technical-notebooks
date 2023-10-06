@@ -6,12 +6,112 @@ author: "Leonardo Hansa"
 date: "2023-09-30"
 categories: [datos]
 execute: 
-  echo: false
+  echo: true
 freeze: auto
-draft: true
 ---
 
 ```{r}
-df <- keras::dataset_mnist()$train$x
+#| labs: data
+#| echo: false
+#| message: false
+# reticulate::use_python("~/Projects/longitud/.venv/bin/python")
+# mnist <- keras::dataset_mnist()$train$x
+# saveRDS(mnist, "mnist.rds")
+number_labels <- readRDS("mnist_y.rds")
+mnist <- readRDS("mnist.rds")
 ```
+
+En este post te muestro cómo puedes usar el algoritmo t-SNE con R para visualizar datos de grandes dimensiones en solo 2. 
+
+Utilizo el conjunto de datos MNIST, que tiene 60.000 observaciones de cifras escritas a mano, determinadas por una malla de 28x28 con un indicador del nivel de gris que hay en cada píxel del mallado. 
+
+Cada una de las observaciones viene dada por el nivel de gris que hay en cada píxel, o sea, por `r 28 * 28` variables.
+
+Si quisieras hacer una visualización de cómo se distribuyen tus observaciones en todas esas variables... pues simplemente no podrías. 
+
+t-SNE te lo proyecta todo en 2 dimensiones, para que puedas luego visualizarlo.
+
+## Preparación de datos
+
+He hecho un poco de trampa y los datos ya los tengo preparados. Pero vamos, que voy a usar los datos que tienes si ejecutas `keras::dataset_mnist()`. Concretamente la parte de entrenamiento. 
+
+Y bueno, tendrás que ejecutar eso y configurarlo bien, porque menuda aventura: Python y sus entornos virtuales. 
+
+Aparte, usaré librerías de tidyverse para dar forma a los datos.
+```{r}
+#| label: libs
+#| message: false
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(ggplot2)
+library(Rtsne)
+
+ggplot2::theme_set(ggplot2::theme_light())
+```
+
+
+Para lo que quiero hacer no necesito las 60.000 observaciones que hay, así que me quedo con las 1000 primeras.
+
+
+```{r}
+#| labs: prep-data
+
+max_number <- 1000
+# map_dfr(seq_len(dim(mnist)[1]), function(i) {
+data <- map_dfr(seq_len(max_number), function(i) {
+  data_aux <- mnist[i, 1:28, 1:28] 
+  colnames(data_aux) <- paste0("Y", 1:28)
+  
+  data_aux |> 
+    as_tibble() |> 
+    mutate(x = paste0("X", 1:28)) |> 
+    pivot_longer(-x, names_to = "y") |> 
+    unite("variable", x, y) |> 
+    mutate(case = i)  
+})
+
+data <- data |> 
+  pivot_wider(names_from = variable, values_from = value)
+
+dim(data)
+```
+
+La columna extra es la que me indica que son observaciones diferentes. 
+
+## Cómo aplicas t-SNE
+
+Mira, sinceramente ni idea. 
+
+O sea, tú ejecuta `Rtsne()` sobre tu _data frame_ y surge la magia. 
+
+```{r}
+#| labs: tsne
+tsne_fit <- Rtsne(data)
+dim(tsne_fit$Y)
+```
+
+
+## Cómo puedes visualizar t-SNE
+
+Recupero de los datos originales la etiqueta del número que se supone que representa cada mallado. Como estoy trabajando solo con los 1.000 primeros, me quedo solo con esos. 
+
+En el gráfico muestro cómo se distribuyen los puntos y los coloreo en función de si son un 0, 1, 2, 3, etc.
+
+```{r}
+df_to_plot <- as_tibble(tsne_fit$Y)
+df_to_plot$label <- as.factor(number_labels[1:max_number])
+
+ggplot(df_to_plot) + 
+  geom_point(aes(x = V1, y = V2, col = label)) + 
+  labs(
+    title = "t-SNE applied to MNIST dataset",
+    subtitle = sprintf("Sample of first %i elements", max_number), 
+    caption = "Source: keras::dataset_mnist()"
+  )
+```
+
+
+
+
 
