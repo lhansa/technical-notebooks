@@ -109,7 +109,7 @@ df_procesado <- df_procesado |>
 ```{r}
 #| label: set-map
 #| warning: false
-register_google(key = "AIzaSyBJ4ySKgC681Yk16bLzPM4ew8clIA2kLyQ")
+register_google(key = "")
 mapa <- get_map(location = c(-3.685, 40.427), 
                 zoom = 13)
 
