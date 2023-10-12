@@ -1,0 +1,200 @@
+---
+title: "Paseo en bicicleta eléctrica por Madrid"
+description: ""
+description-meta: ""
+author: "Leonardo Hansa"
+date: "2023-10-12"
+categories: [datos]
+execute: 
+  echo: false
+  eval: false
+  warning: false
+freeze: auto
+---
+
+Últimamente tengo la sensación de que las estaciones de Bicimad, el servicio de bicis públicas de Madrid, están vacías.
+
+Cuando abro la app, veo que las estaciones de la mitad sur de Madrid están llenas, y las de la mitad norte están vacías. 
+
+Quería ver si los datos públicos me decían algo pero: 
+
+- He tardado casi dos horas en leer el json de datos, porque está escrito como si... no sé. O sea, se suele decir que los datos en json están semiestructurados. Pues mira, los datos de una fotografía tienen más estructura que el json de estos datos públicos. 
+- Los datos que me he puesto a ver (los de estaciones) solo están hasta diciembre de 2022. Como me di cuenta de esto en verano, he cogido los datos de julio de 2022.
+
+
+Los datos de junio los he agregado a nivel horario y calculo la proporción media horaria de bases disponibles. 
+
+Eso es lo que puedes ver aquí: 
+
+```{r}
+#| label: libs
+library(jsonlite)
+library(stringr)
+library(purrr)
+library(dplyr)
+library(ggmap)
+library(gganimate)
+library(gifski)
+```
+
+
+```{r}
+#| label: read
+# Leer el archivo completo como texto
+txt <- readLines("202207.json", warn = FALSE)
+
+# Concatenar todas las líneas en una única cadena
+txt_all <- paste(txt, collapse = "")
+
+# Dividir la cadena en múltiples objetos JSON
+json_strs <- strsplit(txt_all, "}")[[1]]
+
+# El último texto es solo un corchete:
+json_strs <- json_strs[-length(json_strs)]
+```
+
+```{r}
+#| label: indicadores
+indicadores <- map_chr(json_strs, function(x) {
+  
+  if (x == "]") {
+    return("")
+  }
+  
+  out <- NA_character_
+  if (str_detect(x, "^, ", negate = TRUE)) {
+    out <- str_extract(x, "^.*\\[")
+  }
+  return(out)
+})
+
+indicadores <- zoo::na.locf(indicadores)
+indicadores <- purrr::discard(indicadores, \(x) x == "")
+```
+
+
+```{r}
+#| label: procesado
+procesa_json <- function(i) {
+  x <- json_strs[i]
+  
+  if (x == "]") {
+    return(NULL)
+  }
+  
+  if (str_detect(x, "^, ") ){
+    x <- str_remove(x, "^, ")
+  } else {
+    x <- str_remove(x, "^.*\\[")
+  }
+  x <- fromJSON(paste0(x, "}"))
+  return(x)
+}
+
+df_procesado <- map_dfr(seq_along(json_strs), procesa_json)
+
+df_procesado <- df_procesado |> 
+  mutate(
+    datetime = indicadores, 
+    datetime = str_extract(datetime, "[0-9]{4}\\-[0-9]{2}\\-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}"), 
+    datetime = as.POSIXct(datetime, format = "%Y-%m-%dT%H:%M:%S"), 
+    across(
+      c(longitude, latitude),
+      readr::parse_number
+    ), 
+    free_proportion = free_bases / total_bases
+  )
+```
+
+```{r}
+#| label: set-map
+#| warning: false
+register_google(key = "AIzaSyBJ4ySKgC681Yk16bLzPM4ew8clIA2kLyQ")
+mapa <- get_map(location = c(-3.685, 40.427), 
+                zoom = 13)
+
+```
+
+
+
+```{r}
+#| label: agregado
+df_agregado <- df_procesado |> 
+  mutate(hora = format(datetime, "%H"), 
+         hora = as.integer(hora)) |> 
+  group_by(hora, name) |> 
+  summarise(
+    longitude = first(longitude), 
+    latitude = first(latitude), 
+    free_bases = sum(free_bases, na.rm = TRUE), 
+    total_bases = sum(total_bases, na.rm = TRUE), 
+    .groups = "drop"
+  ) |> 
+  mutate(
+   free_proportion = free_bases / total_bases
+  )
+```
+
+```{r}
+#| label: pruebas
+# lapply(0:23, function(i) {
+#   ggmap(mapa) +
+#   geom_point(
+#     aes(x = longitude, y = latitude, colour = free_proportion),
+#     size = 2, 
+#     data = filter(df_agregado, hora == i)
+#   ) + 
+#   labs(
+#     x = "", 
+#     y = "",
+#     title = "Estaciones de Bicimad y disponibilidad"
+#   ) + 
+#   scale_colour_gradient2("Plazas disponibles", low = "#100010", mid = "#800080", high = "#FFCCFF") 
+# })
+
+```
+
+
+```{r}
+#| label: animated-map
+P <- ggmap(mapa) +
+  geom_point(
+    aes(x = longitude, y = latitude, 
+        colour = free_proportion),
+    size = 3, 
+    data = df_agregado
+  ) + 
+  transition_time(
+    hora
+  ) + 
+  labs(
+    x = "", 
+    y = "",
+    # title = "Estaciones de Bicimad y disponibilidad ({format(frame_time, '%Y-%m-%d %Hh')})"
+    title = "Estaciones de Bicimad y disponibilidad ({frame_time})"
+  ) + 
+  scale_colour_gradient2(
+    "Plazas disponibles", 
+    low = "#100010", mid = "#800080", high = "#FFCCFF"
+  ) 
+```
+
+```{r}
+#| label: create-gif
+anim_save(
+  filename = "output.gif", 
+  animation = animate(P, 
+                      duration = 12,
+                      width = 600, 
+                      height = 600, 
+                      renderer = gifski_renderer())
+)
+```
+
+![](output.gif)
+
+
+
+
+
+
