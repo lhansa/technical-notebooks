@@ -171,7 +171,7 @@ P <- ggmap(mapa) +
     x = "", 
     y = "",
     # title = "Estaciones de Bicimad y disponibilidad ({format(frame_time, '%Y-%m-%d %Hh')})"
-    title = "Estaciones de Bicimad y disponibilidad ({frame_time})"
+    title = "Estaciones de Bicimad y disponibilidad ({frame_time}h)"
   ) + 
   scale_colour_gradient2(
     "Plazas disponibles", 
