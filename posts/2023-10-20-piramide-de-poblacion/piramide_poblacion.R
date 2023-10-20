@@ -1,4 +1,4 @@
-library(tidyverse)
+# library(tidyverse)
 library(gganimate)
 df <- read_csv2("~/../Downloads/56934.csv")
 
