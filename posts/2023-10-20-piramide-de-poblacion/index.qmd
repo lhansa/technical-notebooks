@@ -7,7 +7,7 @@ date: "2023-10-20"
 categories: [datos]
 execute: 
   echo: false
-  eval: false
+  eval: true
   warning: false
   message: false
 freeze: auto
@@ -35,6 +35,7 @@ library(dplyr)
 library(stringr)
 library(lubridate)
 library(forcats)
+library(ggplot2)
 library(gganimate)
 library(janitor)
 ```
@@ -79,6 +80,7 @@ df_2_plot <- df_2_plot |>
 
 ```{r}
 #| label: animation
+#| eval: false
 P <- ggplot(df_2_plot) + 
   geom_col(aes(y = edad_simple, x = total, fill = sexo)) + 
   transition_time(year) + 
