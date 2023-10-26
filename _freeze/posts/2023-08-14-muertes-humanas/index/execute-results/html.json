@@ -1,0 +1,16 @@
+{
+  "hash": "f21ca2a122220ee83fe0b11e3d0a8e68",
+  "result": {
+    "markdown": "---\ntitle: \"Muertes de humanos causadas por otros animales\"\ndescription: \"Exploración de muertes de humanos anuales causadas por otros animales.\"\ndescription-meta: \"Número de muertes de humanos por animales\"\nauthor: \"Leonardo Hansa\"\ndate: \"2023-08-14\"\ncategories: [datos]\nexecute: \n  echo: false\nfreeze: auto\n---\n\n\nSiempre me ha fascinado el dato que te voy a enseñar ahora. \n\n**¿Cuál es el animal que más humanos mata al año?**\n\nHay gente que se come el coco sin llegar a nada. Otros dicen que el humano. \n\nPero no. \n\nEl gráfico siguiente además ayudar a desmitificar peligros, como los tiburones.\n\n**Observación.** No consigo encontrar la fuente original de los datos. No es el único sitio donde lo he visto y me gusta la idea general, pero los números quizá no sean fiables (y la traducciones menos todavía, porque esas las he hecho yo, así que eso sí que no xD)\n\n\n::: {.cell}\n::: {.cell-output-display}\n![](index_files/figure-html/everything-1.png){width=672}\n:::\n:::\n\n\nHay 5 ideas que me encantan de esto:\n\n- Los insectos matan a mazo, mazo de humanos. \n- Los tiburones, mal vistos por películas, no suponen mucho problema. \n- Los humanos matamos mucho, pero no somos lo peor (casi sí). \n- Los perros, ellos tan amigos, pero cuidado con ellos. \n- ¿Algo parecido a regla de Pareto?\n\nLa fuente es [esta.](https://www.cbsnews.com/pictures/the-20-deadliest-animals-on-earth-ranked/)\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

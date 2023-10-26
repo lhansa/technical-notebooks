@@ -1,0 +1,15 @@
+{
+  "hash": "327572ce2b935d6a71e6d77f2be1e63a",
+  "result": {
+    "markdown": "---\ntitle: \"Cómo jugar a la ruleta sin perder dinero\"\ndescription: \"Simulación de experimentos del juego de la ruleta en un casino\"\ndescription-meta: \"Simulación de juegos con la ruleta de un casino. Montecarlo\"\nauthor: \"Leonardo Hansa\"\ndate: \"2023-08-15\"\ncategories: [datos]\nexecute: \n  echo: false\nfreeze: auto\ndraft: true\n---\n\n\n\n\n\n\n\n\n\n::: {.cell execution_count=5}\n\n::: {.cell-output .cell-output-display}\n![](index_files/figure-html/simulation-1000-output-1.png){#simulation-1000 width=601 height=449}\n:::\n:::\n\n\n::: {.cell execution_count=6}\n\n::: {#simulation-inf .cell-output .cell-output-display execution_count=6}\n```{=html}\n<div>\n<style scoped>\n    .dataframe tbody tr th:only-of-type {\n        vertical-align: middle;\n    }\n\n    .dataframe tbody tr th {\n        vertical-align: top;\n    }\n\n    .dataframe thead th {\n        text-align: right;\n    }\n</style>\n<table border=\"1\" class=\"dataframe\">\n  <thead>\n    <tr style=\"text-align: right;\">\n      <th></th>\n      <th>Returned Value</th>\n      <th>Frequency</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th>0</th>\n      <td>10</td>\n      <td>1000</td>\n    </tr>\n  </tbody>\n</table>\n</div>\n```\n:::\n:::\n\n\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [],
+    "includes": {
+      "include-in-header": [
+        "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js\" integrity=\"sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==\" crossorigin=\"anonymous\"></script>\n<script src=\"https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js\" integrity=\"sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==\" crossorigin=\"anonymous\"></script>\n<script type=\"application/javascript\">define('jquery', [],function() {return window.jQuery;})</script>\n"
+      ]
+    }
+  }
+}

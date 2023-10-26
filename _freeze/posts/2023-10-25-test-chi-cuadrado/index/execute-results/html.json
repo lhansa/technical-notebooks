@@ -1,0 +1,16 @@
+{
+  "hash": "0f332dd1e0e9a43e201831a71580f78c",
+  "result": {
+    "markdown": "---\ntitle: \"\"\ndescription: \"\"\ndescription-meta: \"\"\nauthor: \"Leonardo Hansa\"\ndate: \"2023-10-25\"\ncategories: [datos]\nexecute: \n  echo: false\nfreeze: auto\n---\n\n\nHe descargado los datos de la encuesta salarial del INE. \n\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-4-1.png){width=672}\n:::\n:::\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

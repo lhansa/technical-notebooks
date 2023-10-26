@@ -1,0 +1,16 @@
+{
+  "hash": "01c81fd33b0c130c46197b966ce66ff0",
+  "result": {
+    "markdown": "---\ntitle: \"Pirámide de población española, desde 1971\"\ndescription: \"Evolución de la población española por edades desde 1971, con R y ggplot2.\"\ndescription-meta: \"Evolución de la población española por edades desde 1971, con R y ggplot2.\"\nauthor: \"Leonardo Hansa\"\ndate: \"2023-10-20\"\ncategories: [datos]\nexecute: \n  echo: false\n  eval: true\n  warning: false\n  message: false\nfreeze: auto\n---\n\n\nTe traigo una película de terror, llamada _La quiebra de las pensiones en España_. \n\nEs un GIF que he hecho con la librería ggplot2 de R, y gganimate. \n\nSi quieres el código, me lo pides y te lo mando (o lo buscas en mi GitHub). \n\nLos datos vienen del INE. \n\nEn el gráfico aparecen unos valores missing en un momento dado, pero ni idea de por qué, porque dato hay.\n\n\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n::: {.cell-output .cell-output-stdout}\n```\n[1] \"Spanish_Spain.1252\"\n```\n:::\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n\n![](piramide-poblacion.gif)\n\n\nPuede serte más práctico tener todos los gráficos seguidos, en lugar de quedarte mirando un GIF. \n\nAquí los tienes:\n\n\n::: {.cell}\n::: {.cell-output-display}\n![](index_files/figure-html/facets-1.png){width=672}\n:::\n:::\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

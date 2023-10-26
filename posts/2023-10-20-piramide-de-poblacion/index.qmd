@@ -114,13 +114,14 @@ Aquí los tienes:
 ```{r}
 #| label: facets
 #| fig-height: 16
+#| fig-width: 16
 ggplot(df_2_plot) + 
   geom_col(aes(y = edad_simple, x = total, fill = sexo)) + 
   facet_wrap(~year) +
   scale_x_continuous(
     limits = c(-400000, 400000), 
     breaks = c(-200000, 0, 200000),
-    labels = \(x) scales::scientific(abs(x))) + 
+    labels = function(x) scales::scientific(abs(x))) + 
   scale_y_discrete(breaks = as.character(seq(0, 100, by = 25))) +
   labs(title = "Población de mujeres y hombres por edad", 
        y = "Edad", x = "", 
