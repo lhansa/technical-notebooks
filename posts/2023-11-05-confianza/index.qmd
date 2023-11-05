@@ -1,0 +1,80 @@
+---
+title: "Qué te dice un intervalo de confianza"
+description: "Cómo calcular e interpretar intervalos de confianza"
+description-meta: "Cómo calcular e interpretar intervalos de confianza."
+author: "Leonardo Hansa"
+date: "2023-11-05"
+categories: [datos]
+execute: 
+  echo: false
+freeze: auto
+draft: true
+---
+
+## Cálculo del intervalo
+
+```{r}
+#| label: muestra1
+set.seed(3718)
+sample_size <- 100
+population_mean <- 1000
+population_sd <- 100
+
+norm_values <- rnorm(sample_size, population_mean, population_sd)
+
+sample_mean <- mean(norm_values)
+sample_sd <- sd(norm_values)
+```
+
+La media muestral es `r sample_mean` y la desviación típica muestral es `r sample_sd`. 
+
+También conocemos el tamaño muestral (porque lo he decidido yo antes) y necesitamos los valores de la distribución normal que delimitan la confianza al nivel que queramos (95% para no salir de lo habitual). 
+
+```{r}
+#| label: intervalo1
+error_margin <- qnorm(c(0.025, 0.975)) * sample_sd / sqrt(sample_size)
+confidence_interval <- sample_mean + error_margin
+```
+
+El resultado es que el intervalo es (`r confidence_interval[1]`, `r confidence_interval[2]`). 
+
+## Interpretación del intervalo
+
+¿Cómo interpretas esos valores? La interpretación **no** es que el valor de la media poblacional está ahí dentro con un 95% de probabilidad. 
+
+Vamos a ver qué es. 
+
+En lugar de dar la definición formal de intervalo de confianza, que no hay dios que la entienda, vamos a construir muchos intervalos de confianza. 
+
+```{r}
+#| label: function
+compute_interval <- function(size, mean, sd) {
+  
+  norm_values <- rnorm(size, mean, sd)
+  sample_mean <- mean(norm_values)
+  sample_sd <- sd(norm_values)
+  error_margin <- qnorm(c(0.025, 0.975)) * sample_sd / sqrt(size)
+  confidence_interval <- sample_mean + error_margin
+  
+  return(list(mean = sample_mean, confint = confidence_interval))
+
+}
+```
+
+```{r}
+computations <- 10000
+experiments <- replicate(
+  computations,
+  {
+    out <- compute_interval(sample_size, population_mean, population_sd) 
+  }
+)
+
+str(experiments)
+
+```
+
+
+
+
+
