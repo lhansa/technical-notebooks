@@ -115,6 +115,7 @@ Aquí los tienes:
 #| label: facets
 #| fig-height: 16
 #| fig-width: 16
+#| eval: false
 ggplot(df_2_plot) + 
   geom_col(aes(y = edad_simple, x = total, fill = sexo)) + 
   facet_wrap(~year) +
@@ -133,5 +134,7 @@ ggplot(df_2_plot) +
         axis.text = element_text(size = 6), 
         axis.title = element_text(size = 8))
 ```
+
+![Pirámides de población desde 1971 hasta 2021](facets.jpeg)
 
 
