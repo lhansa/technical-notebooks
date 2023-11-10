@@ -11,10 +11,47 @@ freeze: auto
 draft: true
 ---
 
+Creo que no entendí qué eran los intervalos de confianza en ninguna clase de estadística.
+
+A ver, no digo que no me los explicaran. 
+
+Digo que, pese a que me los explicaron, no entendí nada de ellos. 
+
+En el mundo laboral me encuentro con dos situaciones contradictorias: 
+
+- Hay personas que defienden que todas las estimaciones que se dan deberían incluir los intervalos de confianza. 
+- Pero hay personas, normalmente los consumidores o clientes de esas estimaciones, que no tienen ni idea de qué es un intervalo de confianza. 
+
+Y no digo que sea culpa suya. 
+
+La verdad, con lo complicado que es el concepto (porque no tiene ni pies ni cabeza) y lo mal que lo dan, normal que no se enteren. 
+
+¿Se deberían dar los intervalos de confianza? Pues dado que algo de la incertidumbre de tus estimaciones deberías dar, mientras no tengas nada mejor, sí, deberías darlos. 
+
+Te muestro aquí un ejemplo de **cómo se interpretan.**
+
+
 ## Cálculo del intervalo
+
+Voy a usar un ejemplo muy concreto. 
+
+¿Significa eso que lo que te voy a explicar solo sirve para este ejemplo?
+
+No, es extrapolable. Pero necesito un ejemplo concreto porque si no, pasa lo de siempre: que nadie se entera de nada. 
+
+El ejemplo es **estimar la media de una población a partir de la media de una muestra.** Parece una bobada, lo sé, pero verás en breve que hay cierta incertidumbre al usar la media muestral para esto. 
+
+Con esto no digo que no uses la media muestral. Lo que digo es que seas consciente de que hay cierta incertidumbre. 
+
+Para jugar con esta incertidumbre, voy a recrear un ejemplo del que conozco la media poblacional, y veremos qué tal se comporta la media muestra. 
+
+Uso una población de distribución **normal de media 1000 y desviación típica 100**. ¿Lo puedes hacer con otros números? Sí, claro. Ya te he dicho que esto es extrapolable a cualquier cosa de estimación. 
+
+Voy a tomar una muestra de tamaño 100 de esta población. Y calculo la media y desviación típica. 
 
 ```{r}
 #| label: muestra1
+#| echo: true
 set.seed(3718)
 sample_size <- 100
 population_mean <- 1000
@@ -28,7 +65,13 @@ sample_sd <- sd(norm_values)
 
 La media muestral es `r sample_mean` y la desviación típica muestral es `r sample_sd`. 
 
-También conocemos el tamaño muestral (porque lo he decidido yo antes) y necesitamos los valores de la distribución normal que delimitan la confianza al nivel que queramos (95% para no salir de lo habitual). 
+El objetivo de estos párrafos es calcular el intervalo de confianza para esa estimación, o sea, a la hora de usar la media muestral como estimación de la media poblacional. 
+
+Para ello necesitamos la media y desviación típica (las tenemos), el tamaño muestral (me lo he inventado yo, 100). 
+
+Y necesitamos también los valores de la distribución normal que delimitan la confianza al nivel que queramos (95% para no salir de lo habitual). En R lo puedes calcular con `qnorm(0.975)` y `qnorm(0.025)`.
+
+La fórmula es...
 
 ```{r}
 #| label: intervalo1
