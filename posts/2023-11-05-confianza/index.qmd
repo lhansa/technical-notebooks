@@ -1,5 +1,5 @@
 ---
-title: "Qué te dice un intervalo de confianza"
+title: "Cómo interpretas un intervalo de confianza"
 description: "Cómo calcular e interpretar intervalos de confianza"
 description-meta: "Cómo calcular e interpretar intervalos de confianza."
 author: "Leonardo Hansa"
@@ -60,32 +60,79 @@ population_sd <- 100
 norm_values <- rnorm(sample_size, population_mean, population_sd)
 
 sample_mean <- mean(norm_values)
-sample_sd <- sd(norm_values)
 ```
 
-La media muestral es `r sample_mean` y la desviación típica muestral es `r sample_sd`. 
+La media muestral es `r sample_mean`. 
 
 El objetivo de estos párrafos es calcular el intervalo de confianza para esa estimación, o sea, a la hora de usar la media muestral como estimación de la media poblacional. 
 
-Para ello necesitamos la media y desviación típica (las tenemos), el tamaño muestral (me lo he inventado yo, 100). 
+Para ello necesitamos la media y **desviación típica poblacional**[^1] (las tenemos), el tamaño muestral (me lo he inventado yo, 100). 
+
+[^1 Si no tienes la poblacional y usas una muestral necesitas hacer un ajuste en lo que voy a contar hoy. Te lo cuento otro día.]
 
 Y necesitamos también los valores de la distribución normal que delimitan la confianza al nivel que queramos (95% para no salir de lo habitual). En R lo puedes calcular con `qnorm(0.975)` y `qnorm(0.025)`.
 
-La fórmula es...
+El intervalo estará centrado en tu media muestral. Las cotas vendrán dadas por un margen de error. 
+
+Este margen de error se calcula con: 
+
+- La desviación típica **poblacional.**
+- La raíz cuadrada del tamaño muestral.
+- Un valor que ahora te explico.
+
+La desviación típica de la muestra dividida por la raíz cuadrada del tamaño muestral no es un valor cualquiera. Es **la desviación típica de la media muestral.** 
+
+O sea, tienes una población, y tomas una muestra; con esa muestra te calculas la media y te la guardas. Ahora tomas otra muestra, vuelves a calcular la media y te la guardas. Y así muchas veces. Todas estas medias no serán iguales entre sí: serán parecidas, y deberían estar cerca de la media poblacional, pero varían. Varían con una desviación típica. ¿Cuál? Ese valor que hemos dicho. 
+
+Mira. 
+
+Voy a calcular 1000 medias muestrales de diferentes muestras de tamaño `r sample_size` y calculo su desviación típica. 
+
+```{r}
+#| label: sd-media-muestra
+#| echo: true
+muchas_medias <- replicate(1000, {
+  mean(rnorm(sample_size, population_mean, population_sd))
+})
+
+sd(muchas_medias)
+```
+
+Y ahora lo comparo con la división de la desviación típica de la población entre la raíz cuadrada del tamaño muestral: `r population_sd / sqrt(sample_size)`. ¿A que se parecen bastante?
+
+Pero el margen de error no depende solo de eso, sino que falta el numerito extra. O sea, tiene sentido que el margen de error dependa de la desviación típica de lo que estás estimando, pero falta lo de la _confianza_. Si quieres mucha confianza, tendrás que aumentar de alguna forma el margen de error; y si quieres menos confianza, tendrás que reducirlo. 
+
+Para eso necesitas el estadístico $z$. Nos interesa el intervalo de confianza al 95%, ¿no? Pues este valor $z$ lo puedes ver como el valor de la distribución normal $\mathcal{N}(0, 1)$ que deja a su izquierda el 95% de la probabilidad. O sea, los números mayores que él, solo aparecerán en una distribución normal con un 5% de probabilidad. 
+
+Al multiplicar este valor por la desviación típica de la media muestral, lo que estás haciendo es llevar el margen de error a la escala de tu población (y no dejarla en la de una normal 0-1). 
+
+Pues ahora ya está todo. 
+
+Si eres alguien anclado en el siglo XX, buscarás el valor de $z$ en una tabla. Si vives en el presente, usarás algún software que te lo busque. 
+
+En R puedes usar la función `qnorm()`. 
+
+Quieres el 95% de probabilidad, pero ten en cuenta que la distribución normal es simétrica. Así que necesitas el extremo que deje el 2.5% a su derecha y el que deje el 2.5% a su izquierda. Lo puedes hacer con `qnorm(c(0.025, 0.975))`.
 
 ```{r}
 #| label: intervalo1
-error_margin <- qnorm(c(0.025, 0.975)) * sample_sd / sqrt(sample_size)
+error_margin <- qnorm(c(0.025, 0.975)) * population_sd / sqrt(sample_size)
 confidence_interval <- sample_mean + error_margin
 ```
 
-El resultado es que el intervalo es (`r confidence_interval[1]`, `r confidence_interval[2]`). 
+El resultado es que el intervalo es (`r confidence_interval[1]`, `r confidence_interval[2]`).
+
+Si tienes en cuenta que la media poblacional era `r population_mean`, no es una estimación horrible.
+
+Pero...
 
 ## Interpretación del intervalo
 
 ¿Cómo interpretas esos valores? La interpretación **no** es que el valor de la media poblacional está ahí dentro con un 95% de probabilidad. 
 
-Vamos a ver qué es. 
+La media poblacional es un dato, es una realidad. No sabemos si está dentro o no, pero no hay una probabilidad para indicar dónde está. 
+
+Vamos a ver cómo se interpreta.
 
 En lugar de dar la definición formal de intervalo de confianza, que no hay dios que la entienda, vamos a construir muchos intervalos de confianza. 
 
@@ -95,27 +142,97 @@ compute_interval <- function(size, mean, sd) {
   
   norm_values <- rnorm(size, mean, sd)
   sample_mean <- mean(norm_values)
-  sample_sd <- sd(norm_values)
-  error_margin <- qnorm(c(0.025, 0.975)) * sample_sd / sqrt(size)
+  
+  error_margin <- qnorm(c(0.025, 0.975)) * sd / sqrt(size)
   confidence_interval <- sample_mean + error_margin
   
   return(list(mean = sample_mean, confint = confidence_interval))
 
 }
+
+computations <- 10000
+```
+
+Construyo `r computations` intervalos de confianza, cada uno a partir de una muestra diferente, pero todas provenientes de la misma población. 
+
+Cada muestra tendrá una media, que aprovecho y calculo también.
+
+```{r}
+#| label: compute-intervals
+#| echo: true
+
+experiments <- lapply(seq_len(computations), function(i) {
+  compute_interval(sample_size, population_mean, population_sd) 
+})
+  
+```
+
+Fíjate en el siguiente gráfico. Ha habido muestras cuya media muestral ha sido cercana a 960 ó a 1040. Y esas muestras tendrán sus intervalos de confianza centrados en ese valor... tiene pinta de que van a estar lejos de la media poblacional. 
+
+```{r}
+#| label: sample-mean-distribution
+library(purrr)
+experiments_means <- map_dbl(experiments, list("mean"))
+
+library(ggplot2)
+theme_set(theme_light())
+
+ggplot() + 
+  geom_histogram(aes(x = experiments_means), fill = "#800080") + 
+  geom_vline(xintercept = population_mean, color = "yellow", linetype = 2) + 
+  labs(x = "Medias muestrales", y = "Conteo", 
+       title = "Distribución de las medias muestrales")
+  
+```
+De esos experimentos que hemos hecho, podemos extraer también los intervalos de confianza. Voy a intentar pintártelos para que veas dónde han caído. 
+
+```{r}
+#| label: aux-plot
+min_confint <- map_dbl(experiments, \(x) x$confint[1])
+max_confint <- map_dbl(experiments, \(x) x$confint[2])
+
+library(dplyr)
+df_confints <- tibble(
+  # experiment = seq_len(computations), 
+  min_confint = min_confint,
+  max_confint = max_confint
+)
+
+df_confints <- df_confints |> 
+  mutate(sample_mean = experiments_means) |> 
+  arrange(min_confint) |> 
+  mutate(experiment = seq_len(computations))
 ```
 
 ```{r}
-computations <- 10000
-experiments <- replicate(
-  computations,
-  {
-    out <- compute_interval(sample_size, population_mean, population_sd) 
-  }
-)
-
-str(experiments)
-
+#| label: plot-confints
+ggplot(df_confints) + 
+  geom_segment(aes(x = min_confint, xend = max_confint, 
+                   y = experiment, yend = experiment), 
+               color = "#800080")  + 
+  geom_point(aes(x = sample_mean, y = experiment), color = "yellow", size = 0.5) + 
+  geom_vline(xintercept = population_mean, color = "black", linetype = 2) + 
+  labs(x = "Media muestral", y = "", 
+       title = "Intervalos de confianza de las medias muestrales")
 ```
+
+Toda esa banda morada son los `r computations` intervalos de confianza calculados. La línea amarilla realmente es una sucesión de puntos (como todas las líneas) con cada media muestral. 
+
+La línea negra es la media poblacional. Y fíjate...
+
+
+
+```{r}
+ggplot(df_confints) + 
+  geom_segment(aes(x = experiment, xend = experiment, 
+                   y = min_confint, yend = max_confint), 
+               color = "#800080") + 
+  geom_hline(yintercept = population_mean, color = "yellow", linetype = 2) + 
+  labs(x = "Experimento", y = "Intervalo de confianza", 
+       title = "Intervalos de confianza de las medias muestrales")
+```
+
+
 
 
 
