@@ -1,0 +1,117 @@
+---
+title: "¿Qué formato de datos es más rápido de leer y escribir?"
+description: "Experimentos para comparar tiempos de ejecución en lectura y escritura de distintos ficheros de datos con R y Python"
+description-meta: "Experimentos para comparar tiempos de ejecución en lectura y escritura de distintos ficheros de datos con R y Python"
+author: "Leonardo Hansa"
+date: "2023-11-25"
+categories: [datos]
+execute: 
+  echo: false
+freeze: auto
+draft: true
+---
+
+He leído [aquí](https://www.blog.dailydoseofds.com/p/the-most-overlooked-source-of-optimization) una comparativa entre tiempos de ejecución de lectura y escritura de varios tipos de ficheros de datos. Con Python. 
+
+Y he pensado: 
+
+> Lo voy a hacer yo con R. 
+
+```{r}
+#| label: create-data
+
+nrows <- 1e6
+ncols <- 20
+
+df_numeric <- as.data.frame(
+  matrix(runif(rows * ncols), nrow = nrows, ncol = ncols)
+)
+
+df_mixed <- cbind(
+  as.data.frame(
+    matrix(sample(letters, size = nrows * ncols / 2, replace =  TRUE), 
+           nrow = nrows, 
+           ncol = ncols / 2)
+  ), 
+  as.data.frame(
+    matrix(runif(nrows * ncols / 2), nrow = nrows, ncol = ncols / 2)
+  )
+)
+
+```
+
+He creado dos data frames, a los que he llamado `df_numeric` y `df_mixed`. Ambos tienen un millón de filas y 20 columnas. 
+
+- `df_numeric` tiene todas las columnas numéricas
+- `df_mixed` tiene 10 columnas de tipo `character` y otras 10 de tipo `numeric`. 
+
+```{r}
+#| label: libs
+library(microbenchmark)
+library(readr)
+library(data.table)
+library(arrow)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+ggplot2::theme_set(theme_light())
+```
+
+
+```{r}
+#| label: runtime-numeric
+#| echo: true
+#| eval: true
+runtimes_numeric <- microbenchmark::microbenchmark(
+  csv_utils = write.csv(df_numeric, "numeric_utils.csv", row.names = FALSE),
+  csv_readr = write_csv(df_numeric, "numeric_readr.csv"),
+  fwrite = data.table::fwrite(df_numeric, "numeric_fwrite.csv"),
+  rds_base = base::saveRDS(df_numeric, "numeric_base.rds"),
+  rds_readr = readr::write_rds(df_numeric, "numeric_readr.rds"),
+  parquet = arrow::write_parquet(df_numeric, "numeric.parquet"),
+  feather = arrow::write_feather(df_numeric, "numeric.feather"),
+  times = 10L
+)
+```
+
+
+```{r}
+#| label: df-plot-numeric
+df_plot <- tibble(case = runtimes_numeric$expr, time = runtimes_numeric$time)
+df_plot <- df_plot |> 
+  filter(case != "csv_utils")
+
+file_info <- file.info(list.files(path = ".", pattern = "csv$|rds$|parquet$|feather$"))
+file_info <- file_info |> 
+  tibble::rownames_to_column("file_name") |> 
+  select(file_name, size)
+
+df_cases_names <- tibble(
+  case = c("csv_utils", "csv_readr", "fwrite", "rds_base", "rds_readr", "parquet", "feather"), 
+  file_name = c("numeric_utils.csv", "numeric_readr.csv",
+                 "numeric_fwrite.csv", "numeric_base.rds",
+                 "numeric_readr.rds", "numeric.parquet",
+                 "numeric.feather")
+)
+
+file_info <- file_info |> 
+  left_join(df_cases_names, by = "file_name") |> 
+  select(-file_name)
+
+df_plot <- df_plot |> 
+  left_join(file_info, by = "case") |> 
+  pivot_longer(-case, names_to = "metric")
+```
+
+```{r}
+#| label: plot-numeric
+
+ggplot(df_plot, aes(x = reorder(case, value, decreasing = TRUE), y = value)) + 
+  geom_bar(stat = "summary", fun = "median") +
+  facet_grid(metric ~ ., scales = "free_y")
+```
+
+
+
+
