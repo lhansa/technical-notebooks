@@ -1,5 +1,40 @@
-```
-data <- readLines("data/2023-01.txt")
+---
+title: "Advent of code (1)"
+description: "Ejercicio 1 de Advent of code 2023"
+description-meta: "Ejercicio 1 de Advent of code 2023"
+author: "Leonardo Hansa"
+date: "2023-12-01"
+categories: [datos]
+execute: 
+  echo: false
+freeze: auto
+draft: true
+---
+
+Nunca he jugado con el [Advent of code](https://adventofcode.com/). Hoy me ha apetecido. 
+
+Para el ejercicio de hoy, me he empeñado **en hacerlo en R base.**
+
+## Parte 1
+
+El día 1 del [Advent of code 2023](https://adventofcode.com/2023) nos pide que sumemos los números que aparecen en un texto.
+
+El texto tiene una pinta así: `"four95qvkvveight5"`, y hay 1.000 como ese. 
+
+La idea es: 
+
+- tomar el primer dígito, 9, 
+- y el último, 5
+- y concatenarlos: 95
+
+Así obtendrás 1000 números. La solución es la suma de esos 1.000 números.
+
+Mi propuesta:
+
+```{r}
+#| label: part-1
+#| echo: true
+data <- readLines("2023-01.txt")
 
 get_number <- function(x) {
   str_number <- gsub("[^0-9]", "", x)
@@ -15,11 +50,86 @@ numbers <- vapply(
 
 sum(numbers)
 
-
-get_number2 <- function(x) {
-  str_number <- gsub("[^0-9]", "", x)
-  len <- nchar(str_number)
-  str_number <- paste0(substr(str_number, 1, 1), substr(str_number, len, len))
-  return(as.numeric(str_number))
-}
 ```
+
+## Parte 2
+
+Ahora hay un matiz. Fíjate de nuevo en el texto: `"four95qvkvveight5"`. Realmente, el primer número es `"four"`, o sea, 4. Lo que hay que hacer ahora es identificar el primer dígito y el último pero tanto si viene en número como en texto. 
+
+Luego igual, concatenarlos y sumarlos.
+
+Mi propuesta: 
+
+```{r}
+#| label: part-2
+#| echo: true
+
+# a character vector with the numbers from zero to nine in letters
+words <- c("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
+
+split_words <- strsplit(words, "")
+words_inv <- vapply(
+  split_words, 
+  function(x) paste0(x[length(x):1], collapse = ""), 
+  character(1)
+)
+
+words_regex <- paste0(words, collapse = "|")
+words_inv_regex <- paste0(words_inv, collapse = "|")
+
+pattern <- paste("[0-9]", words_regex, sep = "|")
+pattern_inv <- paste("[0-9]", words_inv_regex, sep = "|")
+
+# Change the order of a text
+invert <- function(x) {
+  if (nchar(x) == 1) {
+    return(x)
+  } else {
+    return(paste0(strsplit(x, "")[[1]][nchar(x):1], collapse = "") )
+  }
+}
+
+# Convert a text to a number, based on the words and words_inv vectors
+to_numeric <- function(x, words = words, words_inv = words_inv) {
+  if (nchar(x) == 1) {
+    return(as.numeric(x))
+  } else if (x %in% words) {
+    return(which(words == x) - 1)
+  } else {
+    return(which(words_inv == x) - 1)
+  }
+}
+
+get_number2 <- function(x, 
+                        pattern, 
+                        pattern_inv,
+                        words, 
+                        words_inv) {
+  
+  first <- regmatches(x, m = regexpr(pattern, x))
+  first <- to_numeric(first, words = words, words_inv = words_inv)
+  
+  x_inv <- invert(x)
+  last <- regmatches(x_inv, m = regexpr(pattern_inv, x_inv))
+  last <- invert(last)
+  last <- to_numeric(last, words = words, words_inv = words_inv)
+  
+  return(first * 10 + last)
+  
+}
+
+
+numbers2 <- vapply(
+  data, 
+  get_number2,
+  pattern = pattern,
+  pattern_inv = pattern_inv,
+  words = words, 
+  words_inv = words_inv,
+  FUN.VALUE = numeric(1)
+)
+
+sum(numbers2)
+
+```
+
