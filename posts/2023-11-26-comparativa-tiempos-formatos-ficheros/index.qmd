@@ -1,0 +1,169 @@
+---
+title: "¿Qué formato de datos es más rápido de leer y escribir?"
+description: "Experimentos para comparar tiempos de ejecución en lectura y escritura de distintos ficheros de datos con R y Python"
+description-meta: "Experimentos para comparar tiempos de ejecución en lectura y escritura de distintos ficheros de datos con R y Python"
+author: "Leonardo Hansa"
+date: "2023-11-26"
+categories: [datos]
+execute: 
+  echo: false
+freeze: auto
+---
+
+He leído [aquí](https://www.blog.dailydoseofds.com/p/the-most-overlooked-source-of-optimization) una comparativa entre tiempos de ejecución de lectura y escritura de varios tipos de ficheros de datos. Con Python. 
+
+Y he pensado: 
+
+> Lo voy a hacer yo con R. 
+
+```{r}
+#| label: create-data
+
+nrows <- 1e6
+ncols <- 20
+
+df_numeric <- as.data.frame(
+  matrix(runif(nrows * ncols), nrow = nrows, ncol = ncols)
+)
+
+df_mixed <- cbind(
+  as.data.frame(
+    matrix(sample(letters, size = nrows * ncols / 2, replace =  TRUE), 
+           nrow = nrows, 
+           ncol = ncols / 2)
+  ), 
+  as.data.frame(
+    matrix(runif(nrows * ncols / 2), nrow = nrows, ncol = ncols / 2)
+  )
+)
+
+```
+
+He creado dos data frames, a los que he llamado `df_numeric` y `df_mixed`. Ambos tienen un millón de filas y 20 columnas. 
+
+- `df_numeric` tiene todas las columnas numéricas
+- `df_mixed` tiene 10 columnas de tipo `character` y otras 10 de tipo `numeric`. 
+
+```{r}
+#| label: libs
+library(microbenchmark)
+library(readr)
+library(data.table)
+library(arrow)
+library(ggplot2)
+library(tidyr)
+
+ggplot2::theme_set(theme_light())
+```
+
+Y lo que quiero es ver cuánto tardo en guardar cada uno en disco, en función del tipo de fichero y la función que elija.
+
+
+## Ficheros con columnas numéricas
+
+Empiezo con el de todo numérico. Uso mi librería favorita, `microbenchmark`.
+
+```{r}
+#| label: runtime-numeric
+#| echo: true
+#| eval: false
+runtimes_numeric <- microbenchmark::microbenchmark(
+  csv_utils = write.csv(df_numeric, "numeric_utils.csv", row.names = FALSE),
+  csv_readr = write_csv(df_numeric, "numeric_readr.csv"),
+  fwrite = data.table::fwrite(df_numeric, "numeric_fwrite.csv"),
+  rds_base = base::saveRDS(df_numeric, "numeric_base.rds"),
+  rds_readr = readr::write_rds(df_numeric, "numeric_readr.rds"),
+  parquet = arrow::write_parquet(df_numeric, "numeric.parquet"),
+  feather = arrow::write_feather(df_numeric, "numeric.feather"),
+  times = 10L
+)
+```
+
+```{r}
+#| label: runtime-numeric2
+runtimes_numeric <- readr::read_rds("aux/runtime_numeric.rds")
+runtimes_numeric
+```
+Voy a visualizar esto (se puede hacer directamente sobre la salida de la función `microbenchmark()` pero lo paso a data frame porque he querido hacer algunas pruebas con las que necesitaba más control, aunque al final no las muestro aquí porque no aportan nada). 
+
+Creo dos data frames para pintar los tiempos de cómputo y el tamaño de los ficheros. Los tiempos (milisegundos) vienen dados para ejecución: aquí están los primeros casos.
+
+```{r}
+#| label: df-plot-numeric
+df_plot <- data.frame(case = runtimes_numeric$expr, time = runtimes_numeric$time)
+df_plot$time <- df_plot$time / 1e6
+
+head(df_plot, length(unique(df_plot$case)))
+```
+
+Tomo también el tamaño de los ficheros generados:
+
+```{r}
+#| label: df-plot-size
+#| eval: false
+df_file_info <- file.info(list.files(path = "data", 
+                                  pattern = "csv$|rds$|parquet$|feather$", 
+                                  full.names = TRUE))
+df_file_info$file_name <- rownames(df_file_info)
+df_file_info <- df_file_info[, c("file_name", "size")]
+rownames(file_info) <- NULL
+
+df_cases_names <- data.frame(
+  case = c("csv_utils", "csv_readr", "fwrite", "rds_base", "rds_readr", "parquet", "feather"), 
+  file_name = c("numeric_utils.csv", "numeric_readr.csv",
+                 "numeric_fwrite.csv", "numeric_base.rds",
+                 "numeric_readr.rds", "numeric.parquet",
+                 "numeric.feather")
+)
+
+df_cases_names$file_name <- paste0("data/", df_cases_names$file_name)
+
+df_file_info <- merge(df_file_info, df_cases_names, by = "file_name", all.x = TRUE)
+df_file_info$file_name <- NULL
+
+# df_plot <- merge(df_plot, file_info, by = "case", all.x = TRUE)
+
+readr::write_rds(df_file_info, "aux/file_info_numeric.rds")
+```
+
+```{r}
+#| label: df-plot-size2
+df_file_info <- readr::read_rds("aux/file_info_numeric.rds")
+df_file_info 
+```
+
+
+Creo los gráficos por separado aunque se puede visualizar todo junto (pero me parece ganas de complicar). 
+
+Estos son los tiempos de cómputo (quito `utils::write.csv()` porque ya sabemos que tarda mucho).
+
+```{r}
+#| label: plot-numeric
+
+nuevo_orden <- names(sort(tapply(df_plot$time, df_plot$case, median), decreasing = FALSE))
+df_plot$case <- factor(df_plot$case, levels = nuevo_orden)
+
+# lo hago con geom_bar para aprender a usarla... ya sé que estoy 
+# calculando la mediana dos veces
+ggplot(df_plot[df_plot$case != "csv_utils", ], aes(x = case, y = time)) + 
+  geom_bar(stat = "summary", fun = "median", fill = "#800080") + 
+  stat_summary(
+    aes(label = scales::comma(..y.., big.mark = ".", decimal.mark = ",")), 
+    fun = median, 
+    geom = "label", 
+    position = position_nudge(y = 3), 
+    size = 4, 
+    hjust = 0.5
+  ) + 
+  scale_y_continuous(labels = NULL) + 
+  coord_flip() + 
+  labs(
+    y = "Tiempo (milisegundos)", x = "Caso", 
+    title = "Mediana de tiempos de guardado de fichero (ms)", 
+    subtitle = sprintf("data frame numérico de %i filas y %i columnas", nrows, ncols)
+  )
+```
+
+
+
+

@@ -3,7 +3,7 @@ title: "Cómo interpretas un intervalo de confianza"
 description: "Cómo calcular e interpretar intervalos de confianza"
 description-meta: "Cómo calcular e interpretar intervalos de confianza."
 author: "Leonardo Hansa"
-date: "2023-11-05"
+date: "2023-11-11"
 categories: [datos]
 execute: 
   echo: false
@@ -137,12 +137,15 @@ En lugar de dar la definición formal de intervalo de confianza, que no hay dios
 
 ```{r}
 #| label: function
-compute_interval <- function(size, mean, sd) {
+compute_interval <- function(size, mean, sd, confidence = 0.95) {
+  
+  alpha <- 1 - confidence
+  alpha_2 <- alpha / 2
   
   norm_values <- rnorm(size, mean, sd)
   sample_mean <- mean(norm_values)
   
-  error_margin <- qnorm(c(0.025, 0.975)) * sd / sqrt(size)
+  error_margin <- qnorm(c(alpha_2, 1 - alpha_2)) * sd / sqrt(size)
   confidence_interval <- sample_mean + error_margin
   
   return(list(mean = sample_mean, confint = confidence_interval))
@@ -160,7 +163,8 @@ Cada muestra tendrá una media, que aprovecho y calculo también.
 #| label: compute-intervals
 #| echo: true
 
-experiments <- lapply(seq_len(computations), function(i) {
+library(purrr)
+experiments <- map(seq_len(computations), function(i) {
   compute_interval(sample_size, population_mean, population_sd) 
 })
   
@@ -170,7 +174,6 @@ Fíjate en el siguiente gráfico. Ha habido muestras cuya media muestral ha sido
 
 ```{r}
 #| label: sample-mean-distribution
-library(purrr)
 experiments_means <- map_dbl(experiments, list("mean"))
 
 library(ggplot2)
@@ -183,7 +186,7 @@ ggplot() +
        title = "Distribución de las medias muestrales")
   
 ```
-De esos experimentos que hemos hecho, podemos extraer también los intervalos de confianza. Voy a intentar pintártelos para que veas dónde han caído. 
+De esos experimentos que hemos hecho, podemos extraer también los intervalos de confianza. Voy a pintártelos para que veas dónde han caído. 
 
 ```{r}
 #| label: aux-plot
@@ -217,19 +220,83 @@ ggplot(df_confints) +
 
 Toda esa banda morada son los `r computations` intervalos de confianza calculados. La línea amarilla realmente es una sucesión de puntos (como todas las líneas) con cada media muestral. 
 
-La línea negra es la media poblacional. Y fíjate...
+La línea negra es la media poblacional. Y fíjate en que hay unos pocos intervalos (los de más abajo y los de más arriba, los extremos) que no tocan esa línea negra. O sea, **hay intervalos que no contienen a la media poblacional.**
 
+Esto es muy fuerte. 
 
+Al principio he tomado una muestra, he calculado la media muestral como estimación de la poblacional, y en torno a ella he construido un intervalo de confianza. 
+
+Ese intervalo era un posible intervalo de confianza al 95% por ciento. Y en ese caso sí contenía a la media poblacional (cosa que sé porque estoy en un experimento controlado, pero lo normal es que no sepas la media poblacional). 
+
+**Pero si me hubiera salido como muestra una diferente, podría haber ocurrido que el intervalo no hubiera contenido a la media poblacional.**
+
+Muy fuerte esto. 
+
+Pero la pregunta que surge ahora es: **¿cuántos intervalos no contienen a la media poblacional?**
+
+Pues aquí entra el 95%. 
+
+### El 95% de los intervalos de confianza al 95% contienen la media poblacional
+
+A continuación calculo el porcentaje de intervalos que sí contienen a la media poblacional, teniendo en cuenta a los `r computations` que he calculado. 
 
 ```{r}
-ggplot(df_confints) + 
-  geom_segment(aes(x = experiment, xend = experiment, 
-                   y = min_confint, yend = max_confint), 
-               color = "#800080") + 
-  geom_hline(yintercept = population_mean, color = "yellow", linetype = 2) + 
-  labs(x = "Experimento", y = "Intervalo de confianza", 
-       title = "Intervalos de confianza de las medias muestrales")
+#| label: pct-confints
+mean(df_confints$max_confint >= population_mean & df_confints$min_confint <= population_mean) 
 ```
+
+Me sale que el 95,19% de los intervalos calculados contienen a la media poblacional. 
+
+Eso es lo que quiere decir que tengas un intervalo de confianza al 95%. Significa que, de todos los intervalos que puedes calcular, el 95% tendrá al parámetro real. Pero el tuyo no sabes si está en ese 95% o no lo está (repito, en este experimento sí sabemos si está en ese porcentaje porque es un experimento controlado pero normalmente no lo sabes). 
+
+De hecho, puedo cambiar el nivel de confianza, y el porcentaje cambiará acorde a ello: 
+
+**Confianza al 99%**
+
+```{r}
+#| label: pct-99
+experiments <- map(seq_len(computations), function(i) {
+  compute_interval(sample_size, population_mean, population_sd, 
+                   confidence = 0.99) 
+})
+
+min_confint <- map_dbl(experiments, \(x) x$confint[1])
+max_confint <- map_dbl(experiments, \(x) x$confint[2])
+
+tibble(
+  min_confint = min_confint,
+  max_confint = max_confint
+) |>  
+  arrange(min_confint) |> 
+  mutate(experiment = seq_len(computations)) |> 
+  summarise(pct = mean(
+    min_confint <= population_mean & population_mean <= max_confint
+  ))
+```
+
+**Confianza al 80%**
+
+```{r}
+#| label: pct-80
+experiments <- map(seq_len(computations), function(i) {
+  compute_interval(sample_size, population_mean, population_sd, 
+                   confidence = 0.80) 
+})
+
+min_confint <- map_dbl(experiments, \(x) x$confint[1])
+max_confint <- map_dbl(experiments, \(x) x$confint[2])
+
+tibble(
+  min_confint = min_confint,
+  max_confint = max_confint
+) |>  
+  arrange(min_confint) |> 
+  mutate(experiment = seq_len(computations)) |> 
+  summarise(pct = mean(
+    min_confint <= population_mean & population_mean <= max_confint
+  ))
+```
+
 
 
 
