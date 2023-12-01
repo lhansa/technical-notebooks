@@ -81,7 +81,7 @@ runtimes_numeric <- microbenchmark::microbenchmark(
 
 ```{r}
 #| label: runtime-numeric2
-runtimes_numeric <- readr::read_rds("aux/runtime_numeric.rds")
+runtimes_numeric <- readr::read_rds("objetos/runtime_numeric.rds")
 runtimes_numeric
 ```
 Voy a visualizar esto (se puede hacer directamente sobre la salida de la función `microbenchmark()` pero lo paso a data frame porque he querido hacer algunas pruebas con las que necesitaba más control, aunque al final no las muestro aquí porque no aportan nada). 
@@ -128,7 +128,7 @@ readr::write_rds(df_file_info, "aux/file_info_numeric.rds")
 
 ```{r}
 #| label: df-plot-size2
-df_file_info <- readr::read_rds("aux/file_info_numeric.rds")
+df_file_info <- readr::read_rds("objetos/file_info_numeric.rds")
 df_file_info 
 ```
 
