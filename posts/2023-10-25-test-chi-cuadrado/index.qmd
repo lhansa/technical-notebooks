@@ -8,6 +8,7 @@ categories: [datos]
 execute: 
   echo: false
 freeze: auto
+draft: true
 ---
 
 He descargado los datos de la encuesta salarial del INE. 

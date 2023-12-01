@@ -1,0 +1,25 @@
+```
+data <- readLines("data/2023-01.txt")
+
+get_number <- function(x) {
+  str_number <- gsub("[^0-9]", "", x)
+  len <- nchar(str_number)
+  str_number <- paste0(substr(str_number, 1, 1), substr(str_number, len, len))
+  return(as.numeric(str_number))
+}
+numbers <- vapply(
+  data, 
+  get_number,
+  numeric(1)
+)
+
+sum(numbers)
+
+
+get_number2 <- function(x) {
+  str_number <- gsub("[^0-9]", "", x)
+  len <- nchar(str_number)
+  str_number <- paste0(substr(str_number, 1, 1), substr(str_number, len, len))
+  return(as.numeric(str_number))
+}
+```

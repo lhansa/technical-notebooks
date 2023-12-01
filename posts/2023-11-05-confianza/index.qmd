@@ -8,7 +8,6 @@ categories: [datos]
 execute: 
   echo: false
 freeze: auto
-draft: true
 ---
 
 Creo que no entendí qué eran los intervalos de confianza en ninguna clase de estadística.
