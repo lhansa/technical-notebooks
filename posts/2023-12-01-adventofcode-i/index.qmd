@@ -8,7 +8,6 @@ categories: [datos]
 execute: 
   echo: false
 freeze: auto
-draft: true
 ---
 
 Nunca he jugado con el [Advent of code](https://adventofcode.com/). Hoy me ha apetecido. 
