@@ -1,0 +1,119 @@
+---
+title: "Advent of code (2)"
+description: "Ejercicio 2 de Advent of code 2023"
+description-meta: "Ejercicio 2 de Advent of code 2023"
+author: "Leonardo Hansa"
+date: "2023-12-02"
+categories: [datos]
+execute: 
+  echo: true
+freeze: auto
+draft: true
+---
+
+Segundo ejercicio de [Advent of Code](https://adventofcode.com/) de 2023. Voy con retraso, lo sé.
+
+
+## Parte 1
+
+Mi propuesta con R base: 
+
+```{r}
+#| label: init
+total_cubes <- list(red = 12, green = 13, blue = 14)
+data <- readLines("2023-02.txt")
+
+data[1:5]
+```
+
+
+Para cada juego (o sea, cada elemento en `data`) tengo que comprobar si las extracciones son posibles dada la cantidad de cubos original mencionada: 12 rojos, 13 verdes y 14 azules.
+
+```{r}
+#| label: part-1
+validate_game <- function(fila, .total_cubes = total_cubes){
+  fila <- gsub("Game [0-9]+: ", "", fila)
+  fila <- gsub(" ", "", fila)
+  
+  is_valid_extract <- vapply(
+    strsplit(fila, ";")[[1]], 
+    validate_extract, 
+    logical(1)
+  )
+  
+  all(is_valid_extract)
+  
+}
+
+validate_extract <- function(x, .total_cubes = total_cubes) {
+  # Extract with regex the number preceding word blue
+  
+  lgl_out <- vapply(
+    c("blue", "green", "red"),
+    function(color, text = x) {
+      pattern <- sprintf("[0-9]+(?=%s)", color)
+      count_txt <- regmatches(text, m = regexpr(pattern, text, perl = TRUE))
+      if (length(count_txt) == 0) {
+        return(TRUE)
+      } else  {
+        count <- as.numeric(count_txt)
+        return(count <= total_cubes[[color]]  )
+      }
+      
+    }, 
+    logical(1)
+  )
+  
+  all(lgl_out)
+}
+
+valid_games <- vapply(
+  data, 
+  validate_game, 
+  logical(1)
+)
+
+# Count IDs of valid games
+sum(which(valid_games))
+
+```
+
+## Parte 2
+
+Debería poner los enunciados aquí... pero paso. 
+
+Mi propuesta para la parte 2, siempre con R base:
+
+```{r}
+#| label: part-2
+compute_power_game <- function(fila){
+  fila <- gsub("Game [0-9]+: ", "", fila)
+  fila <- gsub(" ", "", fila)
+  
+  color_counts <- vapply(
+    c("blue", "green", "red"),
+    function(color) {
+      pattern <- sprintf("[0-9]+(?=%s)", color)
+      color_count <- regmatches(fila, m = gregexpr(pattern, fila, perl = TRUE))[[1]]
+      color_count <- as.numeric(color_count)
+      max(color_count)    
+    }, 
+    numeric(1)
+  )
+  
+  Reduce(`*`, color_counts)
+
+}
+
+game_powers <- vapply(
+  data, 
+  compute_power_game, 
+  numeric(1)
+)
+
+
+
+# Count IDs of valid games
+sum(game_powers)
+
+```
