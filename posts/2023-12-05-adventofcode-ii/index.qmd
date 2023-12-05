@@ -39,17 +39,16 @@ validate_game <- function(fila, .total_cubes = total_cubes){
     validate_extract, 
     logical(1)
   )
-  
+ 
   all(is_valid_extract)
-  
+
 }
 
 validate_extract <- function(x, .total_cubes = total_cubes) {
-  # Extract with regex the number preceding word blue
-  
   lgl_out <- vapply(
     c("blue", "green", "red"),
     function(color, text = x) {
+      # Extract with regex the number preceding word blue
       pattern <- sprintf("[0-9]+(?=%s)", color)
       count_txt <- regmatches(text, m = regexpr(pattern, text, perl = TRUE))
       if (length(count_txt) == 0) {
@@ -74,7 +73,6 @@ valid_games <- vapply(
 
 # Count IDs of valid games
 sum(which(valid_games))
-
 ```
 
 ## Parte 2
@@ -110,9 +108,6 @@ game_powers <- vapply(
   numeric(1)
 )
 
-
-
-# Count IDs of valid games
+# part 2 solution
 sum(game_powers)
-
 ```
