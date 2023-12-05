@@ -8,7 +8,6 @@ categories: [datos]
 execute: 
   echo: true
 freeze: auto
-draft: true
 ---
 
 Segundo ejercicio de [Advent of Code](https://adventofcode.com/) de 2023. Voy con retraso, lo sé.
