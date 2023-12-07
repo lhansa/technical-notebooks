@@ -1,0 +1,61 @@
+---
+title: "Comparativa pequeña entre tidyverse y R base"
+description: "Una comparativa entre algunos códigos en R base y tidyverse para tratar un data frame"
+description-meta: "Una comparativa entre algunos códigos en R base y tidyverse para tratar un data frame"
+author: "Leonardo Hansa"
+date: "2023-12-07"
+categories: [datos]
+execute: 
+  echo: false
+freeze: auto
+draft: true
+---
+
+Me gusta leer [críticas contra tidyverse](https://github.com/matloff/TidyverseSkeptic). ¿Porque lo odio?
+
+No, lo uso todo el rato. Todos los días. Mi trabajo se basa en [el tidyverse](https://www.tidyverse.org/).
+
+¿Por qué leo críticas entonces?
+
+Porque no entiendo que las haya. Así que me obligo a leer otros puntos de vista para ver en qué estoy equivocado.
+
+Por ahora, gano yo. El link que publico al principio no es convincente. Un día le responderé al autor. Mientras tanto, estudio R base.
+
+Me parece entretenido. Incluso bonito.
+
+Y bromas aparte, le reconozco una cosa: **me quita toda la gestión de dependencias.** Cuando ejecuto este blog en GitHub Actions o cuando creo una librería, quitar dependencias simplifica mucho el trabajo y el proceso.
+
+Eso sí me gusta de R base.
+
+Pero para el día a día es un infierno.
+
+Así que se me ha ocurrido hacerme un diccionario de R base y tidyverse, de cosas que consulto a veces.
+
+Es un mini diccionario: faltarán muchas cosas aquí que te harán falta. Pero aquí encontrarás algunas que quizá te hagan falta. Y oye, si es así, tu búsqueda ha terminado.
+
+## Conversión R base - Tidyverse
+
+Para simplificar dependencias trabajaré, por supuesto, con `iris`.
+
++------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------+
+| Tidyverse                                                                    | R base                                                                                             |
++==============================================================================+====================================================================================================+
+| `iris |> group_by(Species) |> summarise(mean(Sepal.Length))  `             | `aggregate(Sepal.Length ~ Species, iris, mean)`                                                    |
++------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------+
+| `str_extract("cosa123cosa", "\\d+")   `                                      | `regmatches("cosa123cosa", m = regexpr("\\\\d+", "cosa123cosa", perl = TRUE))`                     |
++------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------+
+| `iris |> group_by(Species) |> filter(Sepal.Lengh >= mean(Sepal.Length))` | `do.call("rbind", lapply(split(iris, iris\$Species), function(df) { `                              |
+|                                                                              | `   subset(df, Sepal.Length \>= mean(df\$Sepal.Length)) `                                          |
+|                                                                              | `}))`                                                                                              |
++------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------+
+| `iris |> pivot_longer(-Species)`                                             | `(*)`                                                                                              |
+|                                                                              | `iris$id <- 1:nrow(iris)`                                                                         |
+|                                                                              | `reshape(iris, idvar="id", direction="long",varying=list(1:4), v.names = "value", timevar="metric")` |
++------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------+
+
+: Comparativa R base - Tidyverse
+
+
+En la 4ª he puesto un asterisco porque está mal. No soy capaz de hacer eso en R base de una manera razonablemente cómoda para mí. 
+
+Pero yo lo sigo intentando.
