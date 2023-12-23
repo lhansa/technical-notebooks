@@ -119,11 +119,49 @@ ggplot(df_keplenmeier) +
 ```
 $$
 \hat{S}(t) =  \prod_{i: t_i\leq t}\frac{n_i - d_i}{n_i} \\
+$$
+$$
 \hat{S}(2) = \frac{5-0}{5} = \frac{5}{5} = 1 \\
+$$
+$$
 \hat{S}(3) = \frac{4-0}{4} = \frac{4}{4} = 1 \\
+$$
+$$
 \hat{S}(4) = \frac{4-2}{4} = \frac{2}{4} = 0,5 \\
+$$
+$$
 \hat{S}(5) = \frac{1}{2} \cdot \frac{2-1}{2} = \frac{1}{4} = 0,25 \\
+$$
+$$
 \hat{S}(6) = \frac{1}{4} \cdot \frac{1-0}{1} = \frac{1}{4} = 0,25 
 $$
 
 Aunque después de avanzar un poco con el curso, me entero de que Keplen-Meier se usa principalmente con fines descritivos.
+
+## Método Weibull
+
+Un método que sí se usa para estimar la curva es el de Weibull. Sinceramente, **ni idea de cómo funciona.**
+
+Pero una forma directa de ajustar y visualizarlo es esta (para visualizar simplifica mucho si usas la librería **survminer**):
+
+```{r}
+#| label: weibull
+#| echo: true
+library(survival)
+wb <- survreg(Surv(time, status) ~ 1, lung)
+# Retrieve survival curve from model
+surv <- seq(.99, .01, by = -.01)
+
+# Get time for each probability
+t <- predict(wb, type = "quantile", p = 1 - surv, newdata = data.frame(1))
+
+# Create data frame with the information needed for ggsurvplot_df
+surv_wb <- data.frame(time = t, surv = surv, 
+  upper = NA, lower = NA, std.err = NA)
+
+# Plot
+
+survminer::ggsurvplot_df(fit = surv_wb, surv.geom = ggplot2::geom_line)
+```
+
+
