@@ -1,0 +1,150 @@
+---
+title: "Statistical Rethinking (1)"
+description: "Introducción de métodos generativos en estadística bayesiana, basados en el libro Statistical Rethinking de Richard McElreath"
+description-meta: "Introducción de métodos generativos en estadística bayesiana, basados en el libro Statistical Rethinking de Richard McElreath"
+author: "Leonardo Hansa"
+date: "2023-12-27"
+categories: [datos]
+execute: 
+  echo: true
+freeze: auto
+draft: true
+---
+
+En [Statistical Rethinking](https://xcelab.net/rm/statistical-rethinking/) Richard McEalreath presenta los métodos generativos en estadística bayesiana. 
+
+## Introducción
+
+El problema que plantea es el de estimar la proporción de agua que hay en la Tierra. 
+
+El procedimiento consiste en mirar en varios puntos de la Tierra y ver si hay agua o tierra. De esa forma obtienes una secuencia de valores: `"A", "A", "T", "A", "T", ...` y usas esos datos para estimar la proporción real. 
+
+Concretamente, en 9 observaciones has obtenido 6 porciones de agua.
+
+Hay tres formas de ajustar un modelo estadístico. Las ejemplificaremos con ese problema de la proporción de agua. 
+
+Los códigos no serán los del libro, sino [estos.](https://fehiepsi.github.io/rethinking-numpyro/)
+
+```{python}
+#| label: libs
+import matplotlib.pyplot as plt
+
+import jax.numpy as jnp
+from jax import random
+
+import numpyro
+import numpyro.distributions as dist
+
+from numpyro.infer import SVI, Trace_ELBO
+from numpyro.infer.autoguide import AutoLaplaceApproximation
+```
+
+## Mallado
+
+La primera forma de ajustar un modelo estadístico es mediante mallado. Computacionalmente es costoso pero es más educativo que el resto de métodos. 
+
+Lo que vas a hacer es proponer unos posibles valores para el parámetro que buscas (la proporción de agua) y les das una distribución a priori a estos valores (no pasa nada ahora por que la distribución a priori no sume 1 porque luego estandarizarás el resultado final).  
+
+
+```{python}
+#| label: mallado-priors
+
+grid_size = 20
+p_grid = jnp.linspace(start=0, stop=1, num=grid_size)
+prior = jnp.repeat(1, grid_size)
+```
+
+Tus priori (20 proporciones equiprobables) ya están definidas y ahora te sirven para generar posibles escenarios. La idea es ver la verosimilitud de tus datos observados ante los distintos posibles valores del parámetro. 
+
+```{python}
+#| label: mallado-likelihood
+likelihood = jnp.exp(dist.Binomial(total_count=9, probs=p_grid).log_prob(6))
+likelihood
+```
+
+Ahora calculas la posteriori, ponderando estas verosimilitudes por los prioris que tenías antes. Como los prioris no seguían una distribución de probabilidad, te toca estandarizar el resultado.
+
+```{python}
+#| label: mallado-posterior
+unstd_posterior = likelihood * prior
+posterior = unstd_posterior / jnp.sum(unstd_posterior)
+posterior
+```
+
+
+```{python}
+#| label: mallado-plot
+plt.figure()
+plt.plot(p_grid, 
+         posterior, 
+         '-o', 
+         color='#800080', 
+         label='Priori Uniforme')
+plt.xlabel('Probabilidad de agua')
+plt.ylabel('Probabilidad a posteriori del evento')
+plt.title(f'Mallado de {grid_size} puntos')
+plt.show()
+```
+
+Ahora bien, ten en cuenta que **los prioris forman parte del modelo**. Deberías tener un criterio para elegir unos u otros. 
+
+Los puedes cambiar y los resultados se verán afectados. 
+
+```{python}
+p_grid = jnp.linspace(start=0, stop=1, num=grid_size)
+prior = jnp.exp(-5 * abs(p_grid - 0.5))
+likelihood = jnp.exp(dist.Binomial(total_count=9, probs=p_grid).log_prob(6))
+
+unstd_posterior = likelihood * prior
+posterior = unstd_posterior / jnp.sum(unstd_posterior)
+
+plt.plot(p_grid, 
+         posterior, 
+         '--', 
+         color='#800080', 
+         label='Priori no Uniforme')
+plt.xlabel('Probabilidad de agua')
+plt.ylabel('Probabilidad a posteriori del evento')
+plt.title(f'Mallado de {grid_size} puntos')
+plt.legend()
+plt.show()
+```
+
+## Aproximación cuadrática
+
+No te creas que entiendo esta opción bien. Voy a ponerme con el código y luego la voy explicando... si eso. 
+
+```{python}
+#| label: quadratic
+def model(W, L):
+    p = numpyro.sample("p", dist.Uniform(0, 1))  # uniform prior
+    numpyro.sample("W", dist.Binomial(W + L, p), obs=W)  # binomial likelihood
+
+
+guide = AutoLaplaceApproximation(model)
+svi = SVI(model, guide, optim.Adam(1), Trace_ELBO(), W=6, L=3)
+svi_result = svi.run(random.PRNGKey(0), 1000)
+params = svi_result.params
+
+# display summary of quadratic approximation
+samples = guide.sample_posterior(random.PRNGKey(1), params, (1000,))
+numpyro.diagnostics.print_summary(samples, prob=0.89, group_by_chain=False)
+```
+
+```{python}
+W = 6
+L = 3
+rng_key = random.PRNGKey(6)
+p = numpyro.sample("p", dist.Uniform(0, 1), rng_key = rng_key)  # uniform prior
+# print(p)
+numpyro.sample("W", dist.Binomial(W + L, p), obs=W)  # binomial likelihood
+```
+
+```{python}
+
+```
+
+
+
+
+
