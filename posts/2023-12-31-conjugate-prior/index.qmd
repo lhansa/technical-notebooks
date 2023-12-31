@@ -1,0 +1,69 @@
+---
+title: "¿Cómo se usan las prioris conjugadas?"
+description: "Tutorial en R de cómo usar las prioris conjugadas en estadística bayesiana, con el ejemplo de lanzar una moneda"
+description-meta: "Tutorial en R de cómo usar las prioris conjugadas en estadística bayesiana, con el ejemplo de lanzar una moneda"
+author: "Leonardo Hansa"
+date: "2023-12-31"
+categories: [datos]
+execute: 
+  echo: true
+freeze: auto
+---
+
+En estadística bayesiana, cuando buscas estimar un parámetro, lo que vas a obtener es una distribución de este parámetro. O sea, no obtienes un valor preciso, sino unas probabilidades asociadas a varios valores, de forma que algunos serán más probables que otros. 
+
+Un método intuitivo de conseguir esta distribución es usar el método del mallado ( _grid approximation_ ). Con este método, relacionas todos los casos posibles, calculas una verosimilitud para cada caso, y lo multiplicas por una probabilidad a priori que decidas. Ese producto es la distribución que buscas para tu parámetro, la posteriori. 
+
+En algunas situaciones, usar una priori en concreto te puede simplificar luego el cálculo, ya que no te hará falta aplicar los cálculos del mallado: puedes, pero el resultado será el mismo. 
+
+## Prioris conjugados
+
+En el caso de lanzar una moneda, estás trabajando con una binomial: tienes ciertos éxitos ante un número posible de casos. 
+
+Si en este caso, usas como priori la distribución beta, entonces surgirá la magia. 
+
+Dejo por ahora el código de golpe, porque es Nochevieja y tengo cosas que hacer. 
+
+El Leo del futuro se encargará de contar esto bien. 
+
+```{r}
+#| label: todo
+
+monedas <- 100
+caras <- seq(0, monedas, 1)
+p_cara <- seq(0, 1, 0.01)
+
+beta_alpha <- 2
+beta_beta <- 10
+hist(rbeta(sample_size, beta_alpha, beta_beta))
+
+df <- as.data.frame(expand.grid(caras, p_cara))
+names(df) <- c("caras", "p_cara")
+
+df$prior <- dbeta(df$p_cara, beta_alpha, beta_beta)
+# df$prior <- dunif(df$p_cara)
+
+df$likelihood <- dbinom(df$caras, monedas, df$p_cara)
+
+df$posteriori <- df$likelihood * df$prior
+df$std_posteriori <- df$posteriori / sum(df$posteriori)
+
+
+caras_observadas <- 70
+plot(df$p_cara[df$caras == caras_observadas], 
+     df$posteriori[df$caras == caras_observadas] / sum(df$posteriori[df$caras == caras_observadas]), 
+     type = "l")
+lines(df$p_cara[df$caras == caras_observadas], 
+      df$prior[df$caras == caras_observadas] / sum(df$prior[df$caras == caras_observadas]), 
+      col = "red")
+
+posteriori_simulation <- dbeta(df$p_cara[df$caras == caras_observadas], 
+                               beta_alpha + caras_observadas, 
+                               beta_beta + monedas - caras_observadas)
+
+posteriori_simulation <- posteriori_simulation / sum(posteriori_simulation)
+
+lines(df$p_cara[df$caras == caras_observadas], 
+      posteriori_simulation, col = "blue")
+```
+
