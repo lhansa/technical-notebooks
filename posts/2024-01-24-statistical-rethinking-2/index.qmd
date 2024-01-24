@@ -1,0 +1,44 @@
+---
+title: "Statistical Rethinking (2)"
+description: "Por qué es importante la distribución normal"
+description-meta: "Por qué es importante la distribución normal"
+author: "Leonardo Hansa"
+date: "2024-01-24"
+categories: [datos]
+execute: 
+  echo: true
+freeze: auto
+---
+
+## Por qué lo normal es normal
+
+### Normal por adición
+
+Hay un experimento en el que pones a unas personas en línea con una moneda. Cada persona tiene una moneda que lanza 16 veces. 
+
+Por cada vez que sale cara, da un paso a la derecha; por cada vez que sale cruz, a la izquierda. 
+
+Cada paso será de una distancia aleatoria entre 0 y 1 metro. ¿Cuántos metros se ha desplazado cada persona con respecto al origen?
+
+El experimento con una sola persona sería algo así: 
+
+```{r}
+#| label: exp1
+distancia_por_paso <- runif(16, -1, 1)
+sum(distancia_por_paso)
+```
+
+Nuestro sujeto ha recorrido `r sum(distancia_por_paso)` desde la línea. 
+
+Lo podemos extrapolar a 10000 sujetos:
+
+```{r}
+pos <- replicate(10000, sum(runif(16, -1, 1)))
+
+library(ggplot2)
+theme_set(theme_minimal())
+ggplot() + 
+  geom_histogram(aes(x = pos), fill = "#800080")
+```
+
+
