@@ -8,7 +8,6 @@ categories: [datos]
 execute: 
   echo: true
 freeze: auto
-draft: true
 ---
 
 En [Statistical Rethinking](https://xcelab.net/rm/statistical-rethinking/) Richard McEalreath presenta los métodos generativos en estadística bayesiana. 
@@ -138,10 +137,6 @@ rng_key = random.PRNGKey(6)
 p = numpyro.sample("p", dist.Uniform(0, 1), rng_key = rng_key)  # uniform prior
 # print(p)
 numpyro.sample("W", dist.Binomial(W + L, p), obs=W)  # binomial likelihood
-```
-
-```{python}
-
 ```
 
 
