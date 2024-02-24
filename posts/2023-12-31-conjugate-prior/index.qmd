@@ -32,6 +32,7 @@ El Leo del futuro se encargará de contar esto bien.
 monedas <- 100
 caras <- seq(0, monedas, 1)
 p_cara <- seq(0, 1, 0.01)
+sample_size <- 1000
 
 beta_alpha <- 2
 beta_beta <- 10
