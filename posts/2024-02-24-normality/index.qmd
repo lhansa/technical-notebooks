@@ -1,0 +1,73 @@
+---
+title: "¿Cómo surge la distribución normal?"
+description: "Exploración de la distribución normal con R"
+description-meta: "Exploración de la distribución normal con R"
+author: "Leonardo Hansa"
+date: "2024-02-24"
+categories: [datos]
+execute: 
+  echo: true
+freeze: auto
+---
+
+La distribución normal siempre me ha parecido demasiado perfecta para esperar verla en unos datos reales. 
+
+Pero claro, eso me pasa por no saber de dónde viene. 
+
+Te cuento. 
+
+## Sumas
+
+Imagina un grupo de personas que parten de una línea. Cada uno lanza una moneda al aire; si sale cara, da un paso a la izquierda, de máximo 1 metro; si no, lo da a la derecha. Los pasos estarán entre 0 y 1 metro. Al cabo de 16 lanzamientos, ¿a qué distancia estará del origen?
+
+Será la suma de las distancias de esos pasos.
+
+Podemos calcular esto para 1000 personas.
+
+Primero si dan 4 pasos:
+
+```{r}
+#| label: pasos4
+pos <- replicate(1000, sum(runif(4, -1, 1)))
+hist(pos)
+```
+
+Ahora si dan 8 pasos:
+
+```{r}
+#| label: pasos8
+pos <- replicate(1000, sum(runif(8, -1, 1)))
+hist(pos)
+```
+
+Ahora si dan 16:
+
+```{r}
+#| label: pasos16
+pos <- replicate(1000, sum(runif(16, -1, 1)))
+hist(pos)
+```
+
+Realmente, casi con cualquier distribución puedes hacer esto. La suma de valores de cualquier distribución seguirá una distribución normal. 
+
+
+```{r}
+
+```
+
+
+```{r}
+#| label: suma-exp
+hist(replicate(1000, sum(rexp(100, 2))))
+```
+
+```{r}
+#| label: suma-pois
+hist(replicate(1000, sum(rpois(20, 2))))
+```
+
+
+```{r}
+library(rethinking)
+```
+
