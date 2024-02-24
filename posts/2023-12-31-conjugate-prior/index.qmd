@@ -22,12 +22,9 @@ En el caso de lanzar una moneda, estás trabajando con una binomial: tienes cier
 
 Si en este caso, usas como priori la distribución beta, entonces surgirá la magia. 
 
-Dejo por ahora el código de golpe, porque es Nochevieja y tengo cosas que hacer. 
-
-El Leo del futuro se encargará de contar esto bien. 
-
+La distribución es
 ```{r}
-#| label: todo
+#| label: setup
 
 monedas <- 100
 caras <- seq(0, monedas, 1)
@@ -36,11 +33,16 @@ sample_size <- 1000
 
 beta_alpha <- 2
 beta_beta <- 10
-hist(rbeta(sample_size, beta_alpha, beta_beta))
+hist(rbeta(sample_size, beta_alpha, beta_beta), col = "#800080")
 
 df <- as.data.frame(expand.grid(caras, p_cara))
 names(df) <- c("caras", "p_cara")
+```
 
+Y podemos simular la posteriori con el método del mallado: 
+
+```{r}
+#| label: posterior1
 df$prior <- dbeta(df$p_cara, beta_alpha, beta_beta)
 # df$prior <- dunif(df$p_cara)
 
@@ -53,17 +55,29 @@ df$std_posteriori <- df$posteriori / sum(df$posteriori)
 caras_observadas <- 70
 plot(df$p_cara[df$caras == caras_observadas], 
      df$posteriori[df$caras == caras_observadas] / sum(df$posteriori[df$caras == caras_observadas]), 
-     type = "l")
+     type = "o", xlab = "Probabilidad de cara", ylab = "Probabilidad")
 lines(df$p_cara[df$caras == caras_observadas], 
       df$prior[df$caras == caras_observadas] / sum(df$prior[df$caras == caras_observadas]), 
       col = "red")
 
+```
+
+La magia está en que, dado que la distribución a priori es una beta, no necesitamos simular la posteriori, sino que sabemos que ya seguirá una distribución en concreto (una beta también, con pequeños cambios en sus parámetros);
+
+```{r}
+#| label: posteriori
 posteriori_simulation <- dbeta(df$p_cara[df$caras == caras_observadas], 
                                beta_alpha + caras_observadas, 
                                beta_beta + monedas - caras_observadas)
 
 posteriori_simulation <- posteriori_simulation / sum(posteriori_simulation)
 
+plot(df$p_cara[df$caras == caras_observadas], 
+     df$posteriori[df$caras == caras_observadas] / sum(df$posteriori[df$caras == caras_observadas]), 
+     type = "o", xlab = "Probabilidad de cara", ylab = "Probabilidad")
+lines(df$p_cara[df$caras == caras_observadas], 
+      df$prior[df$caras == caras_observadas] / sum(df$prior[df$caras == caras_observadas]), 
+      col = "red")
 lines(df$p_cara[df$caras == caras_observadas], 
       posteriori_simulation, col = "blue")
 ```
