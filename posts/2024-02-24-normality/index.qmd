@@ -16,8 +16,6 @@ Pero claro, eso me pasa por no saber de dónde viene.
 
 Te cuento. 
 
-## Sumas
-
 Imagina un grupo de personas que parten de una línea. Cada uno lanza una moneda al aire; si sale cara, da un paso a la izquierda, de máximo 1 metro; si no, lo da a la derecha. Los pasos estarán entre 0 y 1 metro. Al cabo de 16 lanzamientos, ¿a qué distancia estará del origen?
 
 Será la suma de las distancias de esos pasos.
@@ -48,26 +46,116 @@ pos <- replicate(1000, sum(runif(16, -1, 1)))
 hist(pos)
 ```
 
-Realmente, casi con cualquier distribución puedes hacer esto. La suma de valores de cualquier distribución seguirá una distribución normal. 
+Realmente, casi con cualquier distribución puedes hacer esto. La suma de valores de cualquier distribución seguirá una distribución normal (con algunas necesitarás una muestra más grande que con otras).
 
-
-```{r}
-
-```
-
-
-```{r}
-#| label: suma-exp
-hist(replicate(1000, sum(rexp(100, 2))))
-```
 
 ```{r}
 #| label: suma-pois
-hist(replicate(1000, sum(rpois(20, 2))))
+hist(replicate(1000, sum(rpois(100, 2))))
 ```
+
+
+## Ejemplo de modelo basado en la normalidad
+
+La altura de varias personas adultas es esperable que se distribuya como una distribución normal. 
+
+La idea intuitiva es que la altura de una persona adulta es el resultado de muchos pequeños aumentos que se suman. Para distintos individuos, estas sumas darán resultados distintos, porque los aumentos progresivos entre ellos serán distintos al cabo de los años. Pero el conjunto de todas ellas será normal, si has esperado suficientes años para que los casos más altos (aumentos más grandes acumulados) se compensen con los más bajos (aumentos más pequeños). 
+
+Vamos a trabajar con una muestra de personas, de las que conocemos su altura. 
+
+Queremos modelizar la altura como una distribución normal, o sea, estimaremos la media y desviación típica. 
+
+El método bayesiano considerará todas las medias y desviaciones típicas posibles (realmente haremos una aproximación), y evaluaremos cada una en función de cómo de plausibles son, dados los datos que tenemos.
 
 
 ```{r}
+#| label: howell1
+#| message: false
 library(rethinking)
+
+data(Howell1)
+head(Howell1)
 ```
+
+Por ahora, vamos a centrarnos solo en los casos adultos, porque la altura de los niños no se distribuye normalmente, sino que está correlada con la edad. 
+
+```{r}
+adultos <- Howell1[Howell1$age > 18, ]
+
+hist(adultos$height, col = "#800080")
+```
+
+Queremos modelizar la altura $h_i$ de cada individuo $i$ como $h_i \sim \cal{N}(\mu, \sigma)$. **El objetivo es estimar** $\mu$ y $\sigma$.
+
+
+Como estamos en un modelo bayesiano, necesitamos unos prioris para ambos parámetros. Los prioris son distribuciones de estos parámetros que consideramos razonables. 
+
+$$
+h_i \sim \cal{N}(\mu, \sigma)
+\mu \sim \cal{N}(178, 20) \\
+\sigma \sim \cal{U}(0, 50)
+$$
+
+Estamos dando como distribución a priori de la media una normal centrada en 178 y con un rango de 40cm con una probablidad de 95%. 
+
+
+```{r}
+#| label: howell1-priori
+
+curve(dnorm(x, 178, 20), from = 100, to = 250, col = "#800080", lwd = 2)
+```
+
+La priori sobre la desviación típica es plana, en el sentido de que no sabemos dar más importancia a unos valores frente a otros, dentro los propuestos en el intervalo de la uniforme. 
+
+Podemos simular cómo serían unos datos a partir de estas prioris. 
+
+```{r}
+#| label: simulacion-prioris
+sample_mu <- rnorm(1e4, 178, 20)
+sample_sigma <- runif(1e4, 0, 50)
+
+prior_h <- rnorm(1e4, sample_mu, sample_sigma)
+dens(prior_h, col = "#800080")
+```
+
+Lo que hemos hecho es simular 10.000 pares de $\mu$ y $\sigma$ y para cada par hemos simulado una altura. Así tenemos 10.000 alturas, cada una originada a partir de una población normal distinta (pero todas las poblaciones normales son tan plausibles como indica nuestra priori). 
+
+
+Si cambiáramos la priori, la simulación a priori de la altura se vería afectada: 
+
+```{r}
+#| label: simulacion-prioris2
+sample_mu <- rnorm(1e4, 178, 100)
+
+prior_h <- rnorm(1e4, sample_mu, sample_sigma)
+dens(prior_h, col = "#800080")
+```
+
+Esa es una priori menos informativa, con una media mucho más dispersa. Pero puedes ver que las alturas que derivarían de unas prioris así no son realistas, dado que hay casos de altura negativa o también demasiado altos. 
+
+
+```{r}
+#| label: quap
+
+fit_altura <- quap( 
+  alist(
+    height ~ dnorm( mu , sigma ) ,
+    mu ~ dnorm( 178 , 20 ) ,
+    sigma ~ dunif( 0 , 50 )
+  ), 
+  data = adultos
+)
+
+precis(fit_altura)
+
+
+```
+
+```{r}
+#| label: altura-posteriori
+
+posterior_h <- extract.samples(fit_altura, n = 1e4)
+hist(posterior_h$mu, col = "#800080")
+```
+
 
