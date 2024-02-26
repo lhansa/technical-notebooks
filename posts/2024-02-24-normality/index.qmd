@@ -92,11 +92,13 @@ Como estamos en un modelo bayesiano, necesitamos unos prioris para ambos paráme
 
 $$
 h_i \sim \cal{N}(\mu, \sigma)
-\mu \sim \cal{N}(178, 20) \\
+\\
+\mu \sim \cal{N}(178, 20)
+\\
 \sigma \sim \cal{U}(0, 50)
 $$
 
-Estamos dando como distribución a priori de la media una normal centrada en 178 y con un rango de 40cm con una probablidad de 95%. 
+Estamos dando como distribución a priori de la media una normal centrada en $\cal{178}$ y con un rango de $\cal{40}$cm con una probablidad de 95%. 
 
 
 ```{r}
