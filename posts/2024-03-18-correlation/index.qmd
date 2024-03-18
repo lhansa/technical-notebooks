@@ -1,0 +1,87 @@
+---
+title: "Relaciones espurias"
+description: "Exploración de relaciones espurias en datos de divorcios"
+description-meta: "Relaciones espurias en datos de divorcios"
+author: "Leonardo Hansa"
+date: "2024-03-18"
+categories: [datos]
+execute: 
+  echo: true
+  message: false
+freeze: auto
+---
+
+Tienes un datos de divorcio en estados de Estados Unidos ([fuente](https://xcelab.net/rm/statistical-rethinking/)). 
+
+```{r}
+#| label: scale-data
+#| echo: false
+library(rethinking)
+data(WaffleDivorce)
+d <- WaffleDivorce
+# standardize variables
+d$A <- scale( d$MedianAgeMarriage )
+d$D <- scale( d$Divorce )
+```
+Parece que hay correlación entre el ratio de divorcio por estado y la edad mediana a la que se casa la gente: 
+
+```{r}
+library(ggplot2)
+
+theme_set(theme_light())
+
+ggplot(d, aes(x = MedianAgeMarriage, y = Divorce)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+```
+
+El ratio de divorcio por estado dada la mediana de edad de casarse podrías modelizarlo como: 
+
+$$
+D_i \sim \text{Normal}(\mu_i, \sigma)
+\\
+\mu_i = \alpha + \beta_AA_i
+\\
+\alpha \sim \text{Normal(0, 0,2)}
+\\
+\beta_A \sim \text{Normal(0, 0,5)}
+\\
+\sigma \sim \text{Exponential(1)}
+$$
+
+- $D_i$ el ratio de divorcio estandarizado (media 0, desviación típica 1) para el Estado $i$.
+- $A_i$ es la edad mediana a la que se casa la gente en el Estado $i$.
+- Como el ratio que modelizamos está centrado en 0, el intercept del modelo es esperable que sea cercano a 0. 
+- Sobre $\beta_A$, si fuera igual a 1, estaríamos diciendo que por cada cambio de una desviación estándar de la edad, observaríamos un cambio de una desviación estándar en el ratio del divorcio. La desviación estándar de la edad es `r sd(d$MedianAgeMarriage)`, por lo que si $\beta_A = 1$, un cambio de ${1,2}$ años en la mediana de edad de casarse aumentaría el ratio de divorcio en una desviación estándar, lo que parece ser demasiado fuerte. 
+
+
+Ahora podemos ajustar el modelo y simular: 
+
+```{r}
+#| label: modelo-divorcio
+
+m5.1 <- quap(
+  alist(
+    D ~ dnorm(mu, sigma), 
+    mu <- a + bA * A, 
+    a ~ dnorm(0, 0.2), 
+    bA ~ dnorm(0, 0.5), 
+    sigma ~ dexp(1)
+  ), 
+  data = d
+)
+```
+
+
+```{r}
+#| label: extract
+
+set.seed(10)
+prior <- extract.prior(m5.1)
+mu <- link( m5.1 , post=prior , data=list( A=c(-2,2) ) )
+plot( NULL , xlim=c(-2,2) , ylim=c(-2,2) )
+for ( i in 1:50 ) lines( c(-2,2) , mu[i,] , col=col.alpha("black",0.4) )
+```
+
+
+
