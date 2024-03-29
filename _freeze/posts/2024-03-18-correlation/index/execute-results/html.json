@@ -1,0 +1,16 @@
+{
+  "hash": "907735a87c326db721a0a6c686da7a9c",
+  "result": {
+    "markdown": "---\ntitle: \"Relaciones espurias\"\ndescription: \"Exploración de relaciones espurias en datos de divorcios\"\ndescription-meta: \"Relaciones espurias en datos de divorcios\"\nauthor: \"Leonardo Hansa\"\ndate: \"2024-03-18\"\ncategories: [datos]\nexecute: \n  echo: true\n  message: false\nfreeze: auto\n---\n\n\nTienes un datos de divorcio en estados de Estados Unidos ([fuente](https://xcelab.net/rm/statistical-rethinking/)). \n\n\n::: {.cell}\n\n:::\n\nParece que hay correlación entre el ratio de divorcio por estado y la edad mediana a la que se casa la gente: \n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(ggplot2)\n\ntheme_set(theme_light())\n\nggplot(d, aes(x = MedianAgeMarriage, y = Divorce)) + \n  geom_point() + \n  geom_smooth(method = \"lm\")\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-2-1.png){width=672}\n:::\n:::\n\n\nEl ratio de divorcio por estado dada la mediana de edad de casarse podrías modelizarlo como: \n\n$$\nD_i \\sim \\text{Normal}(\\mu_i, \\sigma)\n\\\\\n\\mu_i = \\alpha + \\beta_AA_i\n\\\\\n\\alpha \\sim \\text{Normal(0, 0,2)}\n\\\\\n\\beta_A \\sim \\text{Normal(0, 0,5)}\n\\\\\n\\sigma \\sim \\text{Exponential(1)}\n$$\n\n- $D_i$ el ratio de divorcio estandarizado (media 0, desviación típica 1) para el Estado $i$.\n- $A_i$ es la edad mediana a la que se casa la gente en el Estado $i$.\n- Como el ratio que modelizamos está centrado en 0, el intercept del modelo es esperable que sea cercano a 0. \n- Sobre $\\beta_A$, si fuera igual a 1, estaríamos diciendo que por cada cambio de una desviación estándar de la edad, observaríamos un cambio de una desviación estándar en el ratio del divorcio. La desviación estándar de la edad es 1.2436303, por lo que si $\\beta_A = 1$, un cambio de ${1,2}$ años en la mediana de edad de casarse aumentaría el ratio de divorcio en una desviación estándar, lo que parece ser demasiado fuerte. \n\n\nAhora podemos ajustar el modelo y simular: \n\n\n::: {.cell}\n\n```{.r .cell-code}\nm5.1 <- quap(\n  alist(\n    D ~ dnorm(mu, sigma), \n    mu <- a + bA * A, \n    a ~ dnorm(0, 0.2), \n    bA ~ dnorm(0, 0.5), \n    sigma ~ dexp(1)\n  ), \n  data = d\n)\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\nset.seed(10)\nprior <- extract.prior(m5.1)\nmu <- link( m5.1 , post=prior , data=list( A=c(-2,2) ) )\nplot( NULL , xlim=c(-2,2) , ylim=c(-2,2) )\nfor ( i in 1:50 ) lines( c(-2,2) , mu[i,] , col=col.alpha(\"black\",0.4) )\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/extract-1.png){width=672}\n:::\n:::\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

@@ -1,8 +1,10 @@
 {
-  "hash": "15765171be14179fb8ebdfc2b7e851e8",
+  "hash": "85ac682b17757b32db2ec93cce6f0db2",
   "result": {
     "markdown": "---\ntitle: \"Paseo en bicicleta eléctrica por Madrid\"\ndescription: \"\"\ndescription-meta: \"\"\nauthor: \"Leonardo Hansa\"\ndate: \"2023-10-12\"\ncategories: [datos]\nexecute: \n  echo: false\n  eval: false\n  warning: false\nfreeze: auto\n---\n\n\nÚltimamente tengo la sensación de que las estaciones de Bicimad, el servicio de bicis públicas de Madrid, están vacías.\n\nCuando abro la app, veo que las estaciones de la mitad sur de Madrid están llenas, y las de la mitad norte están vacías. \n\nQuería ver si los datos públicos me decían algo pero: \n\n- He tardado casi dos horas en leer el json de datos, porque está escrito como si... no sé. O sea, se suele decir que los datos en json están semiestructurados. Pues mira, los datos de una fotografía tienen más estructura que el json de estos datos públicos. \n- Los datos que me he puesto a ver (los de estaciones) solo están hasta diciembre de 2022. Como me di cuenta de esto en verano, he cogido los datos de julio de 2022.\n\n\nLos datos de junio los he agregado a nivel horario y calculo la proporción media horaria de bases disponibles. \n\nEso es lo que puedes ver aquí: \n\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n\n:::\n\n\n![](output.gif)\n\n\n\n\n\n\n",
-    "supporting": [],
+    "supporting": [
+      "index_files"
+    ],
     "filters": [
       "rmarkdown/pagebreak.lua"
     ],
