@@ -1,0 +1,16 @@
+{
+  "hash": "36e76c9e7f937b9c04a838b22b2ee1f0",
+  "result": {
+    "markdown": "---\ntitle: \"Statistical Rethinking (2)\"\ndescription: \"Por qué es importante la distribución normal\"\ndescription-meta: \"Por qué es importante la distribución normal\"\nauthor: \"Leonardo Hansa\"\ndate: \"2024-01-24\"\ncategories: [datos]\nexecute: \n  echo: true\nfreeze: auto\n---\n\n\n## Por qué lo normal es normal\n\n### Normal por adición\n\nHay un experimento en el que pones a unas personas en línea con una moneda. Cada persona tiene una moneda que lanza 16 veces. \n\nPor cada vez que sale cara, da un paso a la derecha; por cada vez que sale cruz, a la izquierda. \n\nCada paso será de una distancia aleatoria entre 0 y 1 metro. ¿Cuántos metros se ha desplazado cada persona con respecto al origen?\n\nEl experimento con una sola persona sería algo así: \n\n\n::: {.cell}\n\n```{.r .cell-code}\ndistancia_por_paso <- runif(16, -1, 1)\nsum(distancia_por_paso)\n```\n\n::: {.cell-output .cell-output-stdout}\n```\n[1] 2.171815\n```\n:::\n:::\n\n\nNuestro sujeto ha recorrido 2.1718148 desde la línea. \n\nLo podemos extrapolar a 10000 sujetos:\n\n\n::: {.cell}\n\n```{.r .cell-code}\npos <- replicate(10000, sum(runif(16, -1, 1)))\n\nlibrary(ggplot2)\ntheme_set(theme_minimal())\nggplot() + \n  geom_histogram(aes(x = pos), fill = \"#800080\")\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-2-1.png){width=672}\n:::\n:::\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
