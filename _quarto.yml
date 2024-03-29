@@ -43,4 +43,4 @@ format:
     lang: es
     
 execute: 
-  freeze: true
+  freeze: auto
