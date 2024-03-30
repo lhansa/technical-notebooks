@@ -24,7 +24,7 @@ website:
     type: express
     palette: light
     prefs-text: "Cookies"
-  site-url: 'https://lhansa.github.io/picatostes'
+  site-url: 'https://lhansa.github.io/'
   site-path: '/'
   
 format:
