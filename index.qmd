@@ -1,5 +1,5 @@
 ---
-title: "Para dejarte a medias"
+title: "Punto de partida"
 page-layout: full
 title-block-banner: false
 ---
