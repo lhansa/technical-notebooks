@@ -2,7 +2,7 @@ project:
   type: website
 
 website:
-  title: "Picatostes"
+  title: "Leonardo Hansa"
   favicon: favicon.png
   navbar: 
     background: "#ffffff"

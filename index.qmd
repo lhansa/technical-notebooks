@@ -1,5 +1,5 @@
 ---
-title: ""
+title: "Para dejarte a medias"
 listing:
   contents: posts
   sort: "date desc"
@@ -10,7 +10,7 @@ listing:
   sort-ui: false
   filter-ui: false
   field-display-names: 
-    title: "Cacharreos"
+    title: "Tema"
 page-layout: full
 title-block-banner: false
 ---
