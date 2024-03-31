@@ -1,18 +1,8 @@
 ---
 title: "Para dejarte a medias"
-listing:
-  contents: posts
-  sort: "date desc"
-  type: table
-  fields: [title, date, description]
-  date-format: medium
-  categories: false
-  sort-ui: false
-  filter-ui: false
-  field-display-names: 
-    title: "Tema"
-  feed: true
 page-layout: full
 title-block-banner: false
 ---
+
+_Quien tiene convicciones demasiado fuertes es porque no ha profundizado lo suficiente._ (E. M. Cioran)
 
