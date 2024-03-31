@@ -1,6 +1,6 @@
 ---
 title: "Para dejarte a medias"
-page-layout: custom
+page-layout: full
 title-block-banner: false
 ---
 
