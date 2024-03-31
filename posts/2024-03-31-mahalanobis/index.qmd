@@ -112,15 +112,17 @@ Bajo esa premisa, los puntos azules pertenecen a la misma nube de puntos pero el
 ¿Qué hacemos aquí?
 
 ## Distancia de Mahalanobis
-
 ```{r}
-
+df
 ```
 
+
 ```{r}
-mahalanobis(as.matrix(df_dists), 
-            as.numeric(df_dists[2, ]), 
-            cov(df_dists))
+dists_maha <- mahalanobis(as.matrix(df_dists), 
+                          colMeans(df[, c("x", "y")]), 
+                          cov(df[, c("x", "y")]))
+dists_maha
+# sqrt(dists_maha[1] + dists_maha[2])
 ```
 
 
