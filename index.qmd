@@ -1,5 +1,5 @@
 ---
-title: "Punto de partida"
+title: ""
 page-layout: full
 title-block-banner: false
 ---
