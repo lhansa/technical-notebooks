@@ -1,0 +1,127 @@
+---
+title: "Distancia de Mahalanobis"
+description: "Ejemplo de uso de la distancia de Mahalanobis en un conjunto de datos"
+description-meta: "Ejemplo de uso de la distancia de Mahalanobis en un conjunto de datos"
+author: "Leonardo Hansa"
+date: "2024-03-31"
+categories: [datos]
+execute: 
+  echo: true
+  message: false
+freeze: auto
+draf: true
+---
+
+Tienes este conjunto de datos (una nube de puntos que sigue una regresión y un atípico): 
+
+```{r}
+#| label: generacion-datos
+library(ggplot2)
+theme_set(theme_light())
+
+n_size <- 1000
+
+beta_0 <- 0
+beta_1 <- 2
+
+x <- rnorm(n_size, beta_0)
+y <- beta_0 + beta_1 * x + rnorm(n_size, 0, 1)
+
+df <- data.frame(x, y, caso = "nube")
+
+df <- rbind(
+  df, 
+  data.frame(
+    x = quantile(x, probs = 0.75), 
+    y = max(y) + beta_1 * quantile(x, probs = 0.75), 
+    caso = "extra"
+  )
+)
+
+ggplot(df) + 
+  geom_point(aes(x, y, col = caso)) + 
+  scale_color_manual(values = c("red", "lightblue"))
+
+```
+
+Y haces una selección de dos puntos, dentro de la nube. La selección no es aleatoria: he seleccionado los puntos con menor y mayor valor en el eje $x$.
+
+```{r}
+#| label: seleccion
+df$caso[c(which.min(df$x), which.max(df$x))] <- "selección"
+row.names(df) <- NULL
+
+ggplot(df) + 
+  geom_point(aes(x, y, col = caso)) + 
+  geom_point(
+    data = df[df$caso == "selección", ], 
+    aes(x, y), 
+    col = "darkblue"
+  ) + 
+  scale_color_manual(values = c("red", "lightblue", "darkblue"))
+```
+
+La situación que te planteo es: ¿entre qué pares de puntos hay más distancia: entre el azul derecho y el rojo, o entre los dos azules?
+
+
+
+```{r}
+#| label: segmentos
+df_segment <- df[df$caso != "nube", c("x", "y")]
+df_segment <- df_segment[-which.max(df_segment$x), ]
+
+df_segment$xend <- df$x[which.max(df$x)]
+df_segment$yend <- df$y[which.max(df$x)]
+
+row.names(df_segment) <- NULL
+
+ggplot(df) + 
+  geom_point(aes(x, y, col = caso)) + 
+  geom_point(
+    data = df[df$caso == "selección", ], 
+    aes(x, y), 
+    col = "darkblue"
+  ) + 
+  geom_segment(
+    data = df_segment,
+    aes(x = x, xend = xend, y = y, yend = yend), 
+    colour = "grey"
+  ) + 
+  scale_color_manual(values = c("red", "lightblue", "darkblue"))
+```
+## Distancia euclídea
+
+```{r}
+df_dists <- df[df$caso != "nube", c("x", "y")]
+m_dists <- dist(df_dists)
+m_dists
+```
+
+```{r}
+as.matrix(m_dists)
+```
+
+La distancia entre ambos puntos azules es `r as.matrix(m_dists)[3, 2]` mientras que la distancia entre el punto azul máximo y el rojo es `r as.matrix(m_dists)[3, 1]`. Dicho así, la diferencia está clara... en el mundo euclídeo. 
+
+Pero en este caso estamos trabajando con dos métricas, `x` e `y`, y es posible qu tengan algún sentido de negocio (imagina que estás trabajando en un proyecto tuyo comparando dos métricas). 
+
+Bajo esa premisa, los puntos azules pertenecen a la misma nube de puntos pero el rojo no. O sea, los puntos azules tienen algo en común que el rojo no tiene.
+
+**Desde ese punto de vista, el punto rojo debería estar más lejos de los puntos, que los puntos entre sí.** Los puntos _están cerca_ desde un punto de vista de negocio porque se explican bajo la misma regla matemática ($y = \beta_0 + \beta_1\cdot x$) mientras que el rojo no la sigue.
+
+¿Qué hacemos aquí?
+
+## Distancia de Mahalanobis
+
+```{r}
+
+```
+
+```{r}
+mahalanobis(as.matrix(df_dists), 
+            as.numeric(df_dists[2, ]), 
+            cov(df_dists))
+```
+
+
+
