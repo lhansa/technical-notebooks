@@ -3,12 +3,16 @@ project:
 
 website:
   title: "Leonardo Hansa"
+  description: "Tips sobre análisis de datos"
   favicon: favicon.png
   navbar: 
     background: "#ffffff"
     search: false
     pinned: true
     left: 
+      - text: "Contenidos"
+        href: "contenidos.qmd"
+        icon: "book"
       - text: "Cu-cu-trás"
         href: "https://leonardohansa.com"
         icon : "balloon-heart"

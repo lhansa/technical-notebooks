@@ -1,5 +1,5 @@
 ---
-title: "Para dejarte a medias"
+title: "Contenidos"
 listing:
   contents: posts
   sort: "date desc"
