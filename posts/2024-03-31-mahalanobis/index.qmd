@@ -9,7 +9,7 @@ execute:
   echo: true
   message: false
 freeze: auto
-draf: true
+draft: true
 ---
 
 Tienes este conjunto de datos (una nube de puntos que sigue una regresión y un atípico): 

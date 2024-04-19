@@ -1,0 +1,64 @@
+---
+title: "DuckDB"
+description: "Tiempos de ejecución de arrow y duckdb"
+description-meta: "Tiempos de ejecución de arrow y duckdb"
+author: "Leonardo Hansa"
+date: "2024-04-19"
+categories: [datos]
+execute: 
+  echo: true
+  message: false
+freeze: auto
+draft: true
+---
+
+Inspirado en este [benchmark](https://h2oai.github.io/db-benchmark/), con [este tutorial](https://duckdb.org/2024/04/02/duckplyr.html) y [esta charla](https://www.youtube.com/watch?v=V9GwSPjKMKw)
+
+```{r}
+#| eval: false
+# https://duckdb.org/docs/api/r.html
+
+setwd("~/Projects/jekyll/")
+
+library(duckdb)
+library(dplyr)
+library(arrow)
+library(duckplyr)
+
+con <- dbConnect(duckdb())
+duckdb_register(con, "flights", nycflights13::flights)
+
+# Establish a set of Parquet files
+# dbExecute(con, "COPY flights TO 'dataset' (FORMAT PARQUET, PARTITION_BY (year, month))")
+
+# Summarize the dataset in DuckDB to avoid reading 12 Parquet files into R's memory
+bench::mark(
+  min_time = Inf,
+  max_iterations = 100,
+  check = FALSE,
+  duckdb = tbl(con, "flights") |>
+    group_by(month) |>
+    summarise(delay = mean(dep_time, na.rm = TRUE)) |>
+    arrange(month) |> 
+    collect(),
+  duckdb_parquet = tbl(con, "read_parquet('dataset/**/*.parquet', hive_partitioning = true)") |>
+    group_by(month) |>
+    summarise(delay = mean(dep_time, na.rm = TRUE)) |>
+    arrange(month) |> 
+    collect(), 
+  arrow = arrow::open_dataset("dataset") |> 
+    group_by(month) |>
+    summarise(delay = mean(dep_time, na.rm = TRUE)) |>
+    arrange(month) |> 
+    collect(), 
+  duckplyr = nycflights13::flights |> 
+    as_duckplyr_df() |> 
+    duckplyr::summarise(.by = month, delay = mean(dep_time, na.rm = TRUE)) |>
+    duckplyr::arrange(month) |> 
+    collect()
+)
+
+
+
+```
+
