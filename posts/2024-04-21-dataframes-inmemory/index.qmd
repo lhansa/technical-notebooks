@@ -1,0 +1,267 @@
+---
+title: "Cómo procesas datos que no te caben en RAM"
+description: "Procesamiento de datos con más gigas que memoria RAM"
+description-meta: "Procesamiento de datos con más gigas que memoria RAM"
+author: "Leonardo Hansa"
+date: "2024-04-21"
+categories: [datos]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+Tengo unos 16GB de datos en ficheros parquet en una carpeta. 
+
+```{r}
+#| label: compute-size
+
+# https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page
+path_to_folder <- "../../data/taxiny/"
+
+# https://stackoverflow.com/a/68145683/7569570
+dir_size <- function(path, recursive = TRUE) {
+  stopifnot(is.character(path))
+  files <- list.files(path, full.names = T, recursive = recursive)
+  vect_size <- sapply(files, function(x) file.size(x))
+  size_files <- sum(vect_size)
+  size_files
+}
+
+cat(dir_size(path_to_folder)/10**9, "GB")
+```
+
+Cada fichero tiene datos de [trayectos de taxi](# https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page) en la ciudad de Nueva York. 
+
+Quiero calcular cuántos trayectos con tarifa de aeropuerto ha habido en cada día, desde enero de 2021 hasta febrero de 2024. Es una operación con una estructura sencilla: si te cupiera en un Excel lo podrías plantear en una tabla dinámica sin muchas especificaciones. 
+
+O con SQL como lingua franca, si tuviera todos los datos en una tabla, sería algo así: 
+
+```{sql}
+#| eval: false
+SELECT day, count(*)
+FROM Viajes
+WHERE airport_fee > 0
+GROUP BY day
+```
+
+Pero no los tengo todos en una tabla, sino en 38 ficheros. En cualquier programa orientado a dato es fácil juntar varias en tablas en una, con algún _concat_ o variantes. **Pero tengo 16GB de datos para un portátil de 8GB de RAM:** no voy a poder.
+
+Así que necesito calcular eso sin cargar todo en memoria. ¿Cómo procedo?
+
+## Versión directa
+
+Si lo que conoces es R (aplica también a pandas y Python), podrías plantear un bucle que itere sobre cada fichero. 
+
+Los ficheros están en parquet, así que usaré la librería **arrow** para cargar sus datos en un data frame.
+
+```{r}
+#| label: libs
+#| message: false
+#| warning: false
+library(dplyr)
+library(arrow)
+```
+
+La operación con un solo fichero sería algo así:
+
+```{r}
+#| label: read-one
+df <- read_parquet(
+  "../../data/taxiny/fhvhv_tripdata_2023-01.parquet", 
+  col_select = c("pickup_datetime", "airport_fee"),
+  as_data_frame = TRUE
+)
+
+df |> 
+  filter(airport_fee > 0) |> 
+  mutate(day = as.Date(pickup_datetime)) |>
+  summarise(count = n(), .by = day) |> 
+  slice_head(n = 10)
+```
+
+```{r}
+#| include: false
+rm(df); gc()
+```
+
+Luego vemos lo de `as_data_frame = TRUE`. Por ahora metemos eso en un bucle.
+
+## Método 1. Bucle
+
+Lo más intuitivo para mí siempre ha sido un bucle. Que lo plantees directamente con un `for()`, con un `lapply()` más `rbind` y `do.call()` o con otro conjunto de herramientas es cosa tuya. 
+
+Me resulta directo `map_dfr()` de **purrr** porque lo que necesito al final es un data frame de todos los data frames intermedios apilados por filas.
+
+```{r}
+#| label: bucle
+paths_a_ficheros <- list.files(path_to_folder,
+                               pattern = "parquet$", 
+                               full.names = TRUE)
+
+system.time(
+  df_all <- purrr::map_dfr(paths_a_ficheros, function(.path) {
+    df <- read_parquet(
+      .path,
+      col_select = c("pickup_datetime", "airport_fee"),
+      as_data_frame = TRUE
+    )
+    
+    df <- df |> 
+      filter(airport_fee > 0) |> 
+      mutate(day = as.Date(pickup_datetime)) |>
+      summarise(count = n(), .by = day)
+    
+    # gc()
+    
+    return(df)
+  }) 
+)
+```
+
+Ha tardado como un minuto, pero lo tengo. 
+```{r}
+#| label: resultado1
+head(df_all)
+```
+
+No he cargado en ningún momento todos los datos: he cargado solo lo que necesitaba
+de cada fichero y he operado con cada fichero por separado. 
+
+- `col_select` te permite no leer todas las columnas sino solo las que incluyas en la selección. Los ficheros son grandes, así que ahorras tiempo y memoria si eliges previamente.
+- `as_data_frame = TRUE` está diciendo a la función que cargue todo el data frame en memoria (o por lo menos la selección que hemos hecho). Si lo marcas como `FALSE` el resultado de la lectura será una tabla de arrow, y el cómputo que viene después no lo hará dplyr sino arrow, aunque luego tendrás que recuperar los datos con un `collect()`. 
+
+### Alternativa en el bucle. Sin selección de columnas
+
+Siempre que sepas que te sobran columnas, elimínalas. Para que te hagas una idea, el siguiente código solo se diferencia del anterior en la selección de columnas... pues este no me tira. Se peta todo.
+
+```{r}
+#| label: bucle2
+#| eval: false
+system.time(
+  df_all <- purrr::map_dfr(paths_a_ficheros, function(.path) {
+    df <- read_parquet(
+      .path,
+      as_data_frame = TRUE
+    )
+    
+    df <- df |> 
+      filter(airport_fee > 0) |> 
+      mutate(day = as.Date(pickup_datetime)) |>
+      summarise(count = n(), .by = day)
+    
+    # gc()
+    
+    return(df)
+  }) 
+)
+```
+
+
+### Alternativa en el bucle. Tabla arrow
+
+Una opción es fijar `as_data_frame` a `FALSE` para trabajar con las tablas de arrow en lugar de data frame. Esto te será útil si cada fichero es a su vez muy grande. Pero tendrás de todos modos que usar `collect()` en cada iteración para que `map_dfr` pueda apilar los data frames. Esto hará que cada data frame (resultante de cada iteración) se vaya volcando en memoria.
+
+```{r}
+#| label: bucle2
+system.time(
+  df_all <- purrr::map_dfr(paths_a_ficheros, function(.path) {
+    df <- read_parquet(
+      .path,
+      col_select = c("pickup_datetime", "airport_fee"),
+      as_data_frame = FALSE
+    )
+    
+    df <- df |> 
+      filter(airport_fee > 0) |> 
+      mutate(day = as.Date(pickup_datetime)) |>
+      summarise(count = n(), .by = day)
+    
+    # gc()
+    
+    return(collect(df))
+  }) 
+)
+```
+
+## Método 2. `arrow`
+
+En lugar del bucle, si te vas a meter en **arrow**, le sacarás más partido si aprovechas todas sus herramientas. 
+
+Si tienes unos ficheros parquet en una carpeta, en lugar de leerlos uno a uno desde una mentalidad R, puedes dejar que `arrow` se encargue de la gestión en memoria con particiones de todos los ficheros en conjunto. 
+
+> Hay formas más recomendables de guardar los ficheros parquet para facilitar esta tarea a arrow, pero los dejo como están para este ejemplo porque me sirven así.
+
+Con `arrow::open_dataset()` cargo la información de los ficheros. Por ejemplo, debajo puedes ver los nombres y tipos de columnas de los ficheros:
+
+```{r}
+#| label: open-dataset-intro
+open_dataset(path_to_folder)
+```
+
+Y puedes trabajar ese resultado como si fuera un data frame de dplyr. 
+
+```{r}
+#| label: open-dataset2
+open_dataset(path_to_folder) |> 
+  select(airport_fee, pickup_datetime) |> 
+  filter(airport_fee > 0) |> 
+  mutate(day = as.Date(pickup_datetime)) |>
+  summarise(count = n(), .by = day)
+```
+
+Con ese código no has ejecutado ninguna operación, por eso no tarda nada en ejercutarse. Lo que has hecho es preparar una operación con una sintaxis. Ahora falta materializarla, decirle a R que mande la orden y arrow la ejecutará. Para eso, necesitas `collect()`, pero la sintaxis de dplyr no cambia.
+
+
+```{r}
+#| label: open-dataset
+system.time(
+  df_all <- open_dataset(path_to_folder) |> 
+    select(airport_fee, pickup_datetime) |> 
+    filter(airport_fee > 0) |> 
+    mutate(day = as.Date(pickup_datetime)) |>
+    summarise(count = n(), .by = day) |> 
+    collect()
+)
+```
+
+arrow se ha encargado de paralelizar la operación aprovechando los recursos y por eso tarda tan poco. 
+
+En tu caso no sé, pero si hubiera intentando yo pararelizar la operación con ``mcLapply` o cosas así seguramente habría petado el ordenador... porque habría intentado cargar en memoria más de lo que el ordenador puede.
+
+```{r}
+#| label: resultados3
+head(df_all)
+```
+
+## Método 3. duckdb
+
+Otra herramienta en la que te puedes apoyar sin que tu sintaxis tidyverse se vea afectada en **DuckDB**, en colaboración con **dbplyr**, el backend de dplyr para bases de datos. 
+
+```{r}
+#| label: duckdb
+library(duckdb)
+library(dplyr)
+# hive_partitioning = true
+con <- dbConnect(duckdb())
+system.time(
+  df_all <- tbl(con, "read_parquet('../../data/taxiny/*.parquet')") |> 
+    select(airport_fee, pickup_datetime) |> 
+    filter(airport_fee > 0) |> 
+    mutate(day = as.Date(pickup_datetime)) |>
+    summarise(count = n(), .by = day) |> 
+    collect()
+)
+```
+
+Se ha portado bien. En benchmarks más serios, con datos medianos funciona muy bien.
+
+DuckDB además podrías trabajarla con SQL, lo que puede facilitar el trabajo en equipos grandes, en los que pocos miembros sabrán dplyr.
+
+## Comentarios finales
+
+- Si gestionas bien las particiones de ficheros por variables, obtendrás incluso mejores resultados. 
+- Recientemente ha salido [duckplyr](https://github.com/duckdblabs/duckplyr), para que el propio dplyr te contruya la infraestructura duckdb directamente. Pero según entiendo esto lo hace con data frames que ya tienes cargados en memoria. Recuerda que en este caso no tienes suficiente memoria.
+- Si te cabe en memoria, el clásico `data.table` de R sigue estando vigente, aunque muchos ojos se estén yendo a _polars_ ([benchmark](https://h2oai.github.io/db-benchmark/))
+
