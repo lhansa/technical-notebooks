@@ -164,7 +164,7 @@ system.time(
 Una opción es fijar `as_data_frame` a `FALSE` para trabajar con las tablas de arrow en lugar de data frame. Esto te será útil si cada fichero es a su vez muy grande. Pero tendrás de todos modos que usar `collect()` en cada iteración para que `map_dfr` pueda apilar los data frames. Esto hará que cada data frame (resultante de cada iteración) se vaya volcando en memoria.
 
 ```{r}
-#| label: bucle2
+#| label: bucle3
 system.time(
   df_all <- purrr::map_dfr(paths_a_ficheros, function(.path) {
     df <- read_parquet(
@@ -253,6 +253,8 @@ system.time(
     summarise(count = n(), .by = day) |> 
     collect()
 )
+
+dbDisconnect(con)
 ```
 
 Se ha portado bien. En benchmarks más serios, con datos medianos funciona muy bien.
