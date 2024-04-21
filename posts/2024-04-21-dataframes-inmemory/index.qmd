@@ -255,11 +255,14 @@ system.time(
     summarise(count = n(), .by = day) |> 
     collect()
 )
-
-dbDisconnect(con)
 ```
 
 Se ha portado bien. En benchmarks más serios, con datos medianos funciona muy bien.
+```{r}
+#| label: disconnect
+#| include: false
+dbDisconnect(con)
+```
 
 DuckDB además podrías trabajarla con SQL, lo que puede facilitar el trabajo en equipos grandes, en los que pocos miembros sabrán dplyr.
 
