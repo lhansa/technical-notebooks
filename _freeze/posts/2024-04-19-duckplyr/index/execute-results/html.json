@@ -1,0 +1,14 @@
+{
+  "hash": "b63dbb1d7700f6a22eac15819077f626",
+  "result": {
+    "markdown": "---\ntitle: \"DuckDB\"\ndescription: \"Tiempos de ejecución de arrow y duckdb\"\ndescription-meta: \"Tiempos de ejecución de arrow y duckdb\"\nauthor: \"Leonardo Hansa\"\ndate: \"2024-04-19\"\ncategories: [datos]\nexecute: \n  echo: true\n  message: false\nfreeze: auto\ndraft: true\n---\n\n\nInspirado en este [benchmark](https://h2oai.github.io/db-benchmark/), con [este tutorial](https://duckdb.org/2024/04/02/duckplyr.html) y [esta charla](https://www.youtube.com/watch?v=V9GwSPjKMKw)\n\n\n::: {.cell}\n\n```{.r .cell-code}\n# https://duckdb.org/docs/api/r.html\n\nsetwd(\"~/Projects/jekyll/\")\n\nlibrary(duckdb)\nlibrary(dplyr)\nlibrary(arrow)\nlibrary(duckplyr)\n\ncon <- dbConnect(duckdb())\nduckdb_register(con, \"flights\", nycflights13::flights)\n\n# Establish a set of Parquet files\n# dbExecute(con, \"COPY flights TO 'dataset' (FORMAT PARQUET, PARTITION_BY (year, month))\")\n\n# Summarize the dataset in DuckDB to avoid reading 12 Parquet files into R's memory\nbench::mark(\n  min_time = Inf,\n  max_iterations = 100,\n  check = FALSE,\n  duckdb = tbl(con, \"flights\") |>\n    group_by(month) |>\n    summarise(delay = mean(dep_time, na.rm = TRUE)) |>\n    arrange(month) |> \n    collect(),\n  duckdb_parquet = tbl(con, \"read_parquet('dataset/**/*.parquet', hive_partitioning = true)\") |>\n    group_by(month) |>\n    summarise(delay = mean(dep_time, na.rm = TRUE)) |>\n    arrange(month) |> \n    collect(), \n  arrow = arrow::open_dataset(\"dataset\") |> \n    group_by(month) |>\n    summarise(delay = mean(dep_time, na.rm = TRUE)) |>\n    arrange(month) |> \n    collect(), \n  duckplyr = nycflights13::flights |> \n    as_duckplyr_df() |> \n    duckplyr::summarise(.by = month, delay = mean(dep_time, na.rm = TRUE)) |>\n    duckplyr::arrange(month) |> \n    collect()\n)\n```\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
