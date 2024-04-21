@@ -48,6 +48,8 @@ GROUP BY day
 
 Pero no los tengo todos en una tabla, sino en 38 ficheros. En cualquier programa orientado a dato es fácil juntar varias en tablas en una, con algún _concat_ o variantes. **Pero tengo 16GB de datos para un portátil de 8GB de RAM:** no voy a poder.
 
+(Además, estos datos están comprimidos, así que si los intento cargar en memoria ocuparán más).
+
 Así que necesito calcular eso sin cargar todo en memoria. ¿Cómo procedo?
 
 ## Versión directa
