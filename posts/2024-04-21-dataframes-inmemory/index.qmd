@@ -245,7 +245,7 @@ Otra herramienta en la que te puedes apoyar sin que tu sintaxis tidyverse se vea
 #| label: duckdb
 library(duckdb)
 library(dplyr)
-# hive_partitioning = true
+
 con <- dbConnect(duckdb())
 system.time(
   df_all <- tbl(con, "read_parquet('../../data/taxiny/*.parquet')") |> 
