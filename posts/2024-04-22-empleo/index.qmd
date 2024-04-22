@@ -1,0 +1,138 @@
+---
+title: "Cómo aplicar non standard evaluation con dplyr y rlang"
+description: "Cómo aplicar non standard evaluation con dplyr y rlang"
+description-meta: "Cómo aplicar non standard evaluation con dplyr y rlang"
+author: "Leonardo Hansa"
+date: "2024-04-22"
+categories: [datos]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+Tengo datos de empleos en el sector público y privado del INE. Y los quiero explorar con dplyr y ggplot2.
+
+```{r}
+#| label: libs
+library(dplyr)
+library(readr)
+library(stringr)
+library(ggplot2)
+theme_set(theme_light())
+```
+
+
+Leer los ficheros del INE siempre es aventura con sus formatos, pero aquí tienes el código.
+
+```{r}
+#| label: lectura
+df_empleo <- readr::read_csv2("../../data/4262.csv", 
+                              show_col_types = FALSE,
+                              locale = locale(encoding = "latin1"))
+
+df_empleo <- janitor::clean_names(df_empleo) |> 
+  rename(ccaa = comunidades_y_ciudades_autonomas)
+
+head(df_empleo)
+```
+
+
+```{r}
+#| label: convierte-periodo
+#| include: false
+convierte_periodo <- function(.data) {
+  .data |> 
+    mutate(
+      anno = str_extract(periodo, "[0-9]{4}"), 
+      trimestre = str_extract(periodo, "T[1-4]{1}"), 
+      trimestre = case_when(
+        trimestre == "T1" ~ "01-01",
+        trimestre == "T2" ~ "04-01",
+        trimestre == "T3" ~ "07-01",
+        trimestre == "T4" ~ "10-01"
+      ), 
+      periodo = str_c(anno, trimestre, sep = "-"), 
+      periodo = as.Date(periodo),
+      anno = NULL, trimestre = NULL
+    )
+}
+```
+
+## Una exploración rápida
+
+Esto es lo que te planteo explorar: una agregación trimestral por tipo de sector.
+
+```{r}
+#| label: agregacion1
+df_agg <- df_empleo |>
+  group_by(periodo, tipo_de_sector) |> 
+  summarise(total = sum(total), .groups = "drop") |> 
+  convierte_periodo() # función propia para convertir a fecha
+
+df_agg
+```
+
+Que devuelve un gráfico así.
+
+```{r}
+#| label: grafico
+ggplot(df_agg) + 
+  geom_line(aes(x = periodo, y = total, col = tipo_de_sector)) + 
+  scale_color_discrete("Tipo de empleo") + 
+  labs(
+    x = "Trimestre", y = "Empleados", 
+    title = "Evolución trimestral de empleados privados y públicos", 
+    caption = "Fuente: INE"
+  )
+```
+
+## Más libertad
+
+Ahora voy a preparar una función para que un usuario pueda elegir una columna más con la que agregar.
+
+Lo que quiero es una función con la que funcione un código así:
+
+```{r}
+#| label: ejemplo
+#| eval: false
+agrega_empleo(sexo)
+```
+
+Si intentas plantear eso solo con dplyr te dará un error diciendo que cierto objeto no es nada. En el código siguiente, `grouping_var` no sería nada sino fuera por esa combinación de `enquo()` con otros elementos.
+
+```{r}
+library(rlang)
+
+agrega_empleo <- function(grouping_var) {
+  nombre_metrica <- as_name(enquo(grouping_var))
+  nombre_metrica <- paste0("total_por_", nombre_metrica)
+  df_empleo |>
+    group_by(periodo, tipo_de_sector, !!enquo(grouping_var)) |> 
+    summarise(!!nombre_metrica := sum(total), .groups = "drop") |> 
+    convierte_periodo() 
+}
+```
+
+```{r}
+agrega_empleo(ccaa)
+```
+
+En lo anterior, `!!enquo()` se encarga de evaluar la expresión dentro de grouping_var (`ccaa` en este caso) en el entorno adecuado.
+
+Si tienes muchas variables, necesitarás algo como lo siguiente (aunque aún no sé cómo afecta eso entonces a los nombres de nuevas columnas).
+
+```{r}
+agrega_empleo <- function(...) {
+  df_empleo |>
+    group_by(periodo, tipo_de_sector, !!!enquos(...)) |> 
+    summarise(total= sum(total), .groups = "drop") |> 
+    convierte_periodo() 
+}
+
+agrega_empleo(ccaa, sexo)
+```
+
+
+
