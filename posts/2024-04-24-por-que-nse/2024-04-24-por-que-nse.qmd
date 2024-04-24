@@ -1,0 +1,256 @@
+---
+title: "Por qué puedes necesitar non standard evaluation en dplyr"
+description: "Comparativa de non-stantard evaluation y tidyeval"
+description-meta: "Comparativa de non-stantard evaluation y tidyeval"
+author: "Leonardo Hansa"
+date: "2024-04-24"
+categories: [datos]
+execute: 
+  echo: true
+message: false
+warning: false
+freeze: true
+---
+  
+Tienes los datos de `penguins` y quieres hacer una función con el código de una exploración sobre este conjunto de datos. 
+
+```{r}
+#| label: datos
+df_penguins <- palmerpenguins::penguins
+df_penguins
+```
+
+La situación que te planteo es que tienes que crear una función cuyo argumento sea el nombre de una de las columnas, y calcule la media de la longitud del pico (`bill_length_mm`) en función de esa columna. Con dplyr. 
+
+## Planteamiento `tidyselect`
+
+Una forma de hacerlo, aceptando que el nombre de la columna venga como `character`, es esta: 
+```{r}
+#| label: funcion1
+library(dplyr)
+
+calcula_mediana_pico <- function(data, columna_grupos) {
+  data |> 
+    group_by(pick(all_of(columna_grupos))) |> 
+    summarise(mediana_long_pico = median(bill_length_mm, na.rm = TRUE))
+}
+
+df_penguins |> 
+  calcula_mediana_pico("island")
+```
+Le pongo una pega. Puede haber más pero yo le pongo solo una: que tengo que entrecomillar la columna con la que agrupo. O sea, no puedo hacer esto: 
+
+```{r}
+#| label: funcion1-error
+#| eval: false
+df_penguins |> 
+  calcula_mediana_pico(island)
+# Error: object 'island' not found
+```
+
+## Planteamiento rlang
+
+Me gustaría que ese código funcionara, porque con dplyr es normal escribir los nombres de columnas sin comillas: 
+
+- Puedes usar el autocompletado (con comillas no)
+- Va a ser consistente con otras funciones de dplyr
+
+```{r}
+#| label: variascosas
+#| eval: false
+df_penguins |> 
+  select(island, bill_length_mm, year) |> 
+  filter(year > 2007) |> 
+  calcula_mediana_pico(island)
+```
+
+En un código como ese, no quiero tener que entrecomillar `island` porque no viene a cuento. 
+
+Eso lo puedo solucionar con rlang. La función quedará algo así:
+
+```{r}
+#| label: funcion2
+
+library(rlang)
+
+calcula_mediana_pico <- function(data, columna_grupos) {
+  data |> 
+    group_by(!!enquo(columna_grupos)) |> 
+    summarise(mediana_long_pico = median(bill_length_mm, na.rm = TRUE))
+}
+```
+
+Te destripo ese ingrediente que acabo de poner. 
+
+### `enquo`
+
+```{r}
+#| label: enquo1
+f <- function(argumento) {
+  enquo(argumento)
+}
+
+f(island)
+```
+
+`enquo()` me devuelve lo que se llama una _quosure_ (ni idea de su traducción): lo puedes ver como una expresión con información sobre el entorno.
+
+Al evaluar `enquo()` dentro de una función con un argumento, obtenemos el valor que se le ha dado al argumento sin llegar a evaluarlo: 
+
+```{r}
+#| label: enquo2
+f(1 + 1)
+```
+
+Para evaluarlo tenemos que: 
+
+- Añadir el operador `!!` (_bang bang_). 
+- Operar dentro de unas funciones determinadas, como muchas de dplyr.
+
+```{r}
+#| label: evaluacion-enquo
+
+selecciona <- function(columna) {
+  df_penguins |> 
+    select(!!enquo(columna))
+}
+
+selecciona(island) |> 
+  slice_head(n = 6)
+```
+
+Que es justo lo que hacía en la función que te planteé más arriba: 
+
+```{r}
+#| label: evalua-enquo2
+calcula_mediana_pico <- function(data, columna_grupos) {
+  data |> 
+    group_by(!!enquo(columna_grupos)) |> 
+    summarise(mediana_long_pico = median(bill_length_mm, na.rm = TRUE))
+}
+
+df_penguins |> 
+  calcula_mediana_pico(species)
+```
+
+Ni que decir tiene que es compatible con otras operaciones de dplyr: 
+
+```{r}
+#| label: mas-operaciones
+df_penguins |> 
+  select(species, bill_length_mm, year) |> 
+  filter(year > 2007) |> 
+  calcula_mediana_pico(species) |> 
+  arrange(desc(mediana_long_pico))
+```
+
+
+> `!!enquo()` puede reemplazarse por el operador `{{}}` (_curly curly_), con el que tus códigos quedarán más limpios, aunque a mí no termina de gustarme porque creo que se enienden peor los elemenos de la librería rlang.
+
+### Más columnas
+
+Vale, ahora no solo quieres dar al usuario la posibilidad de que dé la columna de agrupación, sino también la métrica que agregamos. 
+
+Si solo quieres eso, no necesitas más ingredientes, pero ya verás cómo sí quieres tener otra cosa:
+
+```{r}
+#| label: funcion4
+calcula_mediana <- function(data, columna_grupos, metrica) {
+  data |> 
+    group_by(!!enquo(columna_grupos)) |> 
+    # cambio nombre de la mediana
+    summarise(mediana = median(!!enquo(metrica), na.rm = TRUE))
+}
+
+df_penguins |> 
+  calcula_mediana(species, bill_depth_mm)
+```
+
+Guay, ha funcionado. Puedo usar cualquier métrica y columna: 
+
+```{r}
+#| label: otras-cols
+df_penguins |> 
+  calcula_mediana(year, flipper_length_mm)
+```
+Lo que me falta ahora es poder cambiar el nombre también de la columna mediana en función de la métrica elegida. 
+
+### `:=` y `as_name`
+
+La intuición podría decirte que hicieras algo parecido a la izquierda del igual, con `!!enquo()`. No te va a funcionar, salvo que añadas el operador. `:=`:
+
+```{r}
+#| label: funcion5mal
+#| eval: false
+calcula_mediana <- function(data, columna_grupos, metrica) {
+  data |> 
+    group_by(!!enquo(columna_grupos)) |> 
+    # cambio nombre de la mediana
+    summarise(!!enquo(metrica) := median(!!enquo(metrica), na.rm = TRUE))
+}
+
+df_penguins |> 
+  calcula_mediana(island, bill_depth_mm)
+```
+Un pequeño cambio y lo solucionas todo. 
+
+Pero vamos incluso un paso más allá. Quieres que la métrica nueva no se llame igual que la columna que agregas sino `"mediana_"` pegado al nombre de la columna. Para eso necesitas la combinación de `as_name()`, que te va a permitir tratar como `character` el argumento que pasa el usuario: 
+
+```{r}
+#| label: as_name
+as_name(quote(bill_length_mm))
+```
+
+Vamos a aplicar esto: 
+
+```{r}
+#| label: funcion5
+#| eval: false
+calcula_mediana <- function(data, columna_grupos, metrica) {
+  nuevo_nombre <- paste0(
+    "mediana_", 
+    as_name(enquo(metrica))
+  )
+  data |> 
+    group_by(!!enquo(columna_grupos)) |> 
+    summarise(!!nuevo_nombre := median(!!enquo(metrica), na.rm = TRUE))
+}
+
+df_penguins |> 
+  calcula_mediana(island, bill_depth_mm)
+```
+
+O: 
+
+```{r}
+#| label: otro-ejemplo
+df_penguins |> 
+  calcula_mediana(year, body_mass_g)
+```
+
+
+***
+
+Como decía más arriba, `!!enquo()` se puede reemplazar por `{{}}`, pero creo que dificulta ver el papel de `enquo()` en todo esto.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
