@@ -233,23 +233,34 @@ df_penguins |>
 
 Como decía más arriba, `!!enquo()` se puede reemplazar por `{{}}`, pero creo que dificulta ver el papel de `enquo()` en todo esto.
 
+***
 
+Atención: 
 
+```{r}
+#| label: entornos
+nuevo_entorno <- new.env()
+nuevo_entorno$`+` <- `-`
 
+suma_expr <- expr(1 + 1)
+suma_expr
+```
 
+Y resulta que: 
+```{r}
+#| label: evaluacion1
+eval_tidy(suma_expr, env = nuevo_entorno)
+```
 
+¿O no?
+```{r}
+#| label: evaluacion2
+eval_tidy(suma_expr)
+```
 
-
-
-
-
-
-
-
-
-
-
-
+```{r}
+`+`
+```
 
 
 
