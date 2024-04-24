@@ -258,9 +258,6 @@ eval_tidy(suma_expr, env = nuevo_entorno)
 eval_tidy(suma_expr)
 ```
 
-```{r}
-`+`
-```
 
 
 
