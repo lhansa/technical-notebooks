@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+.env/
 .venv/
 .quarto/
 /.quarto/
