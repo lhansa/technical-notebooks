@@ -10,14 +10,111 @@ execute:
 message: false
 warning: false
 freeze: true
-draft: true
 ---
 
 ```{python}
+#| label: create-file
+#| echo: false
 from sklearn import datasets
+import pandas as pd
 
 iris = datasets.load_iris()
 
+df = pd.DataFrame(iris.data, columns= iris.feature_names)
+df['species'] = iris.target
+
+df['extra'] = '1,000.23'
+
+df.to_csv('iris.txt', sep=';', index=False)
 ```
+
+Tienes el conjunto de datos _iris_ en un fichero de texto plano con esta pinta: 
+
+```
+sepal length (cm);sepal width (cm);petal length (cm);petal width (cm);species
+5.1;3.5;1.4;0.2;0;1,000.23
+4.9;3.0;1.4;0.2;0;1,000.23
+4.7;3.2;1.3;0.2;0;1,000.23
+4.6;3.1;1.5;0.2;0;1,000.23
+5.0;3.6;1.4;0.2;0;1,000.23
+5.4;3.9;1.7;0.4;0;1,000.23
+```
+
+Como verás, lo he tuneado un poco: le he añadido una columna con valor constante 1000.23, escrito con el formato anglosajón de separador de miles usando comas.
+
+Maravilloso. A ver cómo lo leemos.
+
+## R
+
+En R, puedes tener la tentación de leerlo así: 
+
+```{r}
+#| label: lectura1
+library(readr)
+df_iris <-  read_csv("iris.txt")
+df_iris
+```
+
+Todo horrible porque está todo dentro de una columna. La función no ha sabido separar en columnas porque esperaba la coma como delimitador. La coma está en los valores de la columna `extra` pero no en la primera fila, con los nombres de columnas. Así que `read_csv` entiende que solo hay una columna. 
+
+`read.csv()` se hace bastante lío y daría error con algo así.
+
+Un clásico cuando no te funciona `read_csv()` es probar `read_csv2()`, que asume que la separación es `";"`.
+
+```{r}
+#| label: lectura2
+df_iris <-  read_csv2("iris.txt")
+head(df_iris)
+```
+Tampoco funciona. 
+
+Las columnas sí están separadas, pero los valores no tienens sentido. `read_csv2()` ha usado la coma como separador decimal. Y los puntos que había en los números, se los ha pasado por ahí. Y la columna `extra` la ha puesto como si la coma fuera el separador decimal, cuando realmente es el separador de miles.
+
+Así que mal.
+
+Si usaras R base con `read.csv2()` tendrías también un poco de lío, con columnas identificadas como texto en lugar de número. 
+
+
+En estos casos, yo tiro de `readr::read_delim()` especificando cuál es el separador de miles y cuál el decimal (algo equivalente puedes hacer en R base con `read.table()`).
+
+Con la función `readr::locale()` especifico estos separadores.
+
+
+```{r}
+#| label: lectura3
+df_iris <- read_delim("iris.txt", delim = ";", locale = locale(decimal_mark = ".", grouping_mark = ","))
+head(df_iris)
+```
+
+Es un esperpento anti-estandarizaciones, pero ocurre. Debe de haber algunas herramientas de estas que descargan informes en texto plano que tienen esta configuración horrorosa, porque me llegan ficheros así cada dos por tres. 
+
+Y como no son estándar, las funciones habituales de lectura de CSVs se hacen bastante lío.
+
+Para casos así, intento **ser muy explícito con el código** y `read_delim()` me obliga a ello por sistema. 
+
+## Con Python
+
+En Python usaría directamente la función de pandas `pd.read_csv()` especificando todo.
+
+Por defecto no funciona:
+
+```{python}
+df_iris = pd.read_csv('iris.txt')
+df_iris.head()
+```
+Pero cada cosa tiene su argumento:
+
+```{python}
+df_iris = pd.read_csv(
+  'iris.txt', 
+  sep=';', 
+  decimal='.', #no necesario en este caso
+  thousands=','
+  
+  )
+df_iris.head()
+```
+
+La función `pd.read_csv()` ya asume que el separador decimal es el punto, así que no hace falta especificar nada de eso esta vez... 
 
   
