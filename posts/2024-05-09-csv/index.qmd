@@ -1,0 +1,23 @@
+---
+title: "Un problema habitual en ficheros CSV"
+description: "El formato de los ficheros CSV depende de cómo se separen las columnas y de cómo se indique la separación decimal. ues hay una mezcla horrorosa que no tiene ningún sentido."
+description-meta: "Cómo leer ficheros CSV que te dan problemas"
+author: "Leonardo Hansa"
+date: "2024-05-09"
+categories: [datos]
+execute: 
+  echo: true
+message: false
+warning: false
+freeze: true
+draft: true
+---
+
+```{python}
+from sklearn import datasets
+
+iris = datasets.load_iris()
+
+```
+
+  
