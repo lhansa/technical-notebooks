@@ -100,12 +100,16 @@ En Python usaría directamente la función de pandas `pd.read_csv()` especifican
 Por defecto no funciona:
 
 ```{python}
+#| label: python-mal
+#| python.reticulate: false
 df_iris = pd.read_csv('iris.txt')
 df_iris.head()
 ```
 Pero cada cosa tiene su argumento:
 
 ```{python}
+#| label: python-lectura
+#| python.reticulate: false
 df_iris = pd.read_csv(
   'iris.txt', 
   sep=';', 
