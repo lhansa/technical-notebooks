@@ -15,6 +15,7 @@ freeze: true
 ```{python}
 #| label: create-file
 #| echo: false
+#| python.reticulate: false
 from sklearn import datasets
 import pandas as pd
 
