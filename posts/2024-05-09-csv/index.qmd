@@ -111,6 +111,7 @@ Pero cada cosa tiene su argumento:
 ```{python}
 #| label: python-lectura
 #| python.reticulate: false
+import pandas as pd
 df_iris = pd.read_csv(
   'iris.txt', 
   sep=';', 
