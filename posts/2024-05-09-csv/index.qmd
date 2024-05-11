@@ -102,6 +102,7 @@ Por defecto no funciona:
 ```{python}
 #| label: python-mal
 #| python.reticulate: false
+import pandas as pd
 df_iris = pd.read_csv('iris.txt')
 df_iris.head()
 ```
