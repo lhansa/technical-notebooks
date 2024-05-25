@@ -1,0 +1,96 @@
+---
+title: "Evolución de compraventa mensual en España"
+description: "Evolución de compraventa mensual en España"
+description-meta: "Evolución de compraventa mensual en España"
+author: "Leonardo Hansa"
+date: "2024-05-25"
+categories: [datos]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+El INE tiene datos mensuales sobre compraventa de viviendas por Comunidades Autónomas (lo tiene por provincias pero he pasado de ese nivel):
+
+
+```{python}
+#| label: lectura
+import pandas as pd
+
+df_viviendas = pd.read_csv(
+  'ine-compraventa.csv', 
+  sep=';', 
+  thousands='.',
+  encoding='iso-8859-1'
+)
+
+df_viviendas = (
+  df_viviendas
+  .drop(['Régimen y estado', 'Total Nacional', 'Provincias'], axis=1)
+  .rename(
+    columns=lambda x: x.lower().replace(' ', '_').encode('ascii', 'ignore').decode('utf-8'))
+)
+
+df_viviendas.head()
+```
+
+Vamos a tratarlo un poco (tampoco mucho, que es sábado):
+
+```{python}
+#| label: algo-tratamiento
+df_viviendas['periodo'] = pd.to_datetime(df_viviendas['periodo'], format='%YM%m')
+
+df_viviendas['comunidades_y_ciudades_autnomas'] = df_viviendas['comunidades_y_ciudades_autnomas'].str.replace(r'\d{2} ', '', regex=True)
+
+
+df_viviendas = (
+  df_viviendas
+  .rename(columns={'comunidades_y_ciudades_autnomas': 'ccaa'})
+)
+
+df_viviendas.head()
+
+```
+
+Mucho mejor. Ahora toca visualizar esto. 
+
+El siguiente código es de ChatGPT... y sinceramente, creo que está mal, que pinta lo que le da la gana y no lo que yo quiero (concretamente, se inventa el orden del eje x).
+
+Pero llevo horas con problemas de VSCode, versiones de Python, entornos virtuales y paso de dedicarle más tiempo a esto hoy (cosa que en R habrían sido 5 minutos). 
+
+Otro día.
+
+```{python}
+#| label: evolucion
+import seaborn as sns
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
+g = sns.FacetGrid(
+  df_viviendas, 
+  col='ccaa', 
+  col_wrap=5, 
+  hue='ccaa', 
+  sharey=False,
+)  
+
+g.map_dataframe(sns.lineplot, x='periodo', y='total')
+
+# Ajustar las etiquetas y el layout
+for ax in g.axes.flatten():
+    # Ajustar los locators para que solo se muestren unos pocos ticks
+    ax.xaxis.set_major_locator(mdates.MonthLocator(interval=12))  # Ajusta el intervalo según sea necesario
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+    ax.tick_params(axis='x', rotation=45)
+
+g.set_axis_labels('Fecha', 'Total')
+
+plt.show()
+```
+
+
+
+
+
