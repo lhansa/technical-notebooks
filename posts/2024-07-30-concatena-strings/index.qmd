@@ -1,0 +1,77 @@
+---
+title: "Concatenación de strings con R, con benchmark"
+description: "Comparativa con microbenchmark de distintas formas de concatenar strings con R"
+description-meta: "Comparativa con microbenchmark de distintas formas de concatenar strings con R"
+author: "Leonardo Hansa"
+date: "2024-07-30"
+categories: [datos]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+Tienes una variable con un texto que tienes que introducirlo dentro de otro texto. Este ocurre habitualmente cuando un usuario pone algún parámetro de tipo texto y tienes que incluir en un párrafo preconstruido, o interactuar de alguna forma con ese nombre, por ejemmplo, un chatbot clásico que recibía como entrada el nombre del usuario y luego le preguntaba "¿Qué tal estás, <nombre de usuario>?" (no sé si eso es tan clásico o sigue siendo orden del día).
+
+En este post comparo tiempos de ejecución de varias opciones que tienes en R. 
+
+La idea general te la da este código:
+
+```{r}
+#| label: ejemplo
+nombre_entrada <- "Pepito"
+
+paste("Hola,", nombre_entrada)
+```
+Voy a crear varias funciones con distintas formas de hacer esto y luego cuento tiempos de cómputo.
+
+```{r}
+#| label: funciones
+con_paste <- function(nombre_entrada) paste("Hola,", nombre_entrada)
+con_sprintf <- function(nombre_entrada) sprintf("Hola, %s", nombre_entrada)
+con_glue <- function(nombre_entrada) glue::glue("Hola, {nombre_entrada}")
+con_gsub <- function(nombre_entrada) {
+  gsub("nombre_entrada", nombre_entrada, "Hola, nombre_entrada") 
+}
+
+```
+
+Y aquí los tiempos.
+
+```{r}
+#| label: microbenchmark1
+microbenchmark::microbenchmark(
+  con_paste = con_paste("Pepito"),
+  con_sprintf = con_sprintf("Pepito"),
+  con_glue = con_glue("Pepito"),
+  con_gsub = con_gsub("Pepito")
+)
+```
+
+En casos más complicados, `glue::glue()` puede parecer más intuitivo. ¿Es ese el único motivo para usarlo?
+
+```{r}
+#| label: mascomplejo
+con_paste <- function(nombre_entrada) {
+  paste0("Hola, ", nombre_entrada, ". ¿Cómo estás, ", nombre_entrada, "?")
+} 
+con_sprintf <- function(nombre_entrada) {
+  sprintf("Hola, %s. ¿Cómo estás, %s?", nombre_entrada, nombre_entrada)
+  
+} 
+con_glue <- function(nombre_entrada) {
+  glue::glue("Hola, {nombre_entrada}. ¿Cómo estás, {nombre_entrada}?")
+  
+}
+con_gsub <- function(nombre_entrada) {
+  gsub("nombre_entrada", nombre_entrada, "Hola, nombre_entrada. ¿Cómo estás, nombre_entrada?") 
+}
+
+microbenchmark::microbenchmark(
+  con_paste = con_paste("Pepito"),
+  con_sprintf = con_sprintf("Pepito"),
+  con_glue = con_glue("Pepito"),
+  con_gsub = con_gsub("Pepito")
+)
+```
