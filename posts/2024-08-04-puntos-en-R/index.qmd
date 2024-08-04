@@ -1,0 +1,73 @@
+---
+title: "Papel del punto en R"
+description: ""
+description-meta: ""
+author: "Leonardo Hansa"
+date: "2024-08-04"
+categories: [datos]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+Guillermo Luijk [criticaba](https://www.linkedin.com/feed/update/urn:li:activity:7225379882355044352?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A7225379882355044352%2C7225391436190371840%29&replyUrn=urn%3Ali%3Acomment%3A%28activity%3A7225379882355044352%2C7225459855812120576%29&dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287225391436190371840%2Curn%3Ali%3Aactivity%3A7225379882355044352%29&dashReplyUrn=urn%3Ali%3Afsd_comment%3A%287225459855812120576%2Curn%3Ali%3Aactivity%3A7225379882355044352%29) el punto en R porque se permite usar en el nombre de variables, lo que limita su uso fuera de ellas.
+
+
+He intentado crear un operador en R con `.` que sirviera para sustituir en cierto modo al operador `$`. Imposible. 
+
+Pero comparto avances porque quizá, aunque sea al Leo del futuro, le puede venir bien.
+
+## Operadores _infix_ propios en R
+
+Todo lo que haces en R es una función. Pero no todas las funciones necesitan paréntesis. Por ejemplo, puedes sumar de dos formas:
+
+```{r}
+#| label: suma
+1 + 1
+`+`(1, 1)
+```
+
+La primera opción creo que se llama _infix_. Hay operaciones que se entienden mucho mejor así escritas que escritas como la segunda opción. 
+
+De hecho, esa es la filosofía del _pipe_. El _pipe_ está disponible desde R 4.1.0 con `|>` pero antiguamente había que usar la librería **magrittr**. 
+
+Como esta librería no formaba parte de lo fundamentos del lenguaje, todos los operadores tenían que ser propios y para hacer eso hay que usar una sintaxis muy particular. 
+
+Los pipes de magrittr van acotados por `%`, porque esa es la sintaxis obligatoria para cualquier operador que quieras hacer y usar _infix_. Así resultó en `%>%`. 
+
+## Creación de un operador propio
+
+Mi objetivo era un operador `.` con el que pudiera hacer `df.columna`, por ejemplo, que `mtcars.cyl` obtuviera resultado. Sería algo así:
+
+```{r}
+#| label: mtcarscyl
+#| echo: true
+#| eval: false
+mtcars.cyl
+```
+
+```{r}
+#| label: mtcarsdolarcyl
+#| echo: false
+#| eval: true
+mtcars$cyl
+```
+
+Si intentas ejecutar eso, te dará error. Y no he dado con ninguna forma de hacerlo funcionar. Porque cualquier operador propio tiene que ir rodeado de `%`. 
+
+Por ello, esto es lo que he conseguido:
+
+```{r}
+#| label: operador-propio
+`%.%` <- function(df, columna) {
+    df[[as.character(substitute(columna))]]
+}
+
+mtcars%.%cyl
+```
+
+
+
+
