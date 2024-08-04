@@ -12,20 +12,23 @@ execute:
 freeze: true
 ---
 
-```{r}
-library(readr)
-library(dplyr)
-library(ggplot2)
-```
+El INE tiene unos datos de pernoctaciones a distintos niveles, mes a mes. Me interesan a nivel de Comunidad Autónoma.
 
 ```{r}
 #| label: lectura
-df_pernoctaciones <- read_csv2("~/../Downloads/2941 (1).csv", locale = locale(encoding = "latin1"))
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+df_pernoctaciones <- read_csv2("2941 (1).csv", locale = locale(encoding = "latin1"))
 
 df_pernoctaciones <- janitor::clean_names(df_pernoctaciones)
 ```
 
+El formato de los datos nunca entenderé quién lo ha decidido. Imagino que alguien que no tenía que trabajar con ellos. Los proceso un poco.
+
 ```{r}
+#| label: procesado
 df_series <- df_pernoctaciones |>
   mutate(
     periodo = paste0(periodo, "D01"), 
@@ -36,10 +39,17 @@ df_series <- df_pernoctaciones |>
     summarise(pernoctaciones = sum(total, na.rm = TRUE), .groups = "drop")
 ```
 
+Y aquí, la evolución de pernoctaciones mes a mes de cada Comunidad Autónoma:
+
 ```{r}
+#| label: evolucion
 ggplot(df_series) + 
   geom_line(aes(x = periodo, y = pernoctaciones)) + 
-  facet_wrap(~ comunidades_y_ciudades_autonomas, scales = "free_y")
+  facet_wrap(
+    ~comunidades_y_ciudades_autonomas, 
+    scales = "free_y", 
+    ncol = 2
+  )
 
 ```
 
