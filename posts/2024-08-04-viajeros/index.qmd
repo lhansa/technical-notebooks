@@ -20,6 +20,8 @@ library(readr)
 library(dplyr)
 library(ggplot2)
 
+ggplot2::theme_set(ggplot2::theme_light())
+
 df_pernoctaciones <- read_csv2("2941 (1).csv", locale = locale(encoding = "latin1"))
 
 df_pernoctaciones <- janitor::clean_names(df_pernoctaciones)
@@ -43,13 +45,27 @@ Y aquí, la evolución de pernoctaciones mes a mes de cada Comunidad Autónoma:
 
 ```{r}
 #| label: evolucion
+#| fig-height: 30
+
+formato <- scales::label_number(big.mark = ".", scale = 0.001, suffix = "k")
 ggplot(df_series) + 
-  geom_line(aes(x = periodo, y = pernoctaciones)) + 
+  geom_line(
+    aes(x = periodo, y = pernoctaciones), 
+    col = "#800080"
+  ) + 
+  scale_y_continuous(labels = formato) + 
   facet_wrap(
     ~comunidades_y_ciudades_autonomas, 
     scales = "free_y", 
     ncol = 2
+  ) + 
+  labs(
+    title = "Pernoctaciones mensuales por CCAA", 
+    caption = "Fuente: INE", 
+    y = "Pernoctaciones (miles)", 
+    x = ""
   )
+  
 
 ```
 
