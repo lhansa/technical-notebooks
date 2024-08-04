@@ -1,7 +1,7 @@
 ---
 title: "Papel del punto en R"
-description: ""
-description-meta: ""
+description: "Creación de operadores propios en R para operaciones en línea"
+description-meta: "Creación de operadores propios en R para operaciones en línea"
 author: "Leonardo Hansa"
 date: "2024-08-04"
 categories: [datos]
