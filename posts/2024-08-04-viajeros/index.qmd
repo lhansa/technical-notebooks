@@ -1,0 +1,46 @@
+---
+title: "Pernotaciones por Comunidades Autónomas"
+description: "Exploración de datos del INE de Pernotaciones por Comunidades Autónomas"
+description-meta: "Exploración de datos del INE de Pernotaciones por Comunidades Autónomas"
+author: "Leonardo Hansa"
+date: "2024-08-04"
+categories: [exploraciones]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+#| label: lectura
+df_pernoctaciones <- read_csv2("~/../Downloads/2941 (1).csv", locale = locale(encoding = "latin1"))
+
+df_pernoctaciones <- janitor::clean_names(df_pernoctaciones)
+```
+
+```{r}
+df_series <- df_pernoctaciones |>
+  mutate(
+    periodo = paste0(periodo, "D01"), 
+    periodo = as.Date(periodo, format = "%YM%mD%d"), 
+  total = parse_number(total, locale = locale(grouping_mark = "."))
+  ) |> 
+    group_by(comunidades_y_ciudades_autonomas, periodo) |> 
+    summarise(pernoctaciones = sum(total, na.rm = TRUE), .groups = "drop")
+```
+
+```{r}
+ggplot(df_series) + 
+  geom_line(aes(x = periodo, y = pernoctaciones)) + 
+  facet_wrap(~ comunidades_y_ciudades_autonomas, scales = "free_y")
+
+```
+
+
