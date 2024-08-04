@@ -1,9 +1,10 @@
 {
-  "hash": "4d5fb7e7b7ad109f0eb25d35d4321e9c",
+  "hash": "e2277ca88afe2a978216f9bbf69dded9",
   "result": {
-    "markdown": "---\ntitle: \"Mi IPC es (incluso) más alto\"\nauthor: \"Leonardo Hansa\"\ndate: \"2022-08-06\"\ncategories: [exploraciones]\n---\n\nNo sé tú pero yo no consumo de todo. Si así fuera, entonces el IPC asociado a mis gastos sí sería el 10% del que hablan. \n\nPero a mí me afectan más unos grupos de consumo que otros. \n\nAfortunadamente, no gasto en transporte. \n\nPobrecitos los que sí. \n\n::: {.cell execution_count=1}\n``` {.python .cell-code}\nimport pandas as pd\nimport matplotlib.pyplot as plt\n\ndf_ipc_grupos = pd.read_csv('ipc-grupos-hist.csv')\n\nultimo_mes = df_ipc_grupos.periodo.max()\ndf_ipc_ultimo = (\n    df_ipc_grupos\n    .loc[df_ipc_grupos.periodo == ultimo_mes]\n)\n\n\ndf_ipc_ultimo = df_ipc_ultimo.sort_values(by=['variacion_anual'], ascending=True)\nconstant_line = float(df_ipc_ultimo['indice_general'].unique())\n\nax = df_ipc_ultimo.plot.barh('grupos_ecoicop', 'variacion_anual', rot=0)\nax.axvline(constant_line, color='red', linestyle='--')\nplt.title('IPC por grupos frente al índice general')\n\ntxt = 'INE (junio 2022)'\nplt.figtext(0.5, 0.01, txt, wrap=True, horizontalalignment='center', fontsize=8)\n\nplt.show()\n```\n\n::: {.cell-output .cell-output-display}\n![](index_files/figure-html/reading-output-1.png){#reading width=1149 height=460}\n:::\n:::\n\n\nP.D. Hacer este gráfico con Python ha sido un suplicio :(\n\n",
+    "engine": "jupyter",
+    "markdown": "---\ntitle: \"Mi IPC es (incluso) más alto\"\ndescription-meta: \"Exploración de datos del IPC\"\ndescription: \"Exploración de datos del IPC\"\nauthor: \"Leonardo Hansa\"\ndate: \"2022-08-06\"\ncategories: [exploraciones]\n---\n\n\n\n\nNo sé tú pero yo no consumo de todo. Si así fuera, entonces el IPC asociado a mis gastos sí sería el 10% del que hablan. \n\nPero a mí me afectan más unos grupos de consumo que otros. \n\nAfortunadamente, no gasto en transporte. \n\nPobrecitos los que sí. \n\n::: {#cell-reading .cell execution_count=1}\n\n::: {.cell-output .cell-output-display}\n![](index_files/figure-html/reading-output-1.png){#reading width=1149 height=460}\n:::\n:::\n\n\nP.D. Hacer este gráfico con Python ha sido un suplicio :(\n\n",
     "supporting": [
-      "index_files"
+      "index_files\\figure-html"
     ],
     "filters": [],
     "includes": {}
