@@ -32,10 +32,16 @@ El formato de los datos nunca entenderé quién lo ha decidido. Imagino que algu
 ```{r}
 #| label: procesado
 df_series <- df_pernoctaciones |>
+  # Quito NAs porque son el total
+  filter(!is.na(comunidades_y_ciudades_autonomas)) |> 
   mutate(
     periodo = paste0(periodo, "D01"), 
     periodo = as.Date(periodo, format = "%YM%mD%d"), 
-  total = parse_number(total, locale = locale(grouping_mark = "."))
+    total = parse_number(
+      total, 
+      locale = locale(grouping_mark = "."),
+      na = c(".", "..")
+    )
   ) |> 
     group_by(comunidades_y_ciudades_autonomas, periodo) |> 
     summarise(pernoctaciones = sum(total, na.rm = TRUE), .groups = "drop")
@@ -48,16 +54,14 @@ Y aquí, la evolución de pernoctaciones mes a mes de cada Comunidad Autónoma:
 #| fig-height: 30
 
 formato <- scales::label_number(big.mark = ".", scale = 0.001, suffix = "k")
-ggplot(df_series) + 
-  geom_line(
-    aes(x = periodo, y = pernoctaciones), 
-    col = "#800080"
-  ) + 
+ggplot(df_series, aes(x = periodo, y = pernoctaciones)) + 
+  geom_line(col = "#800080") + 
+  geom_smooth(method = "loess") + 
   scale_y_continuous(labels = formato) + 
   facet_wrap(
     ~comunidades_y_ciudades_autonomas, 
     scales = "free_y", 
-    ncol = 2
+    ncol = 3
   ) + 
   labs(
     title = "Pernoctaciones mensuales por CCAA", 
@@ -65,8 +69,6 @@ ggplot(df_series) +
     y = "Pernoctaciones (miles)", 
     x = ""
   )
-  
-
 ```
 
 
