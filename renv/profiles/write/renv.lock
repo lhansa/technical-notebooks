@@ -113,6 +113,18 @@
       ],
       "Hash": "45f0398006e83a5b10b72a90663d8d8c"
     },
+    "RCurl": {
+      "Package": "RCurl",
+      "Version": "1.98-1.16",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "bitops",
+        "methods"
+      ],
+      "Hash": "ddbdf53d15b47be4407ede6914f56fbb"
+    },
     "Rcpp": {
       "Package": "Rcpp",
       "Version": "1.0.13",
@@ -235,24 +247,6 @@
         "R"
       ],
       "Hash": "543776ae6848fde2f48ff3816d0628bc"
-    },
-    "bench": {
-      "Package": "bench",
-      "Version": "1.1.3",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "glue",
-        "methods",
-        "pillar",
-        "profmem",
-        "rlang",
-        "stats",
-        "tibble",
-        "utils"
-      ],
-      "Hash": "d3920bdeb09b0dd8562c5ca24da562b7"
     },
     "bit": {
       "Package": "bit",
@@ -475,13 +469,6 @@
       ],
       "Hash": "af436915c590afc6fffc3ce3a5be1569"
     },
-    "collections": {
-      "Package": "collections",
-      "Version": "0.3.7",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "90a0eda114ab0bef170ddbf5ef0cd93f"
-    },
     "colorspace": {
       "Package": "colorspace",
       "Version": "2.1-1",
@@ -674,29 +661,6 @@
         "utils"
       ],
       "Hash": "c68785a280aa69dbe449b3cf98fa3dd1"
-    },
-    "duckplyr": {
-      "Package": "duckplyr",
-      "Version": "0.4.1",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "DBI",
-        "R",
-        "cli",
-        "collections",
-        "dplyr",
-        "duckdb",
-        "glue",
-        "jsonlite",
-        "lifecycle",
-        "rlang",
-        "tibble",
-        "tidyselect",
-        "utils",
-        "vctrs"
-      ],
-      "Hash": "8de3d932a099f4c19907b4e459d854eb"
     },
     "e1071": {
       "Package": "e1071",
@@ -1562,17 +1526,6 @@
       ],
       "Hash": "df58958f293b166e4ab885ebcad90e02"
     },
-    "nycflights13": {
-      "Package": "nycflights13",
-      "Version": "1.0.2",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "tibble"
-      ],
-      "Hash": "61eb941328b49a62d7f9816dfed7d959"
-    },
     "openssl": {
       "Package": "openssl",
       "Version": "2.2.0",
@@ -1714,16 +1667,6 @@
         "utils"
       ],
       "Hash": "0c90a7d71988856bad2a2a45dd871bb9"
-    },
-    "profmem": {
-      "Package": "profmem",
-      "Version": "0.6.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "utils"
-      ],
-      "Hash": "4974ce1d5ab22f266af90826f295f6c7"
     },
     "progress": {
       "Package": "progress",

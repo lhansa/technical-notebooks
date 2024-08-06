@@ -1,0 +1,69 @@
+---
+title: "Mercamadrid"
+description: "Exploración de datos públicos de mercamadrid"
+description-meta: "Exploración de datos públicos de mercamadrid"
+author: "Leonardo Hansa"
+date: "2024-08-05"
+categories: [exploraciones]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+```{r}
+#| label: libs
+library(readr)
+library(purrr)
+library(dplyr)
+```
+
+```{r}
+#| label: data-collect
+link_base <- "https://datos.madrid.es/egob/catalogo/300357-%s-mercamadrid-volumen-precio.csv"
+links <- sprintf(link_base, seq(0, 10, 2))
+
+df_merca <- map_dfr(links, function(link) {
+  if (RCurl::url.exists(link)) {
+    datos <- read_csv2(
+      link,
+      locale = locale(encoding = "latin1"),
+      show_col_types = FALSE
+    )
+
+    datos <- janitor::clean_names(datos)
+
+    if (is.character(datos$fecha_desde)) {
+      datos <- datos |>
+        mutate(across(
+          contains("precio"),
+          \(x) parse_number(x, na = c("Precio Más Frecuente", "Precio Máximo", "Precio Mínimo"))
+        ))
+    }
+
+    if (is.character(datos$kilos)) {
+      datos <- datos |>
+        mutate(
+          kilos = parse_number(kilos, na = "Kilos")
+        )
+    }
+
+    datos <- datos |>
+      mutate(
+        across(
+          contains("fecha"),
+          \(x) as.Date(as.character(x), format = "%Y%m%d")
+        ), 
+        origen = as.character(origen)
+      )
+
+    return(datos)
+  }
+})
+```
+
+```{r}
+df_merca |> 
+    distinct(descripcion_origen)
+```
