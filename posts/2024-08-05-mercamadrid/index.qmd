@@ -12,15 +12,23 @@ execute:
 freeze: true
 ---
 
+## Lectura de datos 
+
 ```{r}
 #| label: libs
 library(readr)
 library(purrr)
 library(dplyr)
+library(stringr)
+library(ggplot2)
+
+ggplot2::theme_set(ggplot2::theme_light())
 ```
 
 ```{r}
 #| label: data-collect
+#| echo: true
+#| eval: false
 link_base <- "https://datos.madrid.es/egob/catalogo/300357-%s-mercamadrid-volumen-precio.csv"
 links <- sprintf(link_base, seq(0, 10, 2))
 
@@ -61,9 +69,100 @@ df_merca <- map_dfr(links, function(link) {
     return(datos)
   }
 })
+
 ```
 
 ```{r}
+#| label: save-data
+#| echo: false
+#| eval: false
+write_rds(df_merca, "df_merca.rds")
+```
+
+```{r}
+#| label: load-data
+#| echo: false
+#| eval: true
+df_merca <- read_rds("df_merca.rds")
+df_merca <- select(df_merca, -origen, -codigo_variedad)
+```
+
+df_merca <- select(df_merca, -origen)
+```{r}
 df_merca |> 
-    distinct(descripcion_origen)
+    distinct(descripcion_variedad)
+```
+
+## Vacuno
+
+Hay mil cosas. Voy a ver qué puedo sacar solo del vacuno por ahora.
+
+```{r}
+#| label: datos-vacuno
+df_vacuno <- df_merca |>
+  filter(str_detect(descripcion_variedad, "^VACUNO"))
+```
+
+### Qué variedad de vacuno se vende más
+```{r}
+#| label: evolucion-variedad
+df_vacuno |> 
+  group_by(fecha_desde, descripcion_variedad) |> 
+  summarise(kilos = sum(kilos, na.rm = TRUE), .groups = "drop") |> 
+  ggplot() + 
+  geom_line(aes(x = fecha_desde, y = kilos, col = descripcion_variedad))
+```
+
+**¿Qué será `VACUNO FRESCO`?**
+```{r}
+#| label: distribucion-variedad
+df_vacuno_variedades <- df_vacuno |>
+  group_by(fecha_desde, descripcion_variedad) |>
+  summarise(kilos = sum(kilos, na.rm = TRUE), .groups = "drop") |>
+  group_by(descripcion_variedad) |>
+  summarise(kilos_mes = sum(kilos) / n())
+
+ggplot(df_vacuno_variedades) +
+  geom_col(
+    aes(x = reorder(descripcion_variedad, kilos_mes), y = kilos_mes),
+    fill = "#800080"
+  ) +
+  labs(x = "", y = "Kilos por mes") +
+  coord_flip() 
+```
+
+```{r}
+#| label: evolucion-variedad2
+
+variedades_principales <- df_vacuno_variedades |>
+  slice_max(order_by = kilos_mes, n = 4) |>
+  pull(descripcion_variedad)
+
+df_vacuno |>
+  filter(descripcion_variedad %in% variedades_principales) |>
+  group_by(fecha_desde, descripcion_variedad) |>
+  summarise(kilos = sum(kilos, na.rm = TRUE), .groups = "drop") |>
+  ggplot() +
+  geom_line(aes(x = fecha_desde, y = kilos, col = descripcion_variedad))
+```
+
+### ¿De dónde ha venido el vacuno?
+```{r}
+#| label: origen-vacuno
+df_variedades_origen <- df_vacuno |>
+  filter(descripcion_variedad %in% variedades_principales) |>
+  group_by(descripcion_variedad, descripcion_origen) |>
+  summarise(kilos_mes = sum(kilos) / n(), .groups = "drop") |>
+  group_by(descripcion_variedad) |>
+  slice_max(order_by = kilos_mes, n = 5) |>
+  ungroup()
+
+df_vacuno |>
+  semi_join(
+    df_variedades_origen,
+    by = c("descripcion_variedad", "descripcion_origen")
+  ) |> 
+  ggplot() + 
+  geom_line(aes(x = fecha_desde, y = kilos, col = descripcion_origen)) + 
+  facet_wrap(~descripcion_variedad, scales = "free_y")
 ```
