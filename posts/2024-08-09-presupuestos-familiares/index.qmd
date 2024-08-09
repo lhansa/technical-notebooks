@@ -1,0 +1,41 @@
+---
+title: "Encuesta de presupuestos familiares"
+description: "Exploración de datos de la Encuesta de Presupuestos Familiares del INE"
+description-meta: "Exploración de datos de la Encuesta de Presupuestos Familiares del INE"
+author: "Leonardo Hansa"
+date: "2024-08-09"
+categories: [exploraciones]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+
+```{r}
+#| label: libs
+library(readr)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+#| label: lectura
+df_epf <- read_csv2(
+    "~/Downloads/25168.csv", 
+    locale = locale(encoding = "latin1", grouping_mark = ".", decimal_mark = ",")
+) 
+df_epf <- janitor::clean_names(df_epf)
+df_epf <- df_epf |> 
+  mutate(total = parse_number(total, locale = locale(grouping_mark = ".", decimal_mark = ","), na = c("..")))
+```
+
+```{r}
+df_epf |> 
+  filter()
+  
+```
+
+
+
