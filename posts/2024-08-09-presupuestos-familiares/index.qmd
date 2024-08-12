@@ -32,9 +32,7 @@ df_epf <- df_epf |>
 ```
 
 ```{r}
-df_epf |> 
-  filter()
-  
+nrow(df_epf) 
 ```
 
 
