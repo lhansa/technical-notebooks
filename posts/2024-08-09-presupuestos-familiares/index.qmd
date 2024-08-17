@@ -12,27 +12,105 @@ execute:
 freeze: true
 ---
 
+## Datos
+
+El INE tiene datos de la Encuesta de Presupuestos Familiares.
+He descargado un fichero con cantidades consumidas por hogar de algunos productos.
 
 ```{r}
 #| label: libs
 library(readr)
 library(dplyr)
 library(ggplot2)
+library(stringr)
+
+ggplot2::theme_set(ggplot2::theme_light())
 ```
 
 ```{r}
 #| label: lectura
 df_epf <- read_csv2(
-    "~/Downloads/25168.csv", 
-    locale = locale(encoding = "latin1", grouping_mark = ".", decimal_mark = ",")
-) 
+  here::here("data/25168.csv"),
+  locale = locale(encoding = "latin1", grouping_mark = ".", decimal_mark = ","),
+  show_col_types = FALSE
+)
+
 df_epf <- janitor::clean_names(df_epf)
-df_epf <- df_epf |> 
-  mutate(total = parse_number(total, locale = locale(grouping_mark = ".", decimal_mark = ","), na = c("..")))
+
+df_epf <- df_epf |>
+  mutate(
+    total = parse_number(
+      total,
+       locale = locale(grouping_mark = ".", decimal_mark = ","), na = c("..")
+    ),
+    periodo = as.integer(periodo) 
+  )
+```
+
+Quito columnas, cambio nombres, etc.
+
+```{r}
+#| label: columnas
+df_epf <- df_epf |>
+  select(-cantidades_medias_consumidas) |> 
+  rename(
+    producto = codigos_de_gasto_con_cantidad_fisica
+  )
+```
+
+Los nombres de productos tienen un código al principio que me va a molestar casi siempre pero pueden llegar a servirme para hacer algún filtro de categorías.
+
+Así que hago algo horrible: creo una función a la que llamaré todo el rato para limpiar los nombres de productos (en lugar de hacerlo definitivo al principio).
+```{r}
+#| label: limpia-nombre
+limpia_nombre <- function(data) {
+  data |>
+    mutate(
+      producto = str_remove(
+        producto, 
+        "[0-9]{2}\\.[0-9]\\.[0-9]\\.[0-9]\\sT\\s"
+      )
+    )
+}
+```
+
+
+## Carnes
+
+```{r}
+#| label: dibuja-evolucion
+dibuja_evolucion <- function(data, titulo, .y = "Cantidad") {
+  ggplot(data, aes(x = periodo, y = total, col = producto)) + 
+  geom_line(linewidth = 1) +
+  geom_smooth(method = "loess") +
+  labs(
+    title = sprintf("Cantidad media consumida por hogas (%s)", titulo), 
+    x = "", y = .y
+  ) + 
+  theme(
+    legend.position = "bottom", 
+    legend.title = element_blank()
+  )
+}
 ```
 
 ```{r}
-nrow(df_epf) 
+#| label: evolucion-carnes
+df_epf |>
+  limpia_nombre() |> 
+  filter(str_detect(producto, "^Carne ")) |> 
+  dibuja_evolucion(titulo = "Carnes")
+```
+
+## Bebidas
+```{r}
+listado_bebidas <- c("Agua mineral", "Bebidas refrescantes", "Bebidas energéticas", "Bebidas isotónicas", "Zumos de frutas", "Vinos de uva", "Cerveza", "Cerveza baja en alcohol")
+
+df_epf |>
+  limpia_nombre() |> 
+  filter(str_detect(producto, paste0(listado_bebidas, collapse = "|"))) |> 
+  dibuja_evolucion(titulo = "Bebidas")
+
 ```
 
 
