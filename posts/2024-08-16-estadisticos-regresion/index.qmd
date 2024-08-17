@@ -28,10 +28,10 @@ import matplotlib.pyplot as plt
 Me invento unos datos que me sirvan para ajustar una regresión lineal: 
 
 $$
-y = \beta_0 + \beta_1 \cdot x + \epsilon,
+y = \beta_0 + \beta_1 \cdot x + \varepsilon,
 $$
 
-donde $\beta_0 = - 5$, $\beta_1 = 3$ y $x ~ \mbox{Poisson(12)}$ y $\epislon ~ \cal{N}(0, 10)$.
+donde $\beta_0 = - 5$, $\beta_1 = 3$ y $x ~ \mbox{Poisson(12)}$ y $\varepsilon \sim \cal{N}(0, 10)$.
 
 
 ```{python}

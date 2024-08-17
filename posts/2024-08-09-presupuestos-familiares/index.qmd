@@ -116,5 +116,17 @@ df_epf |>
 
 ```
 
+¿Por qué sube el consumo de agua mineral?
+
+```{r}
+df_epf |> 
+  limpia_nombre() |> 
+  filter(producto == "Agua mineral (L)") |> 
+  ggplot() + 
+  geom_line(aes(x = periodo, y = total), linewidth = 1, col = "#800080") + 
+  labs(x = "", y = "Cantidad (L)", title = "Consumo medio por hogar de agua mineral")
+
+```
+
 
 
