@@ -82,13 +82,13 @@ limpia_nombre <- function(data) {
 dibuja_evolucion <- function(data, titulo, .y = "Cantidad") {
   ggplot(data, aes(x = periodo, y = total, col = producto)) + 
   geom_line(linewidth = 1) +
-  geom_smooth(method = "loess") +
+  # geom_smooth(method = "loess") +
   labs(
     title = sprintf("Cantidad media consumida por hogas (%s)", titulo), 
     x = "", y = .y
   ) + 
   theme(
-    legend.position = "bottom", 
+    legend.position = "right", 
     legend.title = element_blank()
   )
 }
@@ -104,11 +104,14 @@ df_epf |>
 
 ## Bebidas
 ```{r}
-listado_bebidas <- c("Agua mineral", "Bebidas refrescantes", "Bebidas energéticas", "Bebidas isotónicas", "Zumos de frutas", "Vinos de uva", "Cerveza", "Cerveza baja en alcohol")
+listado_bebidas <- c("Agua mineral", "Bebidas refrescantes", "Zumos de frutas", "Vinos de uva", "Cerveza \\(L\\)")
+
+# "Bebidas energéticas", "Bebidas isotónicas",
+# "Cerveza baja en alcohol"
 
 df_epf |>
-  limpia_nombre() |> 
-  filter(str_detect(producto, paste0(listado_bebidas, collapse = "|"))) |> 
+  limpia_nombre() |>
+  filter(str_detect(producto, paste0(listado_bebidas, collapse = "|"))) |>
   dibuja_evolucion(titulo = "Bebidas")
 
 ```
