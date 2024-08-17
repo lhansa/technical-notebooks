@@ -1,0 +1,17 @@
+{
+  "hash": "5fe0ca96dc288bbbdea69d177d6a988e",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Encuesta de presupuestos familiares\"\ndescription: \"Exploración de datos de la Encuesta de Presupuestos Familiares del INE\"\ndescription-meta: \"Exploración de datos de la Encuesta de Presupuestos Familiares del INE\"\nauthor: \"Leonardo Hansa\"\ndate: \"2024-08-09\"\ncategories: [exploraciones]\nexecute: \n  echo: true\n  message: false\n  warning: false\nfreeze: true\n---\n\n\n\n## Datos\n\nEl INE tiene datos de la Encuesta de Presupuestos Familiares.\nHe descargado un fichero con cantidades consumidas por hogar de algunos productos.\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(readr)\nlibrary(dplyr)\nlibrary(ggplot2)\nlibrary(stringr)\n\nggplot2::theme_set(ggplot2::theme_light())\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\ndf_epf <- read_csv2(\n  here::here(\"data/25168.csv\"),\n  locale = locale(encoding = \"latin1\", grouping_mark = \".\", decimal_mark = \",\"),\n  show_col_types = FALSE\n)\n\ndf_epf <- janitor::clean_names(df_epf)\n\ndf_epf <- df_epf |>\n  mutate(\n    total = parse_number(\n      total,\n       locale = locale(grouping_mark = \".\", decimal_mark = \",\"), na = c(\"..\")\n    ),\n    periodo = as.integer(periodo) \n  )\n```\n:::\n\n\n\nQuito columnas, cambio nombres, etc.\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\ndf_epf <- df_epf |>\n  select(-cantidades_medias_consumidas) |> \n  rename(\n    producto = codigos_de_gasto_con_cantidad_fisica\n  )\n```\n:::\n\n\n\nLos nombres de productos tienen un código al principio que me va a molestar casi siempre pero pueden llegar a servirme para hacer algún filtro de categorías.\n\nAsí que hago algo horrible: creo una función a la que llamaré todo el rato para limpiar los nombres de productos (en lugar de hacerlo definitivo al principio).\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlimpia_nombre <- function(data) {\n  data |>\n    mutate(\n      producto = str_remove(\n        producto, \n        \"[0-9]{2}\\\\.[0-9]\\\\.[0-9]\\\\.[0-9]\\\\sT\\\\s\"\n      )\n    )\n}\n```\n:::\n\n\n\n\n## Carnes\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\ndibuja_evolucion <- function(data, titulo, .y = \"Cantidad\") {\n  ggplot(data, aes(x = periodo, y = total, col = producto)) + \n  geom_line(linewidth = 1) +\n  geom_smooth(method = \"loess\") +\n  labs(\n    title = sprintf(\"Cantidad media consumida por hogas (%s)\", titulo), \n    x = \"\", y = .y\n  ) + \n  theme(\n    legend.position = \"bottom\", \n    legend.title = element_blank()\n  )\n}\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\ndf_epf |>\n  limpia_nombre() |> \n  filter(str_detect(producto, \"^Carne \")) |> \n  dibuja_evolucion(titulo = \"Carnes\")\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/evolucion-carnes-1.png){width=672}\n:::\n:::\n\n\n\n## Bebidas\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlistado_bebidas <- c(\"Agua mineral\", \"Bebidas refrescantes\", \"Bebidas energéticas\", \"Bebidas isotónicas\", \"Zumos de frutas\", \"Vinos de uva\", \"Cerveza\", \"Cerveza baja en alcohol\")\n\ndf_epf |>\n  limpia_nombre() |> \n  filter(str_detect(producto, paste0(listado_bebidas, collapse = \"|\"))) |> \n  dibuja_evolucion(titulo = \"Bebidas\")\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-7-1.png){width=672}\n:::\n:::\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
