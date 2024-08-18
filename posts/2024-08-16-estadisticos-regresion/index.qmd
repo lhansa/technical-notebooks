@@ -117,7 +117,7 @@ yy = stats.t.pdf(xx, nobs - 2)
 plt.plot(xx, yy, color='#800080')
 # plot the t distribution and fill the 5% outside 
 plt.fill_between(xx, yy, where=(xx < -percentile) | (xx > percentile), alpha=0.5, color='#800080')
-plt.title(f"Distribución de t con {nobs - 2} grados de libertad")
+plt.title("Distribución de t")
 plt.show()
 ```
 
@@ -127,4 +127,101 @@ Concretamente, la probabilidad para el estadístico $t$ que has obtenido es muy 
 # p value for coefficient, extracted from
 # t distribution
 stats.t.sf(t_stat_x, nobs - 2) * 2
+```
+
+
+## Idea intuitiva
+
+Lo que estás haciendo con esto es calcular la probabilidad de obtener los datos que tienes si asumes que las dos variables no tienen relación. 
+
+Imagina que estás midiendo la relación entre el consumo de torreznos (gramos de torreznos semanales) y los niveles de colesterol (ni idea de qué unidad se usa en los análisis). 
+
+La forma de pensar con este análisis sería: 
+
+- Asumes que no hay relación
+- Tienes unos datos de varias personas, con su consumo de torreznos y el nivel de colesterol. 
+- Haces el cálculo de la regresión. 
+- El p-valor es cómo de probables son tus datos. 
+- Si tu p-valor es pequeño, entonces los datos son poco probables en el supuesto de que no haya relación. Así que deduces que sí hay relación. 
+
+**¿Qué quiero decir con que tu p-valor sea pequeño?**
+
+Me refiero a que, previamente, habrás definido un umbral. Que tu p-valor sea pequeño significa que está por debajo de ese umbral. 
+
+¿Cuál debería ser tu umbral? Normalmente es 0,05. Eso se traduce en que: 
+
+- Si la probabilidad de observar tus datos en el supuesto de que no hay relación (p-valor) es menor de 0,05, entonces es que sí hay relación. 
+- Si la probabilidad (p-valor) es mayor, entonces es que no hay relación. 
+
+Y te pregunto yo. ¿Cuál debería ser para ti la probabilidad? Por ejemplo, si el p-valor es 0,20, ¿automáticamente concluyes que no hay relación?
+
+¿Por qué?
+
+Si tu p-valor es ese, estarías diciendo que la probabilidad de observar tus datos cuando no hubiera relación real es de un 20%. Quizá en un caso médico tienes que tener cuidado, como con lo del colesterol. ¿Pero qué pasa si estás midiendo la eficacia de una acción empresarial?
+
+## Un ejemplo más extremo
+
+
+```{python}
+#| label: genera-escenario
+#| echo: false
+def genera_escenario(alpha=0.2,
+                     b1=3, 
+                     b0=-5, 
+                     lmbd=12, 
+                     sd1=1, 
+                     sd2=10, 
+                     nobs=10000):
+
+    # Creo y en función de x
+    x = np.random.poisson(lmbd, nobs)
+    noise = np.random.normal(0, sd2, nobs)
+    y = b1 * x + b0 + noise
+
+    # Altero x para el modelo
+    x_alt =  x ** 2 # + np.random.normal(0, sd1, nobs)
+
+    X = sm.add_constant(x_alt)
+    model = sm.OLS(y, X).fit()
+
+    standard_error = np.sqrt(np.sum(model.resid**2) / (len(x) - 2))
+    standard_error_x = standard_error / np.sqrt(nobs) / np.std(x)
+
+    t_stat_x = np.abs(model.params[1]) / standard_error_x
+
+    percentile = stats.t.ppf(1 - alpha / 2, nobs - 2)
+
+    xx = np.linspace(-4, 4, 1000)
+    yy = stats.t.pdf(xx, nobs - 2)
+    plt.figure()
+    plt.plot(xx, yy, color='#800080')
+    
+    plt.fill_between(xx, yy, where=(xx < -percentile) | (xx > percentile), alpha=0.5, color='#800080')
+    plt.title(f't: {t_stat_x:.4f}; alpha: {alpha}')
+    plt.show()
+    
+
+genera_escenario()
+```
+
+
+```{python}
+#| label: prueba-variables
+#| echo: false
+def prueba_variables(b1=3, b0=-5, lmbd=12, sd1=1, sd2=10, nobs=10000):
+
+    # Creo y en función de x
+    x = np.random.poisson(lmbd, nobs)
+    noise = np.random.normal(0, sd2, nobs)
+    y = b1 * x + b0 + noise
+
+    # Altero x para el modelo
+    x_alt = x**2  # + np.random.normal(0, sd1, nobs)
+    plt.figure()
+    plt.scatter(x, x_alt)
+    plt.title("Alteración de x")
+
+
+prueba_variables()
+
 ```
