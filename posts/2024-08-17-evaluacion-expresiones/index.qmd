@@ -1,0 +1,48 @@
+---
+title: "Evaluación de expresiones en R"
+description: "Tutorial sobre evaluación manual de expresiones en R con rlang"
+description-meta: "Tutorial sobre evaluación manual de expresiones en R con rlang"
+author: "Leonardo Hansa"
+date: "2024-08-17"
+categories: [datos]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+draft: true
+---
+
+Levanta la mano si a ti también te gusta concatenar caracteres con `+` como en Python. 
+
+Me refiero a que en Python puedes hacer `'Hola ' + ' Leo'` pero en R no. 
+
+¿O sí?
+
+```{r}
+#| label: nueva-suma
+#| echo: false
+`+` <- function(x, y) {
+  if (is.character(x) && is.character(y)) {
+    paste0(x, y)
+  } else {
+    .Primitive("+")(x, y)
+  }
+}
+```
+
+```{r}
+#| label: resultado-suma
+"hola, puedo " + "concatenar"
+```
+
+```{r}
+library(rlang)
+opera <- function(data, entrada) {
+  eval_tidy(enexpr(entrada), data)
+}
+
+opera(iris, Sepal.Length + Sepal.Width)
+
+```
+
