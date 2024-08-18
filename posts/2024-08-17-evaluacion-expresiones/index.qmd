@@ -35,6 +35,15 @@ Me refiero a que en Python puedes hacer `'Hola ' + ' Leo'` pero en R no.
 "hola, puedo " + "concatenar"
 ```
 
+Pero:
+
+```{r}
+#| label: resultado-suma2
+1 + 3
+```
+
+
+
 ```{r}
 library(rlang)
 opera <- function(data, entrada) {
