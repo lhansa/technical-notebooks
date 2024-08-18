@@ -10,7 +10,6 @@ execute:
   message: false
   warning: false
 freeze: true
-draft: true
 ---
 
 Levanta la mano si a ti también te gusta concatenar caracteres con `+` como en Python. 
