@@ -161,6 +161,9 @@ Si tu p-valor es ese, estarías diciendo que la probabilidad de observar tus dat
 
 ## Un ejemplo más extremo
 
+En lugar de utilizar la propia variable $x$ para ajustar el modelo, podemos alterar $x$ introduciendo ruido en ella. Eso lo haré metiendo ruido en la variable, con media 0 y una desviación típica que variaré en varias pruebas.
+
+Por ahora, la desviación típica del ruido sobre $x$ es 1.
 
 ```{python}
 #| label: genera-escenario
@@ -179,7 +182,7 @@ def genera_escenario(alpha=0.2,
     y = b1 * x + b0 + noise
 
     # Altero x para el modelo
-    x_alt =  x ** 2 # + np.random.normal(0, sd1, nobs)
+    x_alt =  x + np.random.normal(0, sd1, nobs)
 
     X = sm.add_constant(x_alt)
     model = sm.OLS(y, X).fit()
@@ -199,16 +202,34 @@ def genera_escenario(alpha=0.2,
     plt.fill_between(xx, yy, where=(xx < -percentile) | (xx > percentile), alpha=0.5, color='#800080')
     plt.title(f't: {t_stat_x:.4f}; alpha: {alpha}')
     plt.show()
-    
-
+  
 genera_escenario()
+```
+
+Voy a poner mucho más ruido. Fíjate en cuánto decrece el estadístico $t$ (y en consecuencia cuánto aumenta el p-valor). 
+
+```{python}
+#| label: genera-escenario2
+#| echo: false
+genera_escenario(sd1 = 5)
+```
+
+```{python}
+#| label: genera-escenario3
+#| echo: false
+genera_escenario(sd1 = 40)
+```
+
+```{python}
+#| label: comprobacion-pvalor
+stats.t.sf(0.5341, 9998)
 ```
 
 
 ```{python}
 #| label: prueba-variables
 #| echo: false
-def prueba_variables(b1=3, b0=-5, lmbd=12, sd1=1, sd2=10, nobs=10000):
+def prueba_variables(b1=3, b0=-5, lmbd=12, sd1=3, sd2=10, nobs=10000):
 
     # Creo y en función de x
     x = np.random.poisson(lmbd, nobs)
@@ -216,12 +237,11 @@ def prueba_variables(b1=3, b0=-5, lmbd=12, sd1=1, sd2=10, nobs=10000):
     y = b1 * x + b0 + noise
 
     # Altero x para el modelo
-    x_alt = x**2  # + np.random.normal(0, sd1, nobs)
+    x_alt = x + np.random.normal(0, sd1, nobs)
     plt.figure()
     plt.scatter(x, x_alt)
     plt.title("Alteración de x")
 
 
-prueba_variables()
-
+prueba_variables(sd1 = 40)
 ```
