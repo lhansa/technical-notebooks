@@ -42,15 +42,57 @@ Pero:
 1 + 3
 ```
 
+## Justificación de `quosures`
 
+La idea detrás de funciones como `base::subset()` o `dplyr::mutate()` es que puedes escribir operaciones dentro de data frames haciendo referencia directamente a las columnas, sin usar la sintaxis `df$columna`. 
 
 ```{r}
+#| label: operacion-columnas
 library(rlang)
 opera <- function(data, entrada) {
   eval_tidy(enexpr(entrada), data)
 }
 
-opera(iris, Sepal.Length + Sepal.Width)
-
+nuevo_calculo <- opera(iris, Sepal.Length + Sepal.Width)
+head(nuevo_calculo)
 ```
+
+El inconveniente es que `enexpr()` puede no ser suficiente porque no tiene en cuenta información del entorno.
+
+Por ejemplo: 
+
+```{r}
+#| label: operacion-columnas2
+df <- data.frame(col1 = c(5, 6, 7))
+factor <- 2
+
+opera2 <- function(data, entrada) {
+  factor <- 10
+  eval_tidy(enexpr(entrada), data)
+}
+
+# Con enquo no sabes cuál es el entorno original de la variable
+opera2(df, col1 * factor)
+```
+
+Una solución que se te puede ocurrir es: _no pongas en la expresión variables que estén definidas en la función_. Ya, ¿y si no sabes lo que hay en la función? ¿Y si el código es tan largo que no te da para revisarlo?
+
+Pues lo arreglas con `enquo()`.
+
+```{r}
+#| label: operacion-columnas3
+df <- data.frame(col1 = c(5, 6, 7))
+factor <- 2
+
+opera3 <- function(data, entrada) {
+  factor <- 10
+  eval_tidy(enquo(entrada), data)
+}
+
+# Con enquo usas el entorno donde se definió la variable original
+opera3(df, col1 * factor)
+```
+
+
+
 
