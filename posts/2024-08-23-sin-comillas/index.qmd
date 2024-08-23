@@ -1,0 +1,73 @@
+---
+title: "Más sobre evaluación de expresiones en R"
+description: "Tutorial sobre evaluación manual de expresiones en R con rlang"
+description-meta: "Tutorial sobre evaluación manual de expresiones en R con rlang"
+author: "Leonardo Hansa"
+date: "2024-08-23"
+categories: [datos]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+## Orden de operaciones
+
+En R puedes evaluar una expresión a partir de texto (o sea, como si la expresión fuera un objeto de tipo `character`).
+
+```{r}
+#| label: expresion1
+a <- 1
+b <- 3
+
+expr1 <- "a + b"
+eval(parse(text = expr1))
+```
+
+Esa expresión es la operación $a + b$. También podrías tener la operación $2\cdot a - 3 \cdot b$, que podrías guardar en un objeto `character` de forma parecida a la anterior.
+
+De manera intuitiva, si quieres _juntar_ o _concatenar_ las dos operaciones mediante una división, ¿qué operación te sale?
+
+A mí me sale esta: $\frac{a + b}{2\cdot a - 3 \cdot b}$, que no es la misma que $a + \frac{b}{2\cdot a} - 3 \cdot b$. 
+
+
+Pero si no tienes cuidado, para R sí lo será:
+```{r}
+#| label: concatenacion1
+expr2 <- "2 * a - 3 * b"
+
+expr_division <- paste(expr1, expr2, sep = " / ")
+expr_division
+```
+
+El resultado de esa operación es `r eval(parse(text = expr_division))`, que no es lo mismo que:
+
+```{r}
+#| label: manual
+(a + b) / (2 * a - 3 * b)
+```
+
+
+# Solución con rlang
+
+Si trabajas con operaciones puedes hacer esto sin gestionar los paréntesis. 
+
+Tampoco te voy a decir que sea fácil, la verdad, pero me parece más práctico:
+
+```{r}
+#| label: planteamiento-rlang
+library(rlang)
+expr1 <- expr(a + b)
+expr2 <- expr(2 * a - 3 * b)
+expr_division  <- expr(!!expr1 / !!expr2) 
+expr_division
+```
+
+Ahora evalúas la expresión:
+
+
+```{r}
+#| label: solucion-rlang
+eval_tidy(expr_division)
+```

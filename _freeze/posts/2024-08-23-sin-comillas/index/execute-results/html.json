@@ -1,0 +1,15 @@
+{
+  "hash": "7da5856002f1690c5e2790be9f2cdf61",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Más sobre evaluación de expresiones en R\"\ndescription: \"Tutorial sobre evaluación manual de expresiones en R con rlang\"\ndescription-meta: \"Tutorial sobre evaluación manual de expresiones en R con rlang\"\nauthor: \"Leonardo Hansa\"\ndate: \"2024-08-23\"\ncategories: [datos]\nexecute: \n  echo: true\n  message: false\n  warning: false\nfreeze: true\n---\n\n\n\n## Orden de operaciones\n\nEn R puedes evaluar una expresión a partir de texto (o sea, como si la expresión fuera un objeto de tipo `character`).\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\na <- 1\nb <- 3\n\nexpr1 <- \"a + b\"\neval(parse(text = expr1))\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 4\n```\n\n\n:::\n:::\n\n\n\nEsa expresión es la operación $a + b$. También podrías tener la operación $2\\cdot a - 3 \\cdot b$, que podrías guardar en un objeto `character` de forma parecida a la anterior.\n\nDe manera intuitiva, si quieres _juntar_ o _concatenar_ las dos operaciones mediante una división, ¿qué operación te sale?\n\nA mí me sale esta: $\\frac{a + b}{2\\cdot a - 3 \\cdot b}$, que no es la misma que $a + \\frac{b}{2\\cdot a} - 3 \\cdot b$. \n\n\nPero si no tienes cuidado, para R sí lo será:\n\n\n::: {.cell}\n\n```{.r .cell-code}\nexpr2 <- \"2 * a - 3 * b\"\n\nexpr_division <- paste(expr1, expr2, sep = \" / \")\nexpr_division\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] \"a + b / 2 * a - 3 * b\"\n```\n\n\n:::\n:::\n\n\n\nEl resultado de esa operación es -6.5, que no es lo mismo que:\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\n(a + b) / (2 * a - 3 * b)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] -0.5714286\n```\n\n\n:::\n:::\n\n\n\n\n# Solución con rlang\n\nSi trabajas con operaciones puedes hacer esto sin gestionar los paréntesis. \n\nTampoco te voy a decir que sea fácil, la verdad, pero me parece más práctico:\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(rlang)\nexpr1 <- expr(a + b)\nexpr2 <- expr(2 * a - 3 * b)\nexpr_division  <- expr(!!expr1 / !!expr2) \nexpr_division\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n(a + b)/(2 * a - 3 * b)\n```\n\n\n:::\n:::\n\n\n\nAhora evalúas la expresión:\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\neval_tidy(expr_division)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] -0.5714286\n```\n\n\n:::\n:::",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
