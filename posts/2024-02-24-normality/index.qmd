@@ -117,7 +117,7 @@ sample_mu <- rnorm(1e4, 178, 20)
 sample_sigma <- runif(1e4, 0, 50)
 
 prior_h <- rnorm(1e4, sample_mu, sample_sigma)
-dens(prior_h, col = "#800080")
+hist(prior_h, col = "#800080")
 ```
 
 Lo que hemos hecho es simular 10.000 pares de $\mu$ y $\sigma$ y para cada par hemos simulado una altura. Así tenemos 10.000 alturas, cada una originada a partir de una población normal distinta (pero todas las poblaciones normales son tan plausibles como indica nuestra priori). 
@@ -130,7 +130,7 @@ Si cambiáramos la priori, la simulación a priori de la altura se vería afecta
 sample_mu <- rnorm(1e4, 178, 100)
 
 prior_h <- rnorm(1e4, sample_mu, sample_sigma)
-dens(prior_h, col = "#800080")
+hist(prior_h, col = "#800080")
 ```
 
 Esa es una priori menos informativa, con una media mucho más dispersa. Pero puedes ver que las alturas que derivarían de unas prioris así no son realistas, dado que hay casos de altura negativa o también demasiado altos. 
@@ -149,15 +149,66 @@ fit_altura <- quap(
 )
 
 precis(fit_altura)
-
-
 ```
+Obtenemos un modelo normal con una media cuya media es 154 y su desviación típica es 0.42. Sí, el resultado de para la media de de la población es una distribución: no conocemos el valor exacto de la media sino que hemos estimado la distribución a la que pertenece. 
+
+Lo mismo con la desviación típica.
+
+Concretamente, esta distribución de la **media** es la que muestra este histograma.
 
 ```{r}
 #| label: altura-posteriori
 
 posterior_h <- extract.samples(fit_altura, n = 1e4)
 hist(posterior_h$mu, col = "#800080")
+```
+
+### Ajuste de prioris
+
+La priori no informativa que sugerimos antes no tenía sentido porque daba lugar a valores de alturas inhumanas, como negativos o demasiados altos. 
+
+Podemos proponer también una priori más restrictica. 
+
+```{r}
+#| label: prioris-ajustadas
+sample_mu <- rnorm(1e4, 178, 0.1)
+
+prior_h <- rnorm(1e4, sample_mu, sample_sigma)
+hist(prior_h, col = "#800080")
+```
+
+Esta priori fuerza a la media a quedarse mucho más centrada en la media propuesta.  Y esto cambia el modelo. 
+
+```{r}
+#| label: fit-altura2
+fit_altura2 <- quap(
+  alist(
+    height ~ dnorm(mu, sigma), 
+    mu ~ dnorm(178, 0.1), 
+    sigma ~ dunif(0, 50)
+  ), 
+  data = adultos
+)
+
+precis(fit_altura2)
+```
+
+La media $\mu$ apenas se ha movido del prior ahora. Sin embargo, el valor de $\sigma$ ha cambiado mucho porque el modelo lo calcula condicionada a la restricción del otro parámetro.
+
+```{r}
+#| label: cambio-orden
+#| eval: false
+#| include: false
+fit_altura3 <- quap(
+  alist(
+    height ~ dnorm(mu, sigma), 
+    sigma ~ dunif(0, 50),
+    mu ~ dnorm(178, 0.1)
+  ), 
+  data = adultos
+)
+
+precis(fit_altura3)
 ```
 
 
