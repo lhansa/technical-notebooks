@@ -1,0 +1,151 @@
+---
+title: "Introducción práctica a Rust"
+description: "Alguna prueba con Rust y su interacción con R y Python"
+description-meta: "Alguna prueba con Rust y su interacción con R y Python"
+author: "Leonardo Hansa"
+date: "2024-09-08"
+categories: [datos]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+No tengo ni idea de Rust, pero he oído que es muy rápido y gestiona la RAM de manera más automática que C++. C++ es fácil de aprovechar con R para utilizar su velocidad pero me tienta probar cosas nuevas. 
+
+Para usar R y Rust [he leído](https://extendr.github.io/rextendr/) sobre el paquete **rextendr**.
+
+```{r}
+#| label: hello-world 
+library(rextendr)
+
+# create a Rust function
+rust_function("fn add(a:f64, b:f64) -> f64 { a + b }")
+
+# call it from R
+add(2.5, 4.7)
+```
+
+Ese código básico funciona. Se ha creado un objeto nuevo `add` que es de tipo `function`.
+
+## Cálculo de R2 con Rust
+
+Ahora creo una función que, dados dos vectores, calcule el R2 de ambos, como si uno fuese la predicción que un modelo hace para el otro.
+
+**Observación.** Yo no sé Rust pero ChatGPT y otras IIAA sí saben.
+
+```{r}
+#| label: r_squared_old
+#| include: false
+#| eval: false
+rust_function(
+    "fn r_squared(actual: &[f64], predicted: &[f64]) -> f64 {
+
+    let n = actual.len() as f64;
+
+    // Calculamos la media de los valores reales
+    let mean_actual = actual.iter().sum::<f64>() / n;
+
+    // Calculamos SSR y SST
+    let ssr = actual.iter()
+        .zip(predicted.iter())
+        .map(|(a, p)| (a - p).powi(2))
+        .sum::<f64>();
+    let sst = actual.iter()
+        .map(|a| (a - mean_actual).powi(2))
+        .sum::<f64>();
+
+    // Calculamos R²
+    1.0 - ssr / sst
+}"
+)
+```
+
+```{r}
+#| label: con-source
+code <- r"(
+    #[extendr]
+    fn calcula_r2_rust(actual: &[f64], predicted: &[f64]) -> f64 {
+     
+        let n = actual.len() as f64;
+        let mean_actual = actual.iter().sum::<f64>() / n;
+
+        let ssr = actual.iter().enumerate().map(|(i, x)| (x - predicted[i]).powi(2)).sum::<f64>();
+        let sst = actual.iter().map(|(x)| (x - mean_actual).powi(2)).sum::<f64>();
+        1.0 - ssr / sst
+    
+    }
+)"
+rust_source(
+    code = code, 
+)
+
+```
+```{r}
+#| label: calcula_r2_rust
+#| eval: false
+#| include: false
+code <- r"(
+    use ndarray::{Array1};
+    use extendr_api::{TryFromRobj, Robj};
+
+    #[extendr]
+    fn calcula_r2_rust(actual: &Robj, predicted: &Robj) -> f64 {
+        // Convert R objects to Array1<f64>
+        let actual_arr = Array1::from_vec(actual.try_convert().unwrap()).unwrap();
+        let predicted_arr = Array1::from_vec(predicted.try_convert().unwrap()).unwrap();
+    
+        let actual_mean = actual_arr.mean().unwrap();
+    
+        let sst = actual_arr.iter().map(|y_i| (y_i - actual_mean).powi(2)).sum::<f64>();
+        let ssr = (actual_arr - predicted_arr).iter().map(|e| e.powi(2)).sum::<f64>();
+    
+        1.0 - (ssr / sst)
+    }
+)"
+rust_source(
+    code = code, 
+    dependencies = list("ndarray" = "0.16.1", "extendr-api" = "0.7.1")
+)
+```
+
+Ahora me invento unos _datos_ y aplico la función.
+
+```{r}
+nsize <- 1e6
+valor_real <- rnorm(nsize, 10, 1)
+valor_pred <- valor_real + rnorm(nsize, 0, 0.5)
+
+calcula_r2_rust(valor_real, valor_pred)
+```
+
+
+## Comparativa de tiempos de ejecución 
+Creo una función para calcular eso mismo con R.
+
+```{r}
+#| label: r2-withr
+
+calcula_r2_r <- function(actual, pred) {
+    numerador <- sum((actual - pred) ^ 2)
+    mean_actual <- mean(actual)
+    denominador <- sum((actual - mean_actual) ^ 2)
+
+    1 - numerador / denominador
+}
+
+calcula_r2_r(valor_real, valor_pred)
+```
+
+Y ahora lo divertido, comparo tiempos. Que, por supuesto, no tienen ningún sentido. 
+
+```{r}
+microbenchmark::microbenchmark(
+    rust = calcula_r2_rust(valor_real, valor_pred), 
+    r = calcula_r2_r(valor_real, valor_pred)
+)
+```
+
+
+Ya, otro día comparo con Rcpp y lo llevo a Python.
