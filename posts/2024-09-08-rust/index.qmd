@@ -113,7 +113,7 @@ rust_source(
 Ahora me invento unos _datos_ y aplico la función.
 
 ```{r}
-nsize <- 1e6
+nsize <- 1e9
 valor_real <- rnorm(nsize, 10, 1)
 valor_pred <- valor_real + rnorm(nsize, 0, 0.5)
 
