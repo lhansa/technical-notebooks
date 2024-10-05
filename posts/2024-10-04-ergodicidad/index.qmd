@@ -12,7 +12,7 @@ execute:
 freeze: true
 ---
 
-[Leo a Gil Bellosta] sobre ergocidad y he querido plantear lo que comenta. 
+[Leo a Gil Bellosta](https://www.datanalytics.com/2024/10/03/ergodicidad-utilitarismo/) sobre ergocidad y he querido plantear lo que comenta. 
 
 El define la ergodicidad mucho mejor de lo que lo podría hacer yo, salvo que lo copiara. Pero para copiarlo, mejor ve a su web. 
 
@@ -21,6 +21,7 @@ Planteo aquí el código de su ejemplo.
 ```{python}
 #| label: libs
 import numpy as np
+import matplotlib.pyplot as plt
 ```
 
 ## Lanzamiento de una moneda
@@ -31,7 +32,7 @@ n_individuos = 100
 n_veces = 1000
 ```
 
-Tienes a `py n_individuos` que lanzan una moneda al aire `py n_veces` cada uno. Eso hace un total de `py n_individuos * n_veces` lanzamientos, en los que la probablidad teórica de obtener cara (resultado igual a 1 en este caso) es $0,5$.
+Tienes a `python n_individuos` que lanzan una moneda al aire `python n_veces` cada uno. Eso hace un total de `python n_individuos * n_veces` lanzamientos, en los que la probablidad teórica de obtener cara (resultado igual a 1 en este caso) es $0,5$.
 
 ```{python}
 #| label: sim-lanzamientos
@@ -87,7 +88,7 @@ Y la evolución del capital se calcula así:
 capitales = multiplicadores_capital.cumprod(axis=1)
 ```
 
-El capital de cada individuo (`py n_individuos`) empezaba en 1, por lo que el capital medio por individuo era de 1. Tras el primer lanzamiento, el capital medio queda en: 
+El capital de cada individuo (`python n_individuos`) empezaba en 1, por lo que el capital medio por individuo era de 1. Tras el primer lanzamiento, el capital medio queda en: 
 
 ```{python}
 #| label: capital1
@@ -103,9 +104,29 @@ La evolución de capitales medios:
 
 # compute mean per column on numpy array capitales
 evolucion_capital_medio = capitales.mean(axis=0)
-import matplotlib.pyplot as plt
-plt.plot(evolucion_capital_medio)
+
+plt.plot(evolucion_capital_medio[0:150, ], color='#800080')
+plt.xlabel('Tiempo')
+plt.ylabel('Capital medio')
+plt.title('Evolución del capital medio')
+plt.show()
 ```
+
+Si pongo de límite hasta la tirada 100, el capital medio ha crecido: 
+```{python}
+#| label: tirada100
+n_tirada = 100
+evolucion_capital_medio[n_tirada, ]
+```
+
+Sin embargo, solo un 11% de los individuos ha visto su capital crecer:
+
+```{python}
+#| label: tirada100-2
+(capitales[:, n_tirada] > 1).sum()
+```
+
+En un proceso no ergódico (¿cuántos hay así en una sociedad occidental?), puedes ver crecimiento global, pero solo de unos pocos.
 
 
 
