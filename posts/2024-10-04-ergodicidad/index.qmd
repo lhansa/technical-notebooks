@@ -1,0 +1,113 @@
+---
+title: "Procesos ergódicos"
+description: "Pequeña práctica y ejemplo con procesos ergódicos en Python"
+description-meta: "Pequeña práctica y ejemplo con procesos ergódicos en Python"
+author: "Leonardo Hansa"
+date: "2024-10-04"
+categories: [exploraciones]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+[Leo a Gil Bellosta] sobre ergocidad y he querido plantear lo que comenta. 
+
+El define la ergodicidad mucho mejor de lo que lo podría hacer yo, salvo que lo copiara. Pero para copiarlo, mejor ve a su web. 
+
+Planteo aquí el código de su ejemplo. 
+
+```{python}
+#| label: libs
+import numpy as np
+```
+
+## Lanzamiento de una moneda
+
+```{python}
+#| label: params
+n_individuos = 100
+n_veces = 1000
+```
+
+Tienes a `py n_individuos` que lanzan una moneda al aire `py n_veces` cada uno. Eso hace un total de `py n_individuos * n_veces` lanzamientos, en los que la probablidad teórica de obtener cara (resultado igual a 1 en este caso) es $0,5$.
+
+```{python}
+#| label: sim-lanzamientos
+np.random.seed(10)
+lanzamientos = np.random.randint(0, 2, size=n_individuos * n_veces)
+lanzamientos = lanzamientos.reshape(n_individuos, n_veces)
+lanzamientos.shape
+```
+
+Este es un proceso estocástico ergódico porque: 
+
+- Para cualquier individuo $i$, la probabilidad de obtener cara en todos sus lanzamientos es 0,5, y
+- para cualquier lanzamiento $k$, la probabilidad de obtener cara entre los $k$-ésimos lanzamientos de todos los individuos es $0,5$.
+
+
+Por ejemplo, la probabilidad de obtener cara para el individuo 2 (el tercero, porque esto es Python y piensan raro) es:
+
+```{python}
+#| label: individuo2
+np.mean(lanzamientos[2, :])
+```
+
+A su vez, la probabilidad de que obtengan cara entre todos los individuos en el lanzamiento 50 (el 51 xD) es:
+
+
+```{python}
+#| label: lanzamiento50
+np.mean(lanzamientos[:, 50])
+```
+
+## Ejemplo de proceso no ergódico
+
+Supón ahora este proceso: 
+
+1. Partes de un capital de 1. 
+2. Tiras una moneda al aire. 
+3. Si sale cara, multiplicas el capital por 1,5; si sale cruz, por 0,6
+4. Ve al paso 2.
+
+
+La simulación de lanzamientos de monedas con sus resultados $1,5$ y $0,6$ se puede hacer así:
+
+```{python}
+#| label: multiplicadores
+multiplicadores_capital = np.random.choice([0.6, 1.5], size=n_individuos * n_veces)
+multiplicadores_capital = multiplicadores_capital.reshape(n_individuos, n_veces)
+```
+
+Y la evolución del capital se calcula así:
+
+```{python}
+#| label: capital-evolution
+capitales = multiplicadores_capital.cumprod(axis=1)
+```
+
+El capital de cada individuo (`py n_individuos`) empezaba en 1, por lo que el capital medio por individuo era de 1. Tras el primer lanzamiento, el capital medio queda en: 
+
+```{python}
+#| label: capital1
+capitales[:, 0].mean()
+```
+
+Ten en cuenta que la media teórica sería $\frac{1,50 + 0,60}{2} = 1,05$.
+
+La evolución de capitales medios: 
+
+```{python}
+#| label: capital-societario
+
+# compute mean per column on numpy array capitales
+evolucion_capital_medio = capitales.mean(axis=0)
+import matplotlib.pyplot as plt
+plt.plot(evolucion_capital_medio)
+```
+
+
+
+
+
