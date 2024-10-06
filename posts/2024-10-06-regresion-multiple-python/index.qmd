@@ -1,0 +1,115 @@
+---
+title: "Ejemplo de regresión múltiple con Python"
+description: "Pequeña práctica de regresión múltiple con Python, siguiendo ISLP"
+description-meta: "Pequeña práctica de regresión múltiple con Python, siguiendo ISLP"
+author: "Leonardo Hansa"
+date: "2024-10-06"
+categories: [exploraciones]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+Aquí sigo un ejercicio de regresión lineal con Python del libro _Introduction to Statistical Learning with Python._
+
+## Código del ajuste del modelo
+
+```{python}
+#| label: libs
+import numpy as np
+import pandas as pd
+from matplotlib.pyplot import subplots
+
+import statsmodels.api as sm
+
+from statsmodels.stats.outliers_influence import variance_inflation_factor as VIF
+from statsmodels.stats.anova import anova_lm
+
+from ISLP import load_data
+from ISLP.models import (ModelSpec as MS, summarize, poly)
+```
+
+```{python}
+#| label: load-data
+boston = load_data('Boston')
+boston.head()
+```
+
+Estos datos son un clásico, que incluso han tenido ya _haters_ por no sé qué variable que hace al conjunto racista. Pero yo voy a seguir con el ejemplo de ISLP porque no me quiero complicar ahora. 
+
+El libro ajusta una regresión lineal de `'medv'` frente a `'lstat'`. Por supuesto, ni idea de qué es cada una. Pero solo quier practicar código Python; el resultado nos da igual. 
+
+```{python}
+#| label: datos
+X = pd.DataFrame({'intercept': np.ones(boston.shape[0]),
+                  'lstat': boston['lstat']})
+
+X.head()                  
+```
+
+```{python}
+#| label: ols1
+y = boston['medv']
+model = sm.OLS(y, X)
+results = model.fit()
+results.summary()
+```
+
+Una forma más generalizable de preparar los datos es con la función `MS()`, que funciona al estilo `sklearn`.
+
+```{python}
+#| label: fit-tranform
+design = MS(['lstat'])
+design = design.fit(boston)
+X = design.transform(boston)
+X.head()
+```
+
+También se puede acortar con `fit_transform()`.
+
+A partir del modelo, guardado en `results`, y un conjunto de datos, puedes obtener predicciones.
+
+```{python}
+new_df = pd.DataFrame({'lstat': [5, 10, 15]})
+newX = design.transform(new_df)
+newX
+```
+
+Y ahora predices:
+
+```{python}
+#| label: predicciones
+new_predictions = results.get_prediction(newX)
+new_predictions.conf_int(alpha=0.95)
+```
+
+## Gráfico
+
+```{python}
+#| label: plot
+def abline(ax, b, m, *args, **kwargs):
+    "Add a line with slope m and intercept b to ax"
+    xlim = ax.get_xlim()
+    ylim = [m * xlim[0] + b, m * xlim[1] + b]
+    ax.plot(xlim, ylim, *args, **kwargs)
+
+ax = boston.plot.scatter('lstat', 'medv')
+abline(ax, 
+       results.params[0],
+       results.params[1], 
+       'r--', 
+       linewidth=3)
+ax = subplots(figsize=(8,8))[1]
+ax.scatter(results.fittedvalues, results.resid)
+ax.set_xlabel('Fitted value')
+ax.set_ylabel('Residual')
+ax.axhline(0, c='k', ls= '--')
+infl = results.get_influence()
+ax = subplots(figsize=(8,8))[1]
+ax.scatter(np.arange(X.shape[0]), infl.hat_matrix_diag)
+ax.set_xlabel('Index')
+ax.set_ylabel('Leverage')
+np.argmax(infl.hat_matrix_diag)
+```
