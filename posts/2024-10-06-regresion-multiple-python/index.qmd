@@ -101,11 +101,17 @@ abline(ax,
        results.params[1], 
        'r--', 
        linewidth=3)
+```
+
+```{python}
 ax = subplots(figsize=(8,8))[1]
 ax.scatter(results.fittedvalues, results.resid)
 ax.set_xlabel('Fitted value')
 ax.set_ylabel('Residual')
 ax.axhline(0, c='k', ls= '--')
+```
+
+```{python}
 infl = results.get_influence()
 ax = subplots(figsize=(8,8))[1]
 ax.scatter(np.arange(X.shape[0]), infl.hat_matrix_diag)
