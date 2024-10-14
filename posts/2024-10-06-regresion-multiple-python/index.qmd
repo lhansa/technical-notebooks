@@ -14,7 +14,9 @@ freeze: true
 
 Aquí sigo un ejercicio de regresión lineal con Python del libro _Introduction to Statistical Learning with Python._
 
-## Código del ajuste del modelo
+## Regresión simple
+
+### Código del ajuste del modelo
 
 ```{python}
 #| label: libs
@@ -49,6 +51,8 @@ X = pd.DataFrame({'intercept': np.ones(boston.shape[0]),
 X.head()                  
 ```
 
+En **statsmodels** el _intercept_ no se incluye por defecto y es el usuario quien tiene que incluirlo.
+
 ```{python}
 #| label: ols1
 y = boston['medv']
@@ -57,7 +61,7 @@ results = model.fit()
 results.summary()
 ```
 
-Una forma más generalizable de preparar los datos es con la función `MS()`, que funciona al estilo `sklearn`.
+Una forma más generalizable de preparar los datos es con la función `MS()`, que funciona al estilo `sklearn`. Pero es algo propio del libro así que no sé si le haré mucho caso.
 
 ```{python}
 #| label: fit-tranform
@@ -85,10 +89,12 @@ new_predictions = results.get_prediction(newX)
 new_predictions.conf_int(alpha=0.95)
 ```
 
-## Gráfico
+### Gráfico
+
+El primer gráfico muestra la regresión calculada.
 
 ```{python}
-#| label: plot
+#| label: plot-regression
 def abline(ax, b, m, *args, **kwargs):
     "Add a line with slope m and intercept b to ax"
     xlim = ax.get_xlim()
@@ -103,7 +109,13 @@ abline(ax,
        linewidth=3)
 ```
 
+El segundo gráfico compara los residuos frente a los valores ajustados. 
+
+Parece que los valores ajustados más pequeños están asociados a residuos negativos y altos.
+En valores más altos de ajuste, hay residuos tanto positivos como negativos, pero se concentran muchos más en casos negativos.
+
 ```{python}
+#| label: residuals
 ax = subplots(figsize=(8,8))[1]
 ax.scatter(results.fittedvalues, results.resid)
 ax.set_xlabel('Fitted value')
@@ -111,11 +123,29 @@ ax.set_ylabel('Residual')
 ax.axhline(0, c='k', ls= '--')
 ```
 
+El _leverage_ es una métrica que indica cuánto se aleja un punto del centroide de toda la nube de puntos. Puntos muy alejados tendrán una mayor influencia en el cálculo del coeficiente que puntos cercanos. 
+
+El gráfico muestra el _leverage_ contra el índice del punto, lo que ayuda a identificar puntos más influyentes (en el caso de una serie temporal, se podría ver como una evolución).
+
 ```{python}
+#| label: plot-levarage
 infl = results.get_influence()
 ax = subplots(figsize=(8,8))[1]
 ax.scatter(np.arange(X.shape[0]), infl.hat_matrix_diag)
 ax.set_xlabel('Index')
 ax.set_ylabel('Leverage')
 np.argmax(infl.hat_matrix_diag)
+```
+
+## Regresión múltiple
+
+Ahora enfrentan `'medv'` a `'lstat'` y `'age'`.
+
+
+```{python}
+#| label: multiple
+X = MS(['lstat', 'age']).fit_transform(boston)
+model1 = sm.OLS(y, X)
+results1 = model1.fit()
+results1.summary()
 ```
