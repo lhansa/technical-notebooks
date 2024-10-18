@@ -1,0 +1,113 @@
+---
+title: "Quita caracteres raros en tus variables"
+description: "Pequeña práctica para limpiar los textos de las variables de tus tablas"
+description-meta: "Pequeña práctica para limpiar los textos de las variables de tus tablas"
+author: "Leonardo Hansa"
+date: "2024-10-18"
+categories: [exploraciones]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+La programación está pensada con el alfabeto anglosajón. Cuando tienes datos en español, francés, turco, etc., aunque el alfabeto tiene casi todo en común con el anglosajón, tiene demasiados elementos molestos en algunos casos. 
+
+Sin ir más lejos, estas líneas están llenas de tildes (y alguna eñe caerá). En las filas de una columna pueden no molestarte  (dependerá del análisis que vayas hacer), pero si tienes que pasar esos valores a nombres de columnas, puede ser muy mala idea que tengas alguna llamada `año`.
+
+Veamos formas de solucionarlo.
+
+## A mano
+
+Forma horrible.
+
+```{r}
+#| label: set-up-nombres
+nombres <- c("Campaña veintitrés", "C'est très petite", "Alışveriş Arabası Önü Giydirme")
+nombres <- rep(nombres, 2)
+nombres
+```
+
+Tienes una columna con esos valores. Tienen textos en español, francés y turco. Y repetidos. Quieres adaptarlo a alfabeto anglosajón. Por ejemplo, `"campaña"` pasará a ser `"campana"` (habrá niños en el cuerpo de un adulto que se pondrían nerviosos si estuviera la palabra `"año"` por allí).
+
+Puedes plantear algún `replace`, pero como intentes hacerlo carácter a carácter, vas a querer dejar tu trabajo.
+
+```{r}
+#| label: str-replace
+stringr::str_replace(nombres, "ñ", "n")
+```
+
+Eso puede serte útil si tienes algún maestro que te dijera como cambiar carácter. Pero no tiene sentido que tengas que hacerlo letra a letra (aunque es muy posible que la mejor forma de construir ese maestro es hacerlo letra a letra la primera vez).
+
+## _Conversiones_
+
+No sé cómo llamar a esto, pero hay un par de funciones que pueden ayudarte... en cierto modo. 
+
+Matizo: te pueden quitar los caracteres raros, pero no va a ser suficiente para que los textos te sirvan como nombres de columnas. 
+
+Ten en cuenta que los nombres de columnas deberían ser en minúsculas y con barras bajas (o quizá con mayúscula la primera letra de cada palabra, si barras), no solo sin tildes ni caracteres raros.
+
+Pero vamos a ver cómo queda. 
+
+En R base tienes la función `iconv()`.
+
+```{r}
+#| label: iconv
+iconv(nombres, to = "ASCII//TRANSLIT")
+```
+
+No está mal, que me ha incluso simplificado las íes turcas. Pero esto sigue sin valerme a mí.
+
+Si te vale a ti, una alternativa es:
+
+```{r}
+#| label: replace
+stringi::stri_trans_general(nombres, "latin-ascii")
+```
+
+Pero:
+
+```{r}
+#| label: benchmark
+microbenchmark::microbenchmark(
+    base = iconv(nombres, to = "ASCII//TRANSLIT"), 
+    stringi = stringi::stri_trans_general(nombres, "latin-ascii")
+)
+```
+
+## Mi solución
+
+Insisto que lo que quiero no es solo unificar caracteres, cosa que podría ser útil en algún proyecto de procesamiento de lenguaje natural, sino convertir esos textos a algo útil como nombres de columnas de una tabla (con sus minúsculas, sus barras bajas en lugar de espacios, etc).
+
+Para esto me gusta la librería **janitor**. La función con la que la conocí es `clean_names()`.
+
+Recuerda que los nombres de columnas del data frame `iris` son `r names(iris)`. Pero:
+
+```{r}
+#| label: clean-names
+library(janitor)
+iris |> 
+  clean_names() |> 
+  names()
+```
+
+Esta librería tiene la función `make_clean_names()`, que actúa sobre vectores.
+
+Pero ten en cuenta una cosa: que su utilidad principal es para nombres de columnas, y **en una tabla nunca debería haber dos columnas con el mismo nombre**, así que evita duplicados:
+
+```{r}
+#| label: make1
+make_clean_names(nombres)
+```
+
+Tú puedes no querer eso. Pero hay un argumento que te soluciona el problema:
+
+```{r}
+#| label: make2
+make_clean_names(nombres, allow_dupes = TRUE)
+```
+
+## Python
+
+En algún momento, haré esto en Python.
