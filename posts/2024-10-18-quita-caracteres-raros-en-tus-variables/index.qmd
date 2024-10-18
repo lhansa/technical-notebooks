@@ -111,3 +111,10 @@ make_clean_names(nombres, allow_dupes = TRUE)
 ## Python
 
 En algún momento, haré esto en Python.
+
+
+```{python}
+nombres = ["Campaña veintitrés", "C'est très petite", "Alışveriş Arabası Önü Giydirme"]
+nombres = nombres * 2
+nombres
+```
