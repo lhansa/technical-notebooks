@@ -1,0 +1,81 @@
+---
+title: "Evolución de la población por provincias en España"
+description: "Exploratorio con Python de los datos públicos de residentes por provincia en España"
+description-meta: "Exploratorio con Python de los datos públicos de residentes por provincia en España"
+author: "Leonardo Hansa"
+date: "2024-10-27"
+categories: [exploraciones]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+El INE tiene datos de evolución ~~trimestral~~ semestral de la población por provincias en España. 
+
+En un formato horrible, por supuesto.
+
+```{python}
+#| label: libs
+import pandas as pd
+import matplotlib.pyplot as plt
+import locale
+```
+
+```{python}
+#| label: read-data
+locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+
+df_ine = pd.read_csv(
+    'ine-poblacion-provincias.csv', 
+    sep=';', 
+    header=0, 
+    names=['edad', 'provincia', 'sexo', 'periodo', 'residentes']
+    # usecols=['provincia', 'periodo', 'residentes']
+)
+
+condicion = (df_ine['edad'] == 'Todas las edades') & (df_ine['sexo'] == 'Total')
+df_ine = df_ine.loc[condicion, ['provincia', 'periodo', 'residentes']]
+
+df_ine['residentes'] = pd.to_numeric(df_ine['residentes'].str.replace('.',''))
+df_ine['periodo'] = pd.to_datetime(df_ine['periodo'], format='%d de %B de %Y')
+
+df_ine.head()
+```
+
+Si los tratas un poco, puedes usar mi librería favorita para hacer gráficos, matplotlib, en la que si tuviera que trabajar dejaría mi trabajo, me pagaran lo que me pagaran. 
+
+```{python}
+#| label: prepara-plot
+df_solo_provincias = df_ine[df_ine['provincia'] != 'Total Nacional']
+df_solo_provincias['residentes'] = df_solo_provincias['residentes'].fillna(method='ffill')
+
+provincias_destacadas = ['28 Madrid', '08 Barcelona', '46 Valencia/València', '29 Málaga']
+
+df_solo_provincias['destacada'] = df_solo_provincias['provincia'].apply(lambda x: x if x in provincias_destacadas else 'Otras')
+```
+
+Dicen que construyendo más vivienda se solucionan los problemas de precios.
+
+```{python}
+#| label: plot
+colors = {'28 Madrid': 'blue', '08 Barcelona': 'red', '46 Valencia/València': 'green', '29 Málaga': 'orange', 'Otras': 'lightgray'}
+
+df_pivot = df_solo_provincias.pivot(index='periodo', columns='provincia', values='residentes')
+
+fig, ax = plt.subplots(figsize=(10, 6))
+
+for provincia in df_pivot.columns:
+    color = colors[provincia] if provincia in provincias_destacadas else colors['Otras']
+    label = provincia if provincia in provincias_destacadas else '_nolegend_'
+    df_pivot[provincia].plot(ax=ax, color=color, label=label)
+
+plt.title('Evolución de la población por provincias en España')
+plt.ylabel('Residentes (millones)')
+plt.xlabel('')
+plt.legend()
+plt.show()
+```
+
+Suerte con pillar el ritmo a la demanda.
