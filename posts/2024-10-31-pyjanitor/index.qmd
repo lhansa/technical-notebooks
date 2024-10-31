@@ -1,0 +1,75 @@
+---
+title: "Quita caracteres raros en tus variables (2)"
+description: "Pequeña práctica para limpiar los textos de las variables de tus tablas con Python"
+description-meta: "Pequeña práctica para limpiar los textos de las variables de tus tablas con Python"
+author: "Leonardo Hansa"
+date: "2024-10-31"
+categories: [exploraciones]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+El otro día [te compartí ideas](https://lhansa.github.io/posts/2024-10-18-quita-caracteres-raros-en-tus-variables/) de cómo adaptar valores de texto que no te sirven como nombres de columnas. En R. 
+
+[José Luis Cañadas](https://muestrear-no-es-pecado.netlify.app/) me habló de la librería **pyjanitor** como alternativa en Python. Me sonaba lejanamente pero nunca la había usado. 
+
+Aporta muchas más cosas aparte de cambiar textos para que cumplan con ciertas reglas de estilo. En cierto modo te da toda una nueva sintaxis para hacer las operaciones que haces con pandas de una forma más parecida al **tidyverse**. 
+
+Ahora mismo no es lo busco. Lo que busco es replicar el ejercicio del otro día. 
+
+Así que vamos a ello. 
+
+## `pyjanitor`
+
+```{python}
+#| label: libs
+import pandas as pd
+import janitor
+```
+
+Teníamos un listado de nombres que en un proyecto real vendrían como valores de la columna de un data frame. Y están repetidos.
+
+```{python}
+nombres = ["Campaña veintitrés", "C'est très petite", "Alışveriş Arabası Önü Giydirme"]
+nombres = nombres * 2
+nombres
+```
+
+Queremos reescribirlos para que sigan un estilo válido como nombres de columnas. Este estilo es opinable, pero para ir al grano asumiré que  lo que quiero es esto: 
+
+- _snake case_, es decir, todo en minúscula con palabras separadas por barras bajas. 
+- Sin tildes, ni eñes ni otros caracteres raros (donde raro es no anglosajón). 
+- ... Y más cosas que ahora me dan igual. 
+
+La librería janitor está pensada para trabajar directamente con un data frame. Pero no es lo que busco ahora. Es más: la funcionalidad de limpiar valores de una columna (no nombres) ni siquiera está a mano. 
+
+## La función escondida
+
+He [curioseado el código fuente](https://github.com/pyjanitor-devs/pyjanitor/blob/dev/janitor/functions/clean_names.py) y he encontrado la función que limpia los nombres de las columnas, es decir, el código que aplica las reglas de limpieza. 
+
+Este código está un poco escondido, pero lo puedes llamar directamenmte sobre una serie de pandas (es decir, lo que podría llegar a ser una columna de un data frame).
+
+La función es `_clean_names` y su primer argumento es la serie que quieres editar. Ninguno de los argumentos de configuración tiene valor por defecto, así que hay que especificarlos todos. 
+
+```{python}
+from janitor.functions.clean_names import _clean_names
+
+nombres = pd.Series(nombres)
+nuevos_nombres = _clean_names(
+    nombres,
+    strip_underscores=True, 
+    case_type='snake', 
+    remove_special=True, 
+    strip_accents=True, 
+    enforce_string=True, 
+    truncate_limit=False)
+
+nuevos_nombres
+```
+
+No queda igual que en el caso de R (por ejemplo, las eñes las quita pero no las convierte a enes) pero para lo que quiero hacer aquí me vale.
+
+Gracias, José Luis, como siempre, que incluso con Python me ayudas.
