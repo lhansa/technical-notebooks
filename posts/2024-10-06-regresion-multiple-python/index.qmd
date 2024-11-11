@@ -22,6 +22,7 @@ Aquí sigo un ejercicio de regresión lineal con Python del libro _Introduction 
 #| label: libs
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from matplotlib.pyplot import subplots
 
 import statsmodels.api as sm
@@ -141,11 +142,167 @@ np.argmax(infl.hat_matrix_diag)
 
 Ahora enfrentan `'medv'` a `'lstat'` y `'age'`.
 
-
 ```{python}
 #| label: multiple
 X = MS(['lstat', 'age']).fit_transform(boston)
 model1 = sm.OLS(y, X)
 results1 = model1.fit()
 results1.summary()
+```
+
+El objeto `results1` es el que contiene información que ahora quiero explorar para validar si el modelo tiene algún sentido. 
+
+
+### Una nota
+
+A mí esto de la programación orientada a objetos, en el que un objeto tiene lo que se supone que necesitas de él, me resulta muy poco intuitivo, porque no estoy acostumbrado a trabajar y estudiar clases. 
+
+No digo que a lo que yo estoy acostumbrado, que es a mirarme funciones a ver qué puedo hacer con ellas, sea mejor. Solo digo que cambiar de una forma a otra requiere un esfuerzo, y cualquiera que se dedique a enseñar estas cosas debería tenerlo en cuenta si sus alumnos vienen ya de una metodología, y van a cambiar a la otra. 
+
+No conocía la función `dir()`, con la que puedes acceder a lo que hay disponible en el objeto. 
+
+```{python}
+#| label: funcion-dir
+[caso for caso in dir(results1) if not(caso.startswith('_'))]
+```
+
+### Más regresión
+
+Ahora cuentan una cosa interesante, y para eso ajustan un modelo con muchas más variables (todas menos la edad).
+
+```{python}
+#| label: more-regression
+columnas_no_edad = boston.columns.drop(['medv', 'age'])
+X_no_edad = MS(columnas_no_edad).fit_transform(boston)
+model2 = sm.OLS(y, X_no_edad)
+print(model2.fit().summary())
+```
+
+## Bondad de ajuste
+
+### Multicolinearidad
+
+Voy a hacer un paréntesis; necesito entrar en detalle con la multicolinearidad. Es el fenómeno que ocurre cuando tienes varias variables explicativas que tienen una correlación alta entre ellas. 
+
+La **multicolinearidad** puede destruirte tu modelo. 
+
+Voy a simular unos datos y a ajustar un modelo con ellos. Como los simulo yo, sé lo que debería salir en el modelo.
+
+```{python}
+#| label: dummy-data-1
+# la multicolinealidad afecta especialmente en muestras pequeñas
+n_size = 100 
+a1 = np.random.normal(20, 4, n_size)
+b1 = np.random.uniform(-50, -30, n_size)
+y_ab = 200 + 0.5 * a1 + (-0.3) * b1 + np.random.normal(0, 1, n_size)
+```
+
+Las variables de las que depende `y_ab` no tienen nada que ver la una con la otra.
+
+```{python}
+#| label: plot-dummy-data-ab
+plt.scatter(a1, b1, c='#800080')
+plt.xlabel('Variable a1')
+plt.ylabel('Variable b1')
+plt.title('Dos variables que no tienen nada que ver')
+plt.show()
+```
+
+Cuando hago ajusto un modelo de regresión lineal todo tiene buena pinta.
+
+```{python}
+#| label: modelo1
+X_ab = pd.DataFrame({
+  'intercept': np.ones(n_size), 
+  'a1': a1, 
+  'b1': b1
+})
+fit_ab = sm.OLS(y_ab, X_ab).fit()
+print(fit_ab.summary())
+```
+
+
+Vamos a plantearlo ahora con otra variable que me invento. 
+
+```{python}
+#| label: more-dummy-data
+a2 = 5 * a1 + np.random.normal(0, 5, n_size)
+y_a = 200 + 0.5 * a1 + (-0.3) * a2 + np.random.normal(0, 1, n_size)
+
+plt.scatter(a1, a2, c='#800080')
+plt.xlabel('a1')
+plt.ylabel('a2')
+plt.title('Dos variables con mucho en común')
+plt.show()
+```
+
+Ahora la nueva variable dependiente depende de 2 variables que a su vez tienen una relación entre ellas. 
+
+Veamos la regresión. 
+
+```{python}
+X_a = pd.DataFrame({
+  'intercept': np.ones(n_size), 
+  'a1': a1, 
+  'a2': a2
+})
+fit_a = sm.OLS(y_a, X_a).fit()
+print(fit_a.summary())
+```
+
+```{python}
+dir(fit_a)
+```
+
+```{python}
+fit_a.bse
+```
+
+### Variance Inflation Factor
+
+La colinearidad puede ocurrir incluso cuando la correlación entre las variables involucradas no sea alta; a eso es a lo que los autores llaman **multicolinearidad.** 
+
+Calcular la matriz de correlaciones, por ello, puede no ser suficiente. Pero yo la voy a calcular de todos modos.
+
+```{python}
+#| label: correlaciones
+X_no_edad.drop(columns='intercept').corr()
+```
+
+Ahora bien, parece mejor calcular el _variance inflator ratio_ (VIF). 
+
+```{python}
+#| label: vif
+l_vifs = [VIF(X_no_edad, i) for i in range(1, X_no_edad.shape[1])]
+df_vif = pd.DataFrame({'vif': l_vifs}, index=X_no_edad.columns[1:])
+df_vif
+```
+
+Esto siguiente no funciona. No entiendo por qué dada la explicación del libro.
+
+```{python}
+#| label: mi-VIF
+def compute_my_vif1(col_name):
+  with_columns = boston.columns.drop(['medv', 'age'])
+  X_with = MS(with_columns).fit_transform(boston)
+  model_with = sm.OLS(y, X_with).fit()
+
+  # without_columns = boston.columns.drop(['medv', 'age', col])
+  # X_without = MS(without_columns).fit_transform(boston)
+  # model_without = sm.OLS(y, X_without)
+
+  X_without = MS([col_name]).fit_transform(boston)
+  model_without = sm.OLS(y, X_without).fit()
+
+  return model_with.bse[col_name] / model_without.bse[col_name]
+
+compute_my_vif1('indus')
+```
+
+```{python}
+df_vif.loc['indus', :]
+```
+
+```{python}
+boston.columns
 ```
