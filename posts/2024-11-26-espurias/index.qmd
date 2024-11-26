@@ -1,0 +1,123 @@
+---
+title: "Relaciones espurias de datos de divorcios"
+description: "Ejemplos de relaciones espurias con Statistical Rethinking"
+description-meta: "Ejemplos de relaciones espurias con Statistical Rethinking"
+author: "Leonardo Hansa"
+date: "2024-11-26"
+categories: [exploraciones]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+En el libro _Statistical Rethinking_ el autor estudia la relación entre el divorcio y dos variables: 
+
+- La edad media en la que la pareja se casa. 
+- La cantidad de gente que se casa.
+
+```{r}
+#| label: libs-and-data
+library(rethinking)
+library(ggplot2)
+ggplot2::theme_set(ggplot2::theme_bw())
+
+data(WaffleDivorce)
+df_divorce <- WaffleDivorce
+head(df_divorce)
+```
+
+Primero estudia ambas variables por separado, como explicativas de la variable objetivo. Y luego usa las dos a la vez. 
+
+Los modelos los plantea con las variables escaladas, con media 0 y desviación típica 1.
+
+```{r}
+#| label: pre-procesado
+df_divorce$A <- scale(df_divorce$MedianAgeMarriage)
+df_divorce$D <- scale(df_divorce$Divorce)
+df_divorce$M <- scale(df_divorce$Marriage)
+
+ggplot(df_divorce) + 
+  geom_histogram(aes(D), binwidth = 0.3)
+```
+
+```{r}
+#| label: modelo-edad
+fit_edad <- rethinking::quap(
+    alist(
+        D ~ dnorm(mu, sigma), 
+        mu <- a + bA * A, 
+        a ~ dnorm(0, 0.2),
+        bA ~ dnorm(0, 0.5),
+        sigma ~ dexp(1)
+    ), 
+    data = df_divorce
+)
+
+precis(fit_edad)
+```
+
+Parece que edades tempranas de matrimonio se asocian a un mayor ratio de divorcios. 
+
+Por otro lado:
+
+```{r}
+#| label: modelo-casados
+fit_casados <- quap(
+    alist(
+        D ~ dnorm(mu, sigma), 
+        mu <- a + bM * M,
+        bM ~ dnorm(0, 0.5), 
+        a ~ dnorm(0, 0.2),
+        sigma ~ dexp(1)
+    ), 
+    data = df_divorce
+)
+
+precis(fit_casados)
+```
+
+El ratio de matrimonios también muestra una relación (positiva en este caso) con los divorcios. Parece razonable: cuanta más gente se case, más divorcios habrá. 
+
+Ahora bien, ¿es esto útil para predecir divorcios?
+
+```{r}
+#| label: modelo-ambos
+fit_ambas <- quap(
+    alist(
+        D ~ dnorm(mu, sigma),
+        mu  <- a + bA * A + bM * M,
+        bA ~ dnorm(0, 0.5),
+        bM ~ dnorm(0, 0.5), 
+        a ~ dnorm(0, 0.2),
+        sigma ~ dexp(1)
+    ), 
+    data = df_divorce
+)
+
+plot(coeftab(fit_edad, fit_casados, fit_ambas), par = c("bA", "bM"))
+```
+
+
+Cuando están ambas variables, el ratio de matrimonios no tiene una relación significativa con el ratio de divorcios; no aporta información que la edad al casarse no esté aportando ya.
+
+Queda ahora pendiente ver si hay relación entre la edad al casarse y la cantidad de matrimonios.
+
+```{r}
+#| label: modelo-edad-casados
+fit_edad_casados <- quap(
+    alist(
+        M ~ dnorm(mu, sigma), 
+        mu <- a + bA * A, 
+        bA ~ dnorm(0, 0.5), 
+        a ~ dnorm(0, 0.5),
+        sigma ~ dexp(1)
+    ), 
+    data = df_divorce
+)
+
+precis(fit_edad_casados)
+```
+
+
