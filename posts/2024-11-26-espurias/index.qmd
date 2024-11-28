@@ -120,4 +120,32 @@ fit_edad_casados <- quap(
 precis(fit_edad_casados)
 ```
 
+Las prioris del modelo:
+```{r}
+#| label: prioris1
+prior <- extract.prior(fit_edad_casados)
+mu <- link(fit_edad_casados, post = prior, data = list(A=c(-2, 2)))
+head(mu)
 
+plot(NULL, xlim = c(-2, 2), ylim = c(-5, 5))
+for (i in 1:50) {
+    lines(c(-2, 2), mu[i, ], col = "gray")
+}
+```
+
+```{r}
+mu <- link(fit_edad)
+mu_mean <- apply(mu, 2, mean)
+mu_pi <- apply(mu, 2, PI)
+
+# D_sim <- sim(fit_edad, n = 1e3)
+# D_sim <- apply(D_sim, 2, PI)
+
+plot(mu_mean ~ df_divorce$D, col=rangi2, ylim = range(mu_pi), 
+     xlab = "Observed divorce", ylab = "Predicted divorce")
+abline(a = 0, b = 1, lty = 2)
+for (i in 1:nrow(df_divorce)) {
+    lines(rep(df_divorce$D[i], 2), mu_pi[, i], col = "gray")
+    # lines(rep(df_divorce$D[i], 2), D_sim[, i], col = "blue")
+}
+```
