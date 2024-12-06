@@ -1,0 +1,126 @@
+---
+title: "Regresión lineal bootstrap y bayesiana"
+description: "Comparativa de regresión lineal bootstrap y bayesiana"
+description-meta: "Comparativa de regresión lineal bootstrap y bayesiana"
+author: "Leonardo Hansa"
+date: "2024-12-06"
+categories: [exploraciones]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+Del libro _Statistical Rethinking_ tomo los datos de divorcios.
+
+```{r}
+#| label: libs-data
+library(rethinking)
+library(ggplot2)
+ggplot2::theme_set(ggplot2::theme_bw())
+
+data(WaffleDivorce)
+df_divorce <- WaffleDivorce
+head(df_divorce)
+```
+
+Voy a plantear una regresión del divorcio frente a la edad media de matrimonio. 
+
+Como primer paso, procedo de la misma forma que el autor, esclando las variables.
+
+```{r}
+#| label: pre-procesado
+df_divorce$s_age <- scale(df_divorce$MedianAgeMarriage)
+df_divorce$s_div <- scale(df_divorce$Divorce)
+```
+
+## Regresión lineal bootstrap
+
+```{r}
+bootstrap_size <- 1000
+coef_df <- purrr::map_dfr(seq_len(bootstrap_size), function(i) {
+    filas = sample(
+        seq_len(nrow(df_divorce)), 
+        size = nrow(df_divorce), 
+        replace = TRUE
+    )
+
+    df_boot <- df_divorce[filas, ]
+    fit <- lm(s_div ~ s_age, data = df_boot)
+    coefs = coef(fit)
+    tibble::tibble(
+        intercept = coefs[1],
+        age = coefs[2]
+    )
+})
+
+coef_df$id = seq_len(nrow(coef_df))
+head(coef_df)
+```
+
+```{r}
+#| label: bootstrap-plot
+
+ggplot() + 
+    geom_point(
+        data = df_divorce, 
+        aes(s_age, s_div), 
+        size = 2
+    ) +
+    geom_abline(
+        data = coef_df, 
+        aes(intercept = intercept, slope = age), 
+        color = "#800080", alpha = 0.1
+    )
+```
+
+## Regresión lineal bayesiana
+
+```{r}
+fit <- quap(
+    alist(
+        s_div ~ dnorm(mu, sigma), 
+        mu <- a + b * s_age, 
+        a ~ dnorm(0, 0.2),
+        b ~ dnorm(0, 0.5),
+        sigma ~ dexp(1)
+    ), 
+    data = df_divorce
+)
+```
+
+Ahora muestro los datos en un gráfico de dispersión y superpongo las rectas de regresión a posteriori.
+
+```{r}
+#| label: bayes-plot
+
+post <- extract.samples(fit)
+post_mean <- apply(post, 2, mean)
+post_hpd <- apply(post, 2, HPDI, prob = 0.89)
+
+ggplot() + 
+    geom_point(
+        data = df_divorce, 
+        aes(s_age, s_div), 
+        size = 2
+    ) +
+    geom_abline(
+        intercept = post_mean[1], 
+        slope = post_mean[2], 
+        color = "#800080"
+    ) +
+    geom_abline(
+        intercept = post_hpd[1, 1], 
+        slope = post_hpd[2, 1], 
+        linetype = "dashed", 
+        color = "#800080"
+    ) +
+    geom_abline(
+        intercept = post_hpd[1, 2], 
+        slope = post_hpd[2, 2], 
+        linetype = "dashed", 
+        color = "#800080"
+    )
+```
+
