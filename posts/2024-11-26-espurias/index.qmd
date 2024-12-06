@@ -134,6 +134,7 @@ for (i in 1:50) {
 ```
 
 ```{r}
+#| label: prioris2
 mu <- link(fit_edad)
 mu_mean <- apply(mu, 2, mean)
 mu_pi <- apply(mu, 2, PI)
