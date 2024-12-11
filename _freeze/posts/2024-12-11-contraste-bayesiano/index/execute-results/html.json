@@ -1,0 +1,17 @@
+{
+  "hash": "9f381285e70ff07912fdf20ab11e3839",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Contraste de medias, estilo bayesiano\"\ndescription: \"Contraste de medias y de distribución con estadística bayesiana\"\ndescription-meta: \"Contraste de medias y de distribución con estadística bayesiana\"\nauthor: \"Leonardo Hansa\"\ndate: \"2024-12-11\"\ncategories: [exploraciones]\nexecute: \n  echo: true\n  message: false\n  warning: false\nfreeze: true\n---\n\n\n\nLos contrastes de hipótesis me parecen de lo más contraintuitivo en el mundo frecuentista. \n\nEl resultado que da la estadística bayesiana es mucho más natural y fácil de interpretar (frase de Copilot)\n\n\nSimulo unos datos y luego voy a intentar contrastar si su la media de los datos es la que creo que es.\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(rethinking)\nlibrary(ggplot2)\n\nn_data <- 10000\npop_mean <- 25\npop_sd <- 5\nreal_data <- rnorm(n_data, mean = pop_mean, sd = pop_sd)\n\nggplot() + \n  geom_histogram(aes(real_data), binwidth = 0.3, fill = \"#800080\")\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/libs-and-data-1.png){width=672}\n:::\n:::\n\n\n\nPongo de prioris los datos que ya sé válidos:\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nfit1 <- quap(\n    alist(\n        y ~ dnorm(mu, sigma), \n        mu <- a, \n        a ~ dnorm(25, 2), \n        sigma ~ dnorm(5, 1)\n    ),\n    data = list(y = real_data)\n)\n\nprecis(fit1)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n           mean         sd      5.5%     94.5%\na     24.981842 0.05072362 24.900776 25.062908\nsigma  5.073994 0.03585699  5.016688  5.131301\n```\n\n\n:::\n:::\n\n\n\nIncluso con unos prioris malísimos, el resultado es el correcto (y más fácil de interpretar).\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nfit2 <- quap(\n    alist(\n        y ~ dnorm(mu, sigma), \n        mu <- a, \n        a ~ dnorm(0, 5), \n        sigma ~ dexp(1)\n    ), \n    data = list(y = real_data)\n)\n\nprecis(fit2)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n            mean       sd     5.5%    94.5%\na       7.663018 3.691649 1.763049 13.56299\nsigma 548.463245      NaN      NaN      NaN\n```\n\n\n:::\n:::",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

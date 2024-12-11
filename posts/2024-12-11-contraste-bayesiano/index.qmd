@@ -1,0 +1,68 @@
+---
+title: "Contraste de medias, estilo bayesiano"
+description: "Contraste de medias y de distribución con estadística bayesiana"
+description-meta: "Contraste de medias y de distribución con estadística bayesiana"
+author: "Leonardo Hansa"
+date: "2024-12-11"
+categories: [exploraciones]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+Los contrastes de hipótesis me parecen de lo más contraintuitivo en el mundo frecuentista. 
+
+El resultado que da la estadística bayesiana es mucho más natural y fácil de interpretar (frase de Copilot)
+
+
+Simulo unos datos y luego voy a intentar contrastar si su la media de los datos es la que creo que es.
+
+```{r}
+#| label: libs-and-data
+library(rethinking)
+library(ggplot2)
+
+n_data <- 10000
+pop_mean <- 25
+pop_sd <- 5
+real_data <- rnorm(n_data, mean = pop_mean, sd = pop_sd)
+
+ggplot() + 
+  geom_histogram(aes(real_data), binwidth = 0.3, fill = "#800080")
+```
+
+Pongo de prioris los datos que ya sé válidos:
+
+```{r}
+#| label: modelo1
+fit1 <- quap(
+    alist(
+        y ~ dnorm(mu, sigma), 
+        mu <- a, 
+        a ~ dnorm(25, 2), 
+        sigma ~ dnorm(5, 1)
+    ),
+    data = list(y = real_data)
+)
+
+precis(fit1)
+```
+
+Incluso con unos prioris malísimos, el resultado es el correcto (y más fácil de interpretar).
+
+```{r}
+#| label: modelo2
+fit2 <- quap(
+    alist(
+        y ~ dnorm(mu, sigma), 
+        mu <- a, 
+        a ~ dnorm(0, 5), 
+        sigma ~ dexp(1)
+    ), 
+    data = list(y = real_data)
+)
+
+precis(fit2)
+```
