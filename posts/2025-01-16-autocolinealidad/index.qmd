@@ -1,0 +1,72 @@
+---
+title: "Experimento con autocolinealidad"
+description: "Experimentos con autocolinealidad para ver si siempre es tan mala como se dice en la regresión lineal"
+description-meta: "Experimentos con autocolinealidad para ver si siempre es tan mala como se dice en la regresión lineal"
+author: "Leonardo Hansa"
+date: "2025-01-16"
+categories: [datos]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+## Autocolinealidad en la regresión lineal con muestras grandes
+
+Tienes una variable $y$ que depende de dos variables $x_1$ y $x_2$. Pero $x_2$ es una combinación lineal de $x_1$. 
+
+```{python}
+#| label: libs
+import numpy as np
+import statsmodels.api as sm
+from statsmodels.regression.linear_model import OLS
+```
+
+```{python}
+#| label: datos
+n = 10000
+x1 = np.random.normal(50, 10, n)
+x2 = 0.5 * x1 + np.random.normal(0, 5, n)
+y = 2 + 3 * x1 + 4 * x2 + np.random.normal(0, 10, n)
+```
+
+
+¿Qué pasa si usas $x_1$ y $x_2$ en una regresión lineal?
+
+```{python}
+#| label: regresion
+X = np.column_stack((x1, x2))
+X = sm.add_constant(X)
+
+modelo = OLS(y, X).fit()
+print(modelo.summary())
+```
+
+Pues aparentemente nada. Los coeficientes son los esperados y las $t$-stats son altas.
+
+## Autocolinealidad en la regresión lineal con muestras pequeñas
+
+Antes tenías una muestra de tamaño `python n`. Vamos a cambiar eso.
+
+
+```{python}
+#| label: datos-pequenos
+n = 100
+x1 = np.random.normal(50, 10, n)
+x2 = 0.5 * x1 + np.random.normal(0, 5, n)
+y = 2 + 3 * x1 + 4 * x2 + np.random.normal(0, 10, n)
+```
+
+Con estos datos, aparentemente los mismos pero con menor muestra, ajusto la regresión. 
+
+```{python}
+#| label: regresion-pequena
+X = np.column_stack((x1, x2))
+X = sm.add_constant(X)
+
+modelo = OLS(y, X).fit()
+print(modelo.summary())
+```
+
+Los coeficientes de $x_1$ y $x_2$ no son horribles, pero el intercept ya no tiene sentido. 
