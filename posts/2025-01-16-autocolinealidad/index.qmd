@@ -1,7 +1,7 @@
 ---
-title: "Experimento con autocolinealidad"
-description: "Experimentos con autocolinealidad para ver si siempre es tan mala como se dice en la regresión lineal"
-description-meta: "Experimentos con autocolinealidad para ver si siempre es tan mala como se dice en la regresión lineal"
+title: "Experimento con multicolinealidad"
+description: "Experimentos con multicolinealidad para ver si siempre es tan mala como se dice en la regresión lineal"
+description-meta: "Experimentos con multicolinealidad para ver si siempre es tan mala como se dice en la regresión lineal"
 author: "Leonardo Hansa"
 date: "2025-01-16"
 categories: [datos]
@@ -12,10 +12,6 @@ execute:
 freeze: true
 ---
 
-## Autocolinealidad en la regresión lineal con muestras grandes
-
-Tienes una variable $y$ que depende de dos variables $x_1$ y $x_2$. Pero $x_2$ es una combinación lineal de $x_1$. 
-
 ```{python}
 #| label: libs
 import numpy as np
@@ -23,12 +19,23 @@ import statsmodels.api as sm
 from statsmodels.regression.linear_model import OLS
 ```
 
+## Multicolinealidad en la regresión lineal con muestras grandes
+
+Tienes una variable $y$ que depende de dos variables $x_1$ y $x_2$. Pero $x_2$ es una combinación lineal de $x_1$. 
+
 ```{python}
 #| label: datos
 n = 10000
 x1 = np.random.normal(50, 10, n)
 x2 = 0.5 * x1 + np.random.normal(0, 5, n)
 y = 2 + 3 * x1 + 4 * x2 + np.random.normal(0, 10, n)
+```
+
+Por si hay alguna duda:
+
+```{python}
+#| label: correlacion
+np.corrcoef(x1, x2)[0, 1]
 ```
 
 
@@ -45,9 +52,9 @@ print(modelo.summary())
 
 Pues aparentemente nada. Los coeficientes son los esperados y las $t$-stats son altas.
 
-## Autocolinealidad en la regresión lineal con muestras pequeñas
+## Multicolinealidad en la regresión lineal con muestras pequeñas
 
-Antes tenías una muestra de tamaño `python n`. Vamos a cambiar eso.
+Antes tenías una muestra de tamaño `py n`. Vamos a cambiar eso.
 
 
 ```{python}
