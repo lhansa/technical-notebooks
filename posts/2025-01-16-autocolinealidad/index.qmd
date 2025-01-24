@@ -77,3 +77,60 @@ print(modelo.summary())
 ```
 
 Los coeficientes de $x_1$ y $x_2$ no son horribles, pero el intercept ya no tiene sentido. 
+
+## Incertidumbre
+
+Los resultados de la regresión pueden mejorar, no solo por tener más datos, sino simplemente por una muestra que encaje mejor. 
+
+Así que vamos a generar muchas muestras, de distintos tamaños, y vemos en cada una cómo cambian los coeficientes.
+
+```{python}
+#| label: simulacion
+
+n_sizes = np.arange(100, 1100, 100)
+runs_per_size = 100
+
+coeficientes = np.zeros((len(n_sizes), runs_per_size, 3))
+
+for i, n in enumerate(n_sizes):
+    for j in range(runs_per_size):
+        x1 = np.random.normal(50, 10, n)
+        x2 = 0.5 * x1 + np.random.normal(0, 5, n)
+        y = 2 + 3 * x1 + 4 * x2 + np.random.normal(0, 10, n)
+        
+        X = np.column_stack((x1, x2))
+        X = sm.add_constant(X)
+
+        modelo = OLS(y, X).fit()
+        coeficientes[i, j] = modelo.params
+
+coeficientes[:, :, 0]
+```
+
+Visualizo los coeficientes como puntos, incluido el intercept. En el eje $x$ tienes el tamaño de la muestra y en el eje $y$ el valor del coeficiente. La línea horizontal es el valor real del coeficiente.
+
+Fíjate cómo, cuanto menor es el tamaño muestral, menor es la precisión de la estimación. No creas que por que alguna vez salga bien con una muestra, tu estimación va a ser buena. La incertidumbre es alta, te guste o no.
+
+```{python}
+#| label: grafico
+
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(1, 3, figsize=(18, 4))
+
+for i in range(runs_per_size):
+    ax[0].scatter(n_sizes, coeficientes[:, i, 0], color='blue', alpha=0.1)
+    ax[1].scatter(n_sizes, coeficientes[:, i, 1], color='blue', alpha=0.1)
+    ax[2].scatter(n_sizes, coeficientes[:, i, 2], color='blue', alpha=0.1)
+
+ax[0].axhline(2, color='red', linestyle='--')
+ax[1].axhline(3, color='red', linestyle='--')
+ax[2].axhline(4, color='red', linestyle='--')
+
+
+ax[0].set_title('Intercept')
+ax[1].set_title('Coeficiente de x1')
+ax[2].set_title('Coeficiente de x2')
+
+plt.show()
+```
