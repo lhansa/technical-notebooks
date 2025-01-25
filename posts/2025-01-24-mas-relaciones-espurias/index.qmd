@@ -12,6 +12,9 @@ execute:
 freeze: true
 ---
 
+## Datos y planteamiento
+
+Tienes una variable $x_{real}$ que genera dos variables: $y$ y $x_{spur}$. 
 
 ```{r}
 #| label: libs-and-data
@@ -28,6 +31,40 @@ df <- data.frame(y, x_real, x_spur)
 ggplot(df) + 
   geom_histogram(aes(x_spur), fill = "#800080")
 ```
+
+Como la relación entre $x_{real}$ y $x_{spur}$ es alta, $x_{spur}$ parece tener una relación con $y$.
+
+```{r}
+#| label: plot
+ggplot(df) + 
+  geom_point(aes(x_spur, y)) + 
+  geom_smooth(aes(x_spur, y), method = "lm")
+```
+
+Pero $y$ por definición depende únicamente de $x_{real}$, por lo que la relación entre $x_{spur}$ y $y$ es espuria.
+
+## Regresiones
+
+La regresión que se ajusta según la definición sería:
+
+```{r}
+#| label: modelo-real
+
+fit_real <- quap(
+  alist(
+    y ~ dnorm(mu, sigma), 
+    mu <- a + b * x_real, 
+    a ~ dnorm(0, 0.2), 
+    b ~ dnorm(0, 0.5),
+    sigma ~ dexp(1)
+  ), 
+  data = df
+)
+
+precis(fit_real)
+```
+
+Si intentas ajustar una regresión que incluya a la variable espuria, el modelo te la rechazará.
 
 ```{r}
 #| label: modelo
@@ -47,7 +84,7 @@ fit <- quap(
 precis(fit)
 ```
 
-O con regresión `lm()`. 
+Si no quieres hacerlo bayesiano:
 
 ```{r}
 #| label: modelo-lm
@@ -56,4 +93,21 @@ fit_lm <- lm(y ~ x_spur + x_real, data = df)
 summary(fit_lm)
 ```
 
+Otra opción sería que sí usaras la variable espuria pero no la real:
 
+```{r}
+#| label: modelo-solo-spur
+
+fit_spur <- quap(
+  alist(
+    y ~ dnorm(mu, sigma), 
+    mu <- a + b * x_spur, 
+    a ~ dnorm(0, 0.2),
+    b ~ dnorm(0, 0.5),
+    sigma ~ dexp(1)
+  ), 
+  data = df
+)
+
+precis(fit_spur)
+```
