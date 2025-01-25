@@ -87,8 +87,9 @@ Así que vamos a generar muchas muestras, de distintos tamaños, y vemos en cada
 ```{python}
 #| label: simulacion
 
-n_sizes = np.arange(100, 1100, 100)
-runs_per_size = 100
+n_sizes = np.array([100, 1000, 2500, 5000, 7500, 10000])
+
+runs_per_size = 50
 
 coeficientes = np.zeros((len(n_sizes), runs_per_size, 3))
 
@@ -103,8 +104,6 @@ for i, n in enumerate(n_sizes):
 
         modelo = OLS(y, X).fit()
         coeficientes[i, j] = modelo.params
-
-coeficientes[:, :, 0]
 ```
 
 Visualizo los coeficientes como puntos, incluido el intercept. En el eje $x$ tienes el tamaño de la muestra y en el eje $y$ el valor del coeficiente. La línea horizontal es el valor real del coeficiente.

@@ -1,0 +1,59 @@
+---
+title: "Otro experimento con relaciones espurias"
+description: "Ejercicio con variables espurias y regresión"
+description-meta: "Ejercicio con variables espurias y regresión"
+author: "Leonardo Hansa"
+date: "2025-01-24"
+categories: [datos]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+
+```{r}
+#| label: libs-and-data
+library(rethinking)
+library(ggplot2)
+
+n_data <- 100
+x_real <- rnorm(n_data)
+x_spur <- rnorm(n_data, x_real)
+y  <- rnorm(n_data, x_real)
+
+df <- data.frame(y, x_real, x_spur)
+
+ggplot(df) + 
+  geom_histogram(aes(x_spur), fill = "#800080")
+```
+
+```{r}
+#| label: modelo
+
+fit <- quap(
+    alist(
+        y ~ dnorm(mu, sigma), 
+        mu <- a + b_spur * x_spur + b_real * x_real, 
+        a ~ dnorm(0, 0.2),
+        b_spur ~ dnorm(0, 0.5),
+        b_real ~ dnorm(0, 0.5),
+        sigma ~ dexp(1)
+    ), 
+    data = df
+)
+
+precis(fit)
+```
+
+O con regresión `lm()`. 
+
+```{r}
+#| label: modelo-lm
+
+fit_lm <- lm(y ~ x_spur + x_real, data = df)
+summary(fit_lm)
+```
+
+
