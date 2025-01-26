@@ -1,0 +1,81 @@
+---
+title: "Experimento bayesiano con multicolinealidad"
+description: "Regresión lineal bayesiana con multicolinealidad"
+description-meta: "Regresión lineal bayesiana con multicolinealidad"
+author: "Leonardo Hansa"
+date: "2025-01-26"
+categories: [datos]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+draft: true
+---
+
+El [otro día mostraba](https://lhansa.github.io/posts/2025-01-16-autocolinealidad/) cómo la multicolinealidad puede no suponerte mucho problema en algunos casos. 
+
+Ahora lo planteo de otra forma. 
+
+Genero unos datos parecidos.
+
+```{r}
+library(rethinking)
+
+set.seed(123)
+
+n_size <- 10000
+x1 <- rnorm(n_size, 50, 10)
+x2  <-  0.5 * x1 + rnorm(n_size, 0, 5)
+y  <-  2 + 3 * x1 + 4 * x2 + rnorm(n_size, 0, 10)
+
+fit_10000 <- quap(
+    alist(
+        y ~ dnorm(mu, sigma), 
+        mu <- a + b1 * x1 + b2 * x2, 
+        a ~ dnorm(2, 0.5),
+        b1 ~ dnorm(0, 0.5),
+        b2 ~ dnorm(0, 0.5),
+        sigma ~ dexp(1)
+    ), 
+    data = list(y = y, x1 = x1, x2 = x2)
+)
+
+precis(fit_10000)
+```
+
+
+Con el intercept le tengo que ayudar bastante porque es muy sensible al priori. 
+
+
+```{r}
+#| label: modelo-100
+
+
+n_size <- 100
+x1 <- rnorm(n_size, 50, 10)
+x2  <-  0.5 * x1 + rnorm(n_size, 0, 5)
+y  <-  2 + 3 * x1 + 4 * x2 + rnorm(n_size, 0, 10)
+
+fit_100 <- quap(
+    alist(
+        y ~ dnorm(mu, sigma), 
+        mu <- a + b1 * x1 + b2 * x2, 
+        a ~ dnorm(2, 0.5),
+        b1 ~ dnorm(0, 0.5),
+        b2 ~ dnorm(0, 0.5),
+        sigma ~ dexp(1)
+    ), 
+    data = list(y = y, x1 = x1, x2 = x2)
+)
+
+precis(fit_100)
+```
+
+
+
+```{r}
+
+precis(fit_10000)
+precis(fit_100)
+```
