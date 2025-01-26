@@ -54,7 +54,7 @@ Pues aparentemente nada. Los coeficientes son los esperados y las $t$-stats son 
 
 ## Multicolinealidad en la regresión lineal con muestras pequeñas
 
-Antes tenías una muestra de tamaño `py n`. Vamos a cambiar eso.
+Antes tenías una muestra de tamaño `{python} n`. Vamos a cambiar eso.
 
 
 ```{python}
