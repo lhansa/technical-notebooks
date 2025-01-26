@@ -25,6 +25,9 @@ Tienes una variable $y$ que depende de dos variables $x_1$ y $x_2$. Pero $x_2$ e
 
 ```{python}
 #| label: datos
+
+np.random.seed(123)
+
 n = 10000
 x1 = np.random.normal(50, 10, n)
 x2 = 0.5 * x1 + np.random.normal(0, 5, n)
