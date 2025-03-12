@@ -41,8 +41,8 @@ fit1 <- quap(
     alist(
         y ~ dnorm(mu, sigma), 
         mu <- a, 
-        a ~ dnorm(25, 2), 
-        sigma ~ dnorm(5, 1)
+        a ~ dnorm(pop_mean, 2), 
+        sigma ~ dnorm(pop_sd, 1)
     ),
     data = list(y = real_data)
 )
