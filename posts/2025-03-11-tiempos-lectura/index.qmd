@@ -68,6 +68,11 @@ df <- cbind(df_fechas, df_enteros, df_caracter, df_numericos)
 writexl::write_xlsx(df, "~/Desktop/datos.xlsx")
 ```
 
+```{r}
+#| echo: false
+rm(df)
+```
+
 ## Prueba 1
 
 Ahora leo el fichero Excel con la función `readxl::read_xlsx` y cuento tiempos.
@@ -79,11 +84,11 @@ library(readxl)
 microbenchmark(
   excel = readxl::read_excel("~/Desktop/datos.xlsx"),
   xlsx = readxl::read_xlsx("~/Desktop/datos.xlsx"),
-  times = 4
+  times = 10
 )
 ```
 
-Flipo por primera vez porque apenas hay diferencia entre dejar que averigüe la extensión y especificársela.
+Flipo por primera vez porque dejar que averigüe la extensión es más rápido que especificársela.
 
 ## Prueba 2
 
@@ -93,11 +98,11 @@ Ahora intento acelerar esto. Una opción es usar la función `readxl::read_xlsx`
 microbenchmark(
   xlsx_1000 = readxl::read_xlsx("~/Desktop/datos.xlsx"),
   xlsx_10 = readxl::read_xlsx("~/Desktop/datos.xlsx", guess_max = 10),
-  times = 4
+  times = 10
 )
 ```
 
-Flipo por segunda vez porque dejar que adivine con 10 filas es solo un pelín más rápido que dejarle que adivine con 1000.
+Flipo por segunda vez porque dejar que adivine con 10 filas es más lento que dejarle que adivine con 1000.
 
 ## Prueba 3
 
@@ -114,7 +119,7 @@ col_types <- c(
 microbenchmark(
   xlsx_1000 = readxl::read_xlsx("~/Desktop/datos.xlsx"),
   xlsx_col_types = readxl::read_xlsx("~/Desktop/datos.xlsx", col_types = col_types),
-  times = 5
+  times = 10
 )
 ```
 
