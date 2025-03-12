@@ -126,4 +126,13 @@ microbenchmark(
 
 Y me quedo flipando aún más porque lo de especificar `col_types` apenas ayuda (de hecho, si el número de filas es 1000 en lugar de 10000, empeora el tiempo; por lo menos, en una prueba que he hecho pero no he publicado).
 
+***
+
+Mira, esto tiene trampa. El fichero Excel con el que estoy probando es pequeño. Si pruebas con un fichero grande, tipo 500.000 filas, o 1.000.000, es posible que los resultados sean más razonables. 
+
+Yo no lo hago porque mi ordenador peta. Pero lo puedes probar tú. Seguramente sí consigas en ese caso mejoras según dicta la intuición. Ahora bien, no creo que sean mejoras enormes. 
+
+Son mejoras que, si tienes que leer el fichero una vez, te van a dar igual. Te pueden venir bien si tienes muchos ficheros que leer, de forma que te ahorres 1 segundo por fichero y, en suma, aporte. 
+
+
 
