@@ -1,0 +1,79 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"Mi IPC es (incluso) más alto\"\n",
+        "description-meta: \"Exploración de datos del IPC\"\n",
+        "description: \"Exploración de datos del IPC\"\n",
+        "author: \"Leonardo Hansa\"\n",
+        "date: \"2022-08-06\"\n",
+        "categories: [exploraciones]\n",
+        "---\n",
+        "\n",
+        "\n",
+        "No sé tú pero yo no consumo de todo. Si así fuera, entonces el IPC asociado a mis gastos sí sería el 10% del que hablan. \n",
+        "\n",
+        "Pero a mí me afectan más unos grupos de consumo que otros. \n",
+        "\n",
+        "Afortunadamente, no gasto en transporte. \n",
+        "\n",
+        "Pobrecitos los que sí. \n"
+      ],
+      "id": "1dacd5c2"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: reading\n",
+        "import pandas as pd\n",
+        "import matplotlib.pyplot as plt\n",
+        "\n",
+        "df_ipc_grupos = pd.read_csv('ipc-grupos-hist.csv')\n",
+        "\n",
+        "ultimo_mes = df_ipc_grupos.periodo.max()\n",
+        "df_ipc_ultimo = (\n",
+        "    df_ipc_grupos\n",
+        "    .loc[df_ipc_grupos.periodo == ultimo_mes]\n",
+        ")\n",
+        "\n",
+        "\n",
+        "df_ipc_ultimo = df_ipc_ultimo.sort_values(by=['variacion_anual'], ascending=True)\n",
+        "constant_line = float(df_ipc_ultimo['indice_general'].unique())\n",
+        "\n",
+        "ax = df_ipc_ultimo.plot.barh('grupos_ecoicop', 'variacion_anual', rot=0)\n",
+        "ax.axvline(constant_line, color='red', linestyle='--')\n",
+        "plt.title('IPC por grupos frente al índice general')\n",
+        "\n",
+        "txt = 'INE (junio 2022)'\n",
+        "plt.figtext(0.5, 0.01, txt, wrap=True, horizontalalignment='center', fontsize=8)\n",
+        "\n",
+        "plt.show()"
+      ],
+      "id": "reading",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "P.D. Hacer este gráfico con Python ha sido un suplicio :(\n"
+      ],
+      "id": "a3bfaa00"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "C:\\Users\\Leonardo.Hansa\\AppData\\Roaming\\Python\\share\\jupyter\\kernels\\python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

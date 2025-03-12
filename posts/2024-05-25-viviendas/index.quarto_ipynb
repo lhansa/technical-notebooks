@@ -1,0 +1,141 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"Evolución de compraventa mensual en España\"\n",
+        "description: \"Evolución de compraventa mensual en España\"\n",
+        "description-meta: \"Evolución de compraventa mensual en España\"\n",
+        "author: \"Leonardo Hansa\"\n",
+        "date: \"2024-05-25\"\n",
+        "categories: [datos]\n",
+        "execute: \n",
+        "  echo: true\n",
+        "  message: false\n",
+        "  warning: false\n",
+        "freeze: true\n",
+        "---\n",
+        "\n",
+        "\n",
+        "El INE tiene datos mensuales sobre compraventa de viviendas por Comunidades Autónomas (lo tiene por provincias pero he pasado de ese nivel):\n"
+      ],
+      "id": "ec676654"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: lectura\n",
+        "import pandas as pd\n",
+        "\n",
+        "df_viviendas = pd.read_csv(\n",
+        "  'ine-compraventa.csv', \n",
+        "  sep=';', \n",
+        "  thousands='.',\n",
+        "  encoding='iso-8859-1'\n",
+        ")\n",
+        "\n",
+        "df_viviendas = (\n",
+        "  df_viviendas\n",
+        "  .drop(['Régimen y estado', 'Total Nacional', 'Provincias'], axis=1)\n",
+        "  .rename(\n",
+        "    columns=lambda x: x.lower().replace(' ', '_').encode('ascii', 'ignore').decode('utf-8'))\n",
+        ")\n",
+        "\n",
+        "df_viviendas.head()"
+      ],
+      "id": "lectura",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Vamos a tratarlo un poco (tampoco mucho, que es sábado):\n"
+      ],
+      "id": "c7c2473e"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: algo-tratamiento\n",
+        "df_viviendas['periodo'] = pd.to_datetime(df_viviendas['periodo'], format='%YM%m')\n",
+        "\n",
+        "df_viviendas['comunidades_y_ciudades_autnomas'] = df_viviendas['comunidades_y_ciudades_autnomas'].str.replace(r'\\d{2} ', '', regex=True)\n",
+        "\n",
+        "\n",
+        "df_viviendas = (\n",
+        "  df_viviendas\n",
+        "  .rename(columns={'comunidades_y_ciudades_autnomas': 'ccaa'})\n",
+        ")\n",
+        "\n",
+        "df_viviendas.head()"
+      ],
+      "id": "algo-tratamiento",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Mucho mejor. Ahora toca visualizar esto. \n",
+        "\n",
+        "El siguiente código es de ChatGPT... y sinceramente, creo que está mal, que pinta lo que le da la gana y no lo que yo quiero (concretamente, se inventa el orden del eje x).\n",
+        "\n",
+        "Pero llevo horas con problemas de VSCode, versiones de Python, entornos virtuales y paso de dedicarle más tiempo a esto hoy (cosa que en R habrían sido 5 minutos). \n",
+        "\n",
+        "Otro día.\n"
+      ],
+      "id": "28c59f3e"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: evolucion\n",
+        "import seaborn as sns\n",
+        "import matplotlib.pyplot as plt\n",
+        "import matplotlib.dates as mdates\n",
+        "\n",
+        "g = sns.FacetGrid(\n",
+        "  df_viviendas, \n",
+        "  col='ccaa', \n",
+        "  col_wrap=5, \n",
+        "  hue='ccaa', \n",
+        "  sharey=False,\n",
+        ")  \n",
+        "\n",
+        "g.map_dataframe(sns.lineplot, x='periodo', y='total')\n",
+        "\n",
+        "# Ajustar las etiquetas y el layout\n",
+        "for ax in g.axes.flatten():\n",
+        "    # Ajustar los locators para que solo se muestren unos pocos ticks\n",
+        "    ax.xaxis.set_major_locator(mdates.MonthLocator(interval=12))  # Ajusta el intervalo según sea necesario\n",
+        "    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))\n",
+        "    ax.tick_params(axis='x', rotation=45)\n",
+        "\n",
+        "g.set_axis_labels('Fecha', 'Total')\n",
+        "\n",
+        "plt.show()"
+      ],
+      "id": "evolucion",
+      "execution_count": null,
+      "outputs": []
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "C:\\Users\\Leonardo.Hansa\\AppData\\Roaming\\Python\\share\\jupyter\\kernels\\python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

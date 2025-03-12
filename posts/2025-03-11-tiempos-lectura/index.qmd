@@ -1,0 +1,124 @@
+---
+title: "Tiempos de lectura de un fichero Excel"
+description: "Ejercicio de exploración de tiempos de lectura de un fichero Excel"
+description-meta: "Ejercicio de exploración de tiempos de lectura de un fichero Excel"
+author: "Leonardo Hansa"
+date: "2025-03-11"
+categories: [exploraciones]
+execute: 
+  echo: true
+  message: false
+  warning: false
+freeze: true
+---
+
+Voy a intentar mejorar el tiempo de lectura de un fichero Excel. 
+
+## Preparación de datos
+
+No tengo ninguno a mano, así que me lo invento. Genero un data frame con 1000 filas y 100 columnas y lo guardo en un fichero Excel.
+
+Las columnas serán de distintos tipos: 
+
+- Las 10 primeras columnas serán de tipo fecha. 
+- Las 10 columnas siguientes serán de tipo entero.
+- Las 10 columnas siguienets serán de tipo character. 
+- Las demás columnas serán de tipo numérico.
+
+```{r}
+set.seed(123)
+
+n <- 10000
+m <- 100
+
+df_fechas <- data.frame(
+  lapply(1:10, function(i) {
+    as.Date("2025-01-01") + sample(1:1000, n, replace = TRUE)
+  })
+)
+
+names(df_fechas) <- paste0("fecha_", 1:10)
+
+df_enteros <- data.frame(
+  lapply(1:10, function(i) {
+    sample(1:1000, n, replace = TRUE)
+  })
+)
+
+names(df_enteros) <- paste0("entero_", 1:10)
+
+df_caracter <- data.frame(
+  lapply(1:10, function(i) {
+    sample(letters, n, replace = TRUE)
+  })
+)
+
+names(df_caracter) <- paste0("caracter_", 1:10)
+
+df_numericos <- data.frame(
+  lapply(1:(m - 30), function(i) {
+    rnorm(n)
+  })
+)
+
+names(df_numericos) <- paste0("numerico_", 1:(m - 30))
+
+df <- cbind(df_fechas, df_enteros, df_caracter, df_numericos)
+
+writexl::write_xlsx(df, "~/Desktop/datos.xlsx")
+```
+
+## Prueba 1
+
+Ahora leo el fichero Excel con la función `readxl::read_xlsx` y cuento tiempos.
+
+```{r}
+library(microbenchmark)
+library(readxl)
+
+microbenchmark(
+  excel = readxl::read_excel("~/Desktop/datos.xlsx"),
+  xlsx = readxl::read_xlsx("~/Desktop/datos.xlsx"),
+  times = 10
+)
+```
+
+Flipo por primera vez porque dejar que averigüe la extensión es más rápido que especificársela.
+
+## Prueba 2
+
+Ahora intento acelerar esto. Una opción es usar la función `readxl::read_xlsx` con el argumento `guess_max`.
+
+```{r}
+microbenchmark(
+  xlsx_1000 = readxl::read_xlsx("~/Desktop/datos.xlsx"),
+  xlsx_10 = readxl::read_xlsx("~/Desktop/datos.xlsx", guess_max = 10),
+  times = 10
+)
+```
+
+Flipo por segunda vez porque dejar que adivine con 1000 filas es más rápido que dejarle que adivine con menos.
+
+## Prueba 3
+
+Ahora voy a especificar los tipos de columnas en el argumento col_types. 
+
+```{r}
+col_types <- c(
+  rep("date", 10),
+  rep("numeric", 10),
+  rep("text", 10),
+  rep("numeric", m - 30)
+)
+
+microbenchmark(
+  xlsx_1000 = readxl::read_xlsx("~/Desktop/datos.xlsx"),
+  xlsx_col_types = readxl::read_xlsx("~/Desktop/datos.xlsx", col_types = col_types),
+  times = 10
+)
+```
+
+
+Y me quedo flipando aún más porque lo de especificar `col_types` apenas ayuda (de hecho, si el número de filas es 1000 en lugar de 10000, empeora el tiempo; por lo menos, en una prueba que he hecho pero no he publicado).
+
+

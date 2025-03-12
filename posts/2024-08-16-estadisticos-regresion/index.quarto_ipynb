@@ -1,0 +1,408 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"Estadísticos en regresión lineal por variable\"\n",
+        "description: \"Revisión paso a paso de cómo calcular el p-valor de una variable en una regresión lineal\"\n",
+        "description-meta: \"Guía paso a paso de cómo calcular el p-valor de una variable en una regresión lineal\"\n",
+        "author: \"Leonardo Hansa\"\n",
+        "date: \"2024-08-16\"\n",
+        "categories: [datos]\n",
+        "execute: \n",
+        "  echo: true\n",
+        "  message: false\n",
+        "  warning: false\n",
+        "freeze: true\n",
+        "---\n",
+        "\n",
+        "\n",
+        "## Intro y datos\n",
+        "Voy a revisar aquí cómo se calcula el p-valor de una variable en una regresión lineal, porque es una cosa que siempre se me olvida. Y quiero tenerlo a mano.\n",
+        "\n",
+        "Además, lo voy a hacer en Python porque me gusta sufrir.\n"
+      ],
+      "id": "9483fed9"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: libs\n",
+        "import numpy as np\n",
+        "import statsmodels.api as sm\n",
+        "import scipy.stats as stats\n",
+        "import matplotlib.pyplot as plt"
+      ],
+      "id": "libs",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Me invento unos datos que me sirvan para ajustar una regresión lineal: \n",
+        "\n",
+        "$$\n",
+        "y = \\beta_0 + \\beta_1 \\cdot x + \\varepsilon,\n",
+        "$$\n",
+        "\n",
+        "donde $\\beta_0 = - 5$, $\\beta_1 = 3$ y $x ~ \\mbox{Poisson(12)}$ y $\\varepsilon \\sim \\cal{N}(0, 10)$.\n"
+      ],
+      "id": "d8abda9d"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: generate-data\n",
+        "nobs = 10000\n",
+        "x = np.random.poisson(12, nobs)\n",
+        "noise = np.random.normal(0, 10, nobs)\n",
+        "\n",
+        "y = 3 * x - 5 + noise"
+      ],
+      "id": "generate-data",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Ahora ajusto la regresión lineal con **statsmodels**. ¿Se puede hacer con **sklearn**? Pues imagino que sí, pero necesitaré luego acceder a detalles del modelo a los que no sé acceder con sklearn.\n"
+      ],
+      "id": "b6358b4f"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: fit-model\n",
+        "X = sm.add_constant(x)\n",
+        "model = sm.OLS(y, X).fit()\n",
+        "print(model.summary())"
+      ],
+      "id": "fit-model",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Para calcular el p-valor de $x$ en el modelo necesito el estadístico $t$. Para eso necesito, aparte del valor del coeficiente, el error estándar de la variable. \n",
+        "\n",
+        "## Error estándar\n",
+        "\n",
+        "Este error estándar relaciona la varianza de la variable con la varianza de los errores: \n",
+        "\n",
+        "- Si una variable tiene poca varianza y los errores tienen mucha, la variable está aportando poco al modelo. \n",
+        "- Si una variable tiene una varianza alta, estará contribuyendo más al modelo. \n",
+        "- Si un modelo tiene errores con varianza baja, el error estándar de la variable tenderá a ser bajo.\n",
+        "\n",
+        "> Cuanto mayor sea el error estándar, menor siginificatividad tendrá la variable. Por lo tanto, con un varianza del error pequeña, más fácil será que la variable aparezca significativa.\n"
+      ],
+      "id": "ddd36320"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: standard-error\n",
+        "standard_error = np.sqrt(np.sum(model.resid ** 2) / (len(x) - 2))\n",
+        "standard_error_x = standard_error / np.sqrt(nobs)  / np.std(x)"
+      ],
+      "id": "standard-error",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "El error estándar de los residuos es `{python} standard_error` y el de la variable es `{python} standard_error_x`.\n",
+        "\n",
+        "> El error estándar del intercept es más lío de calcular e interpretar; la idea intuitiva es que tiene en cuenta la varianza de todas las variables explicativas a la vez. \n"
+      ],
+      "id": "c87884ba"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: standard-error-int\n",
+        "standard_error * np.sqrt(1 / nobs + np.mean(x) ** 2 / np.sum((x - np.mean(x)) ** 2))"
+      ],
+      "id": "standard-error-int",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Estadístico $t$\n",
+        "El estadístico $t$ se calcula como \n",
+        "\n",
+        "$$\n",
+        "t = \\frac{\\mbox{coef}\\ x}{\\mbox{std error}\\ x}.\n",
+        "$$ \n",
+        "\n",
+        "- Si la variable tiene un error pequeño, el estadístico crece (eso es bueno para la significatividad de la variable). \n",
+        "- A su vez, si el coeficiente es alto (en valor absoluto), entonces también crece. \n",
+        "- El estadístico decrece con coeficientes bajos o con errores altos (es decir, la variable parecerá no significativa).\n"
+      ],
+      "id": "c3835362"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# label: t-stat\n",
+        "t_stat_x = np.abs(model.params[1]) / standard_error_x\n",
+        "t_stat_x"
+      ],
+      "id": "1ca1ee01",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## p-valor\n",
+        "Ahora hay que ver qué valor es esperable para el estadístico $t$. \n",
+        "\n",
+        "Pon que trabajas al nivel de confianza del 90%. Hace falta calcular el $t$ que deja el 5% a un lado de la distribución, y el que lo deja al otro lado. Como la distribución es simétrica, solo calculo uno:\n"
+      ],
+      "id": "61c81709"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "percentile = stats.t.ppf(0.95, nobs - 2)\n",
+        "percentile"
+      ],
+      "id": "8dc6acaf",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Ahora tienes la distribución de $t$. Si $t$ cae en el área sombreada (el 10% extremo) entonces la probabilidad de observar tus datos en el supuesto de que la variable no sea significativa ($H_0$ o $\\beta_1 = 0$) es menor de 0,10.\n"
+      ],
+      "id": "4227c3aa"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: t-distribution\n",
+        "xx = np.linspace(-4, 4, 1000)\n",
+        "yy = stats.t.pdf(xx, nobs - 2)\n",
+        "plt.plot(xx, yy, color='#800080')\n",
+        "# plot the t distribution and fill the 5% outside \n",
+        "plt.fill_between(xx, yy, where=(xx < -percentile) | (xx > percentile), alpha=0.5, color='#800080')\n",
+        "plt.title(\"Distribución de t\")\n",
+        "plt.show()"
+      ],
+      "id": "t-distribution",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Concretamente, la probabilidad para el estadístico $t$ que has obtenido es muy muy baja.\n"
+      ],
+      "id": "86c389bf"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# p value for coefficient, extracted from\n",
+        "# t distribution\n",
+        "stats.t.sf(t_stat_x, nobs - 2) * 2"
+      ],
+      "id": "7f667917",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Idea intuitiva\n",
+        "\n",
+        "Lo que estás haciendo con esto es calcular la probabilidad de obtener los datos que tienes si asumes que las dos variables no tienen relación. \n",
+        "\n",
+        "Imagina que estás midiendo la relación entre el consumo de torreznos (gramos de torreznos semanales) y los niveles de colesterol (ni idea de qué unidad se usa en los análisis). \n",
+        "\n",
+        "La forma de pensar con este análisis sería: \n",
+        "\n",
+        "- Asumes que no hay relación\n",
+        "- Tienes unos datos de varias personas, con su consumo de torreznos y el nivel de colesterol. \n",
+        "- Haces el cálculo de la regresión. \n",
+        "- El p-valor es cómo de probables son tus datos. \n",
+        "- Si tu p-valor es pequeño, entonces los datos son poco probables en el supuesto de que no haya relación. Así que deduces que sí hay relación. \n",
+        "\n",
+        "**¿Qué quiero decir con que tu p-valor sea pequeño?**\n",
+        "\n",
+        "Me refiero a que, previamente, habrás definido un umbral. Que tu p-valor sea pequeño significa que está por debajo de ese umbral. \n",
+        "\n",
+        "¿Cuál debería ser tu umbral? Normalmente es 0,05. Eso se traduce en que: \n",
+        "\n",
+        "- Si la probabilidad de observar tus datos en el supuesto de que no hay relación (p-valor) es menor de 0,05, entonces es que sí hay relación. \n",
+        "- Si la probabilidad (p-valor) es mayor, entonces es que no hay relación. \n",
+        "\n",
+        "Y te pregunto yo. ¿Cuál debería ser para ti la probabilidad? Por ejemplo, si el p-valor es 0,20, ¿automáticamente concluyes que no hay relación?\n",
+        "\n",
+        "¿Por qué?\n",
+        "\n",
+        "Si tu p-valor es ese, estarías diciendo que la probabilidad de observar tus datos cuando no hubiera relación real es de un 20%. Quizá en un caso médico tienes que tener cuidado, como con lo del colesterol. ¿Pero qué pasa si estás midiendo la eficacia de una acción empresarial?\n",
+        "\n",
+        "## Un ejemplo más extremo\n",
+        "\n",
+        "En lugar de utilizar la propia variable $x$ para ajustar el modelo, podemos alterar $x$ introduciendo ruido en ella. Eso lo haré metiendo ruido en la variable, con media 0 y una desviación típica que variaré en varias pruebas.\n",
+        "\n",
+        "Por ahora, la desviación típica del ruido sobre $x$ es 1.\n"
+      ],
+      "id": "0b79c706"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: genera-escenario\n",
+        "#| echo: false\n",
+        "def genera_escenario(alpha=0.2,\n",
+        "                     b1=3, \n",
+        "                     b0=-5, \n",
+        "                     lmbd=12, \n",
+        "                     sd1=1, \n",
+        "                     sd2=10, \n",
+        "                     nobs=10000):\n",
+        "\n",
+        "    # Creo y en función de x\n",
+        "    x = np.random.poisson(lmbd, nobs)\n",
+        "    noise = np.random.normal(0, sd2, nobs)\n",
+        "    y = b1 * x + b0 + noise\n",
+        "\n",
+        "    # Altero x para el modelo\n",
+        "    x_alt =  x + np.random.normal(0, sd1, nobs)\n",
+        "\n",
+        "    X = sm.add_constant(x_alt)\n",
+        "    model = sm.OLS(y, X).fit()\n",
+        "\n",
+        "    standard_error = np.sqrt(np.sum(model.resid**2) / (len(x) - 2))\n",
+        "    standard_error_x = standard_error / np.sqrt(nobs) / np.std(x)\n",
+        "\n",
+        "    t_stat_x = np.abs(model.params[1]) / standard_error_x\n",
+        "\n",
+        "    percentile = stats.t.ppf(1 - alpha / 2, nobs - 2)\n",
+        "\n",
+        "    xx = np.linspace(-4, 4, 1000)\n",
+        "    yy = stats.t.pdf(xx, nobs - 2)\n",
+        "    plt.figure()\n",
+        "    plt.plot(xx, yy, color='#800080')\n",
+        "    \n",
+        "    plt.fill_between(xx, yy, where=(xx < -percentile) | (xx > percentile), alpha=0.5, color='#800080')\n",
+        "    plt.title(f't: {t_stat_x:.4f}; alpha: {alpha}')\n",
+        "    plt.show()\n",
+        "  \n",
+        "genera_escenario()"
+      ],
+      "id": "genera-escenario",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Voy a poner mucho más ruido. Fíjate en cuánto decrece el estadístico $t$ (y en consecuencia cuánto aumenta el p-valor). \n"
+      ],
+      "id": "07d66576"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: genera-escenario2\n",
+        "#| echo: false\n",
+        "genera_escenario(sd1 = 5)"
+      ],
+      "id": "genera-escenario2",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: genera-escenario3\n",
+        "#| echo: false\n",
+        "genera_escenario(sd1 = 40)"
+      ],
+      "id": "genera-escenario3",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: comprobacion-pvalor\n",
+        "stats.t.sf(0.5341, 9998)"
+      ],
+      "id": "comprobacion-pvalor",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: prueba-variables\n",
+        "#| echo: false\n",
+        "def prueba_variables(b1=3, b0=-5, lmbd=12, sd1=3, sd2=10, nobs=10000):\n",
+        "\n",
+        "    # Creo y en función de x\n",
+        "    x = np.random.poisson(lmbd, nobs)\n",
+        "    noise = np.random.normal(0, sd2, nobs)\n",
+        "    y = b1 * x + b0 + noise\n",
+        "\n",
+        "    # Altero x para el modelo\n",
+        "    x_alt = x + np.random.normal(0, sd1, nobs)\n",
+        "    plt.figure()\n",
+        "    plt.scatter(x, x_alt)\n",
+        "    plt.title(\"Alteración de x\")\n",
+        "\n",
+        "\n",
+        "prueba_variables(sd1 = 40)"
+      ],
+      "id": "prueba-variables",
+      "execution_count": null,
+      "outputs": []
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "C:\\Users\\Leonardo.Hansa\\AppData\\Roaming\\Python\\share\\jupyter\\kernels\\python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
