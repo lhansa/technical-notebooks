@@ -25,7 +25,7 @@
         "\n",
         "Planteo aquí el código de su ejemplo. \n"
       ],
-      "id": "9f2f67fd"
+      "id": "c2e611d4"
     },
     {
       "cell_type": "code",
@@ -45,7 +45,7 @@
       "source": [
         "## Lanzamiento de una moneda\n"
       ],
-      "id": "9663c608"
+      "id": "7ae472eb"
     },
     {
       "cell_type": "code",
@@ -65,7 +65,7 @@
       "source": [
         "Tienes a `python n_individuos` que lanzan una moneda al aire `python n_veces` cada uno. Eso hace un total de `python n_individuos * n_veces` lanzamientos, en los que la probablidad teórica de obtener cara (resultado igual a 1 en este caso) es $0,5$.\n"
       ],
-      "id": "ac9a0d17"
+      "id": "1b76838f"
     },
     {
       "cell_type": "code",
@@ -93,7 +93,7 @@
         "\n",
         "Por ejemplo, la probabilidad de obtener cara para el individuo 2 (el tercero, porque esto es Python y piensan raro) es:\n"
       ],
-      "id": "9c0ae710"
+      "id": "ce6c2903"
     },
     {
       "cell_type": "code",
@@ -112,7 +112,7 @@
       "source": [
         "A su vez, la probabilidad de que obtengan cara entre todos los individuos en el lanzamiento 50 (el 51 xD) es:\n"
       ],
-      "id": "b0a3214b"
+      "id": "eb42c3af"
     },
     {
       "cell_type": "code",
@@ -141,7 +141,7 @@
         "\n",
         "La simulación de lanzamientos de monedas con sus resultados $1,5$ y $0,6$ se puede hacer así:\n"
       ],
-      "id": "5c5566d4"
+      "id": "3ace33ca"
     },
     {
       "cell_type": "code",
@@ -161,7 +161,7 @@
       "source": [
         "Y la evolución del capital se calcula así:\n"
       ],
-      "id": "3b52b141"
+      "id": "24cd2b2b"
     },
     {
       "cell_type": "code",
@@ -180,7 +180,7 @@
       "source": [
         "El capital de cada individuo (`python n_individuos`) empezaba en 1, por lo que el capital medio por individuo era de 1. Tras el primer lanzamiento, el capital medio queda en: \n"
       ],
-      "id": "fd572013"
+      "id": "4c770e9c"
     },
     {
       "cell_type": "code",
@@ -201,7 +201,7 @@
         "\n",
         "La evolución de capitales medios: \n"
       ],
-      "id": "e96a65f0"
+      "id": "5548e41c"
     },
     {
       "cell_type": "code",
@@ -228,7 +228,7 @@
       "source": [
         "Si pongo de límite hasta la tirada 100, el capital medio ha crecido: "
       ],
-      "id": "08fed797"
+      "id": "71992c5c"
     },
     {
       "cell_type": "code",
@@ -248,7 +248,7 @@
       "source": [
         "Sin embargo, solo un 11% de los individuos ha visto su capital crecer:\n"
       ],
-      "id": "96081c66"
+      "id": "da405ff2"
     },
     {
       "cell_type": "code",
@@ -267,7 +267,7 @@
       "source": [
         "En un proceso no ergódico (¿cuántos hay así en una sociedad occidental?), puedes ver crecimiento global, pero solo de unos pocos.\n"
       ],
-      "id": "b9cb1f8f"
+      "id": "ec96f0da"
     }
   ],
   "metadata": {
