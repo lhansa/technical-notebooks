@@ -82,7 +82,7 @@ plt.hist(l_mse, bins=20)
 ```{python}
 import seaborn as sns
 
-df_long = df.reset_index().melt(id_vars='index', var_name='modelo', value_name='pred')
+df_long = df_preds.reset_index().melt(id_vars='index', var_name='modelo', value_name='pred')
 df_long = df_long.rename(columns={'index': 'id'})
 
 subset_ids = df_long['id'].unique()[:100]
