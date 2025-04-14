@@ -7,6 +7,7 @@ date: "2025-04-12"
 categories: [exploraciones]
 execute: 
   echo: true
+  eval: false
   message: false
   warning: false
 freeze: true
@@ -22,16 +23,19 @@ El objetivo es ver que, cada vez que lo ejecuto, la predicción cambia, por lo q
 
 ```{python}
 #| label: libs
-from sklearn.datasets import fetch_california_housing
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.datasets import fetch_california_housing, load_breast_cancer
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, roc_auc_score
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 ```
 
-## Preparación de datos
+## Ejemplo 1. Regresión
+
+### Preparación de datos
 
 Los datos no me importan especialmente. Cargo unos de **sklearn** que me ha sugerido ChatGPT. Los separo en train y test. Esta separación la dejo fija: voy a estudiar cómo afecta la aleatoriedad del modelo, no la de los datos.
 
@@ -44,7 +48,9 @@ y = data.target
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 ```
 
-## Ajuste de los modelos
+### Ajuste de los modelos
+
+Ajusto 100 modelos. Voy a guardar algunas cosas de los ajustes para luego ver cómo varían de un caso a otro. Lo que quiero estudiar es si hay mucha dispersión entre unos resultados y otros.
 
 ```{python}
 #| label: loop-model
@@ -69,23 +75,32 @@ for i in range(num_trials):
   df_preds[f'pred_{i}'] = y_pred
 ```
 
-## Visualización
+### Visualización
 
-### Métrica de ajuste
+#### Métrica de ajuste
+
+Reconozco que esperaba más dispersión entre las métricas. Entre los 100 modelos, la métrica de ajuste (MSE) varía entre 0.25 y 0.26. Muy estable.
 
 ```{python}
+#| label: hist-mse
 plt.hist(l_mse, bins=20)
+plt.show()
 ```
 
 
-## Predicciones
+### Predicciones
+
+Ahora muestro cómo varía cada predicción observación a observación. Muestro solo unas pocas porque no se ve nada si intento ver todas una a una. 
+
+Quizá no tenga sentido ver todas una a una, sino ver la desviación en general de todas las observación con respecto a su punto medio o su media o lo que sea. Pero paso de pensar. 
+
 ```{python}
-import seaborn as sns
+#| label: preds-boxplots
 
 df_long = df_preds.reset_index().melt(id_vars='index', var_name='modelo', value_name='pred')
 df_long = df_long.rename(columns={'index': 'id'})
 
-subset_ids = df_long['id'].unique()[:100]
+subset_ids = df_long['id'].unique()[:50]
 subset = df_long[df_long['id'].isin(subset_ids)]
 
 plt.figure(figsize=(20, 6))
@@ -94,6 +109,85 @@ plt.xlabel('ID de observación (subconjunto)')
 plt.ylabel('Predicción')
 plt.title('Boxplot de predicciones por observación (100 primeras)')
 plt.xticks(rotation=90)
+plt.tight_layout()
+plt.show()
+```
+
+Hay alguna observación que sí presenta algo de variabilidad entre los modelos pero no me escandizaría por ello. 
+
+## Ejemplo 2. Clasificación
+
+Ahora quiero hacer algo parecido en un problema de clasificación 0-1. 
+
+### Preparación de datos
+```{python}
+#| label: data-class
+data = load_breast_cancer()
+X = data.data
+y = data.target
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+```
+
+### Ajuste de modelos
+
+```{python}
+#| label: modelos
+all_preds = []
+all_aucs = []
+
+for i in range(100):  # 100 semillas
+    model = RandomForestClassifier(random_state=i, n_jobs=-1)
+    model.fit(X_train, y_train)
+    probs = model.predict_proba(X_test)[:, 1]
+    
+    # Guardar predicciones
+    df_temp = pd.DataFrame({
+        'id': range(len(X_test)),
+        'prob': probs,
+        'seed': i,
+        'true_label': y_test
+    })
+    all_preds.append(df_temp)
+    
+    # Calcular y guardar AUC
+    auc = roc_auc_score(y_test, probs)
+    all_aucs.append(auc)
+
+```
+
+### Visualización
+
+#### Bondad de ajuste
+
+```{python}
+#| label: hist-auc
+df_all = pd.concat(all_preds, ignore_index=True)
+
+plt.figure(figsize=(8, 4))
+sns.histplot(all_aucs, bins=20, kde=True)
+plt.xlabel('AUC')
+plt.title('Distribución de AUCs sobre 100 random forests')
+plt.tight_layout()
+plt.show()
+```
+
+
+#### Probabalidad por observación
+
+```{python}
+# Unir todos los resultados
+df_all = pd.concat(all_preds, ignore_index=True)
+
+# Crear gráfico
+plt.figure(figsize=(10, 8))
+sns.stripplot(data=df_all, x='prob', y='id', hue='true_label', dodge=True, alpha=0.6, palette='Set1', jitter=0)
+plt.axvline(x=50, color='gray', linestyle='--')
+plt.xlabel('Probabilidad predicha (clase 1)')
+plt.ylabel('ID de observación')
+plt.xticks(ticks=range(0, len(df_all['id'].unique()), len(df_all['id'].unique()) // 5))
+plt.title('Variabilidad de predicciones por semilla (Random Forest)')
+plt.legend(title='Clase real', loc='lower right')
 plt.tight_layout()
 plt.show()
 ```
