@@ -28,7 +28,7 @@ Las columnas serán de distintos tipos:
 ```{r}
 set.seed(123)
 
-n <- 10000
+n <- 500000
 m <- 100
 
 df_fechas <- data.frame(
@@ -73,6 +73,7 @@ writexl::write_xlsx(df, "~/Desktop/datos.xlsx")
 Ahora leo el fichero Excel con la función `readxl::read_xlsx` y cuento tiempos.
 
 ```{r}
+#| eval: false
 library(microbenchmark)
 library(readxl)
 
@@ -83,7 +84,7 @@ microbenchmark(
 )
 ```
 
-Flipo por primera vez porque dejar que averigüe la extensión es más rápido que especificársela.
+No pongo resultados por no ejecutar esto infitamente. Pero flipo por primera vez porque dejar que averigüe la extensión es más rápido que especificársela.
 
 ## Prueba 2
 
