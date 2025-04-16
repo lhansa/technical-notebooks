@@ -7,7 +7,7 @@ date: "2025-04-12"
 categories: [exploraciones]
 execute: 
   echo: true
-  eval: false
+  eval: true
   message: false
   warning: false
 freeze: true
