@@ -89,7 +89,7 @@ Aquí la distribución del R2.
 ```{python}
 #| label: hist-mse
 #| echo: false
-plt.figure(figsize=(12, 9))
+plt.figure(figsize=(8, 5))
 plt.hist(l_r2, bins=20, color="#800080", edgecolor="black", alpha=0.7)
 
 plt.title(
@@ -113,18 +113,26 @@ Ahora muestro cómo varía cada predicción observación a observación. Muestro
 Quizá no tenga sentido ver todas una a una, sino ver la desviación en general de todas las observación con respecto a su punto medio o su media o lo que sea. Pero paso de pensar. 
 
 ```{python}
-#| label: preds-boxplots
-df_long = df_preds.reset_index().melt(id_vars='index', var_name='modelo', value_name='pred')
-df_long = df_long.rename(columns={'index': 'id'})
+# | label: preds-boxplots
+df_long = df_preds.reset_index().melt(
+    id_vars="index", var_name="modelo", value_name="pred"
+)
+df_long = df_long.rename(columns={"index": "id"})
 
-subset_ids = df_long['id'].unique()[:50]
-subset = df_long[df_long['id'].isin(subset_ids)]
+subset_ids = df_long["id"].unique()[:50]
+subset = df_long[df_long["id"].isin(subset_ids)]
+
+# Calcular mediana por id
+medianas = subset.groupby("id")["pred"].median().sort_values()
+
+# Convertir 'id' a categoría ordenada según su mediana
+subset["id"] = pd.Categorical(subset["id"], categories=medianas.index, ordered=True)
 
 plt.figure(figsize=(20, 6))
-sns.boxplot(data=subset, x='id', y='pred', showfliers=False)
-plt.xlabel('ID de observación (subconjunto)')
-plt.ylabel('Predicción')
-plt.title('Boxplot de predicciones por observación (unas pocas)')
+sns.boxplot(data=subset, x="id", y="pred", showfliers=False)
+plt.xlabel("ID de observación (subconjunto)")
+plt.ylabel("Predicción")
+plt.title("Boxplot de predicciones por observación (unas pocas)")
 plt.xticks(rotation=90, fontsize=5)
 plt.tight_layout()
 plt.show()

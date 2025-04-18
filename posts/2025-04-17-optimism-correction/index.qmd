@@ -104,8 +104,20 @@ mean_optimism
 Por curiosidad, así se distribuye el optimismo.
 
 ```{python}
-#| label: histogram
-plt.hist(optimism_estimates, color="#800080", bins=20)
+# | label: histogram
+plt.figure(figsize=(8, 5))
+plt.hist(optimism_estimates, bins=20, color="#800080", edgecolor="black", alpha=0.75)
+
+plt.title(
+    "Distribución del optimismo del modelo (bootstrap)", fontsize=14, fontweight="bold"
+)
+plt.xlabel("Optimismo estimado", fontsize=12)
+plt.ylabel("Frecuencia", fontsize=12)
+
+plt.grid(True, linestyle="--", linewidth=0.5, alpha=0.3)
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+plt.tight_layout()
 plt.show()
 ```
 

@@ -32,7 +32,7 @@
         "\n",
         "_Bootstrap_ es una solución. \n"
       ],
-      "id": "f6d1fce2"
+      "id": "ed7ea482"
     },
     {
       "cell_type": "code",
@@ -67,7 +67,7 @@
         "\n",
         "### Algunos datos\n"
       ],
-      "id": "b0eda3d3"
+      "id": "b07d76d6"
     },
     {
       "cell_type": "code",
@@ -91,7 +91,7 @@
       "source": [
         "### Entrenamiento en muestras bootstrap\n"
       ],
-      "id": "ed3aac26"
+      "id": "19fdb806"
     },
     {
       "cell_type": "code",
@@ -110,7 +110,7 @@
       "source": [
         "Lo siguiente creo que quedaría más claro con un bucle `for`, pero en teoría no están recomendados. Así que creo una función y la llamo en una _list comprehension_. \n"
       ],
-      "id": "c16fd8ec"
+      "id": "5e983a8e"
     },
     {
       "cell_type": "code",
@@ -141,7 +141,7 @@
       "source": [
         "Y ahora calculo todo.\n"
       ],
-      "id": "b4add8d5"
+      "id": "9abfb06e"
     },
     {
       "cell_type": "code",
@@ -162,7 +162,7 @@
         "\n",
         "El optimismo medio es lo que necesito para el próximo paso. Así que calculo la media de la lista que acabo de generar.\n"
       ],
-      "id": "0b45c674"
+      "id": "86043ebc"
     },
     {
       "cell_type": "code",
@@ -182,14 +182,26 @@
       "source": [
         "Por curiosidad, así se distribuye el optimismo.\n"
       ],
-      "id": "7a0efe16"
+      "id": "23c022a2"
     },
     {
       "cell_type": "code",
       "metadata": {},
       "source": [
         "#| label: histogram\n",
-        "plt.hist(optimism_estimates, color=\"#800080\", bins=20)\n",
+        "plt.figure(figsize=(8, 5))\n",
+        "plt.hist(optimism_estimates, bins=20, color=\"#800080\", edgecolor=\"black\", alpha=0.75)\n",
+        "\n",
+        "plt.title(\n",
+        "    \"Distribución del optimismo del modelo (bootstrap)\", fontsize=14, fontweight=\"bold\"\n",
+        ")\n",
+        "plt.xlabel(\"Optimismo estimado\", fontsize=12)\n",
+        "plt.ylabel(\"Frecuencia\", fontsize=12)\n",
+        "\n",
+        "plt.grid(True, linestyle=\"--\", linewidth=0.5, alpha=0.3)\n",
+        "plt.xticks(fontsize=10)\n",
+        "plt.yticks(fontsize=10)\n",
+        "plt.tight_layout()\n",
         "plt.show()"
       ],
       "id": "histogram",
@@ -204,7 +216,7 @@
         "\n",
         "Todos los entrenamientos anteriores estaban hechos sobre muestras _bootrstrap_, es decir, no estaban sobre el entrenamiento\n"
       ],
-      "id": "59f70efc"
+      "id": "8e08ec59"
     },
     {
       "cell_type": "code",

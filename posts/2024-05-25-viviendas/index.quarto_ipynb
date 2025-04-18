@@ -21,7 +21,7 @@
         "\n",
         "El INE tiene datos mensuales sobre compraventa de viviendas por Comunidades Autónomas (lo tiene por provincias pero he pasado de ese nivel):\n"
       ],
-      "id": "36ca6e99"
+      "id": "4eded82e"
     },
     {
       "cell_type": "code",
@@ -56,7 +56,7 @@
       "source": [
         "Vamos a tratarlo un poco (tampoco mucho, que es sábado):\n"
       ],
-      "id": "92c14c71"
+      "id": "91845d3b"
     },
     {
       "cell_type": "code",
@@ -91,7 +91,7 @@
         "\n",
         "Otro día.\n"
       ],
-      "id": "28190b1a"
+      "id": "ca8028fa"
     },
     {
       "cell_type": "code",
