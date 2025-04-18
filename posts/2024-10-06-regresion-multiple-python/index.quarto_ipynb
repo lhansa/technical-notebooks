@@ -25,7 +25,7 @@
         "\n",
         "### Código del ajuste del modelo\n"
       ],
-      "id": "43697ce2"
+      "id": "5552c1f0"
     },
     {
       "cell_type": "code",
@@ -69,7 +69,7 @@
         "\n",
         "El libro ajusta una regresión lineal de `'medv'` frente a `'lstat'`. Por supuesto, ni idea de qué es cada una. Pero solo quier practicar código Python; el resultado nos da igual. \n"
       ],
-      "id": "1e976cf2"
+      "id": "d5c81e4d"
     },
     {
       "cell_type": "code",
@@ -91,7 +91,7 @@
       "source": [
         "En **statsmodels** el _intercept_ no se incluye por defecto y es el usuario quien tiene que incluirlo.\n"
       ],
-      "id": "d322d36a"
+      "id": "8790d02d"
     },
     {
       "cell_type": "code",
@@ -113,7 +113,7 @@
       "source": [
         "Una forma más generalizable de preparar los datos es con la función `MS()`, que funciona al estilo `sklearn`. Pero es algo propio del libro así que no sé si le haré mucho caso.\n"
       ],
-      "id": "69b77063"
+      "id": "b7633bc8"
     },
     {
       "cell_type": "code",
@@ -137,7 +137,7 @@
         "\n",
         "A partir del modelo, guardado en `results`, y un conjunto de datos, puedes obtener predicciones.\n"
       ],
-      "id": "54679335"
+      "id": "1b4656cd"
     },
     {
       "cell_type": "code",
@@ -147,7 +147,7 @@
         "newX = design.transform(new_df)\n",
         "newX"
       ],
-      "id": "74c1011e",
+      "id": "2f2165f0",
       "execution_count": null,
       "outputs": []
     },
@@ -157,7 +157,7 @@
       "source": [
         "Y ahora predices:\n"
       ],
-      "id": "ab1dba6a"
+      "id": "1bf75a69"
     },
     {
       "cell_type": "code",
@@ -179,7 +179,7 @@
         "\n",
         "El primer gráfico muestra la regresión calculada.\n"
       ],
-      "id": "f41f6dec"
+      "id": "2ba5448f"
     },
     {
       "cell_type": "code",
@@ -212,7 +212,7 @@
         "Parece que los valores ajustados más pequeños están asociados a residuos negativos y altos.\n",
         "En valores más altos de ajuste, hay residuos tanto positivos como negativos, pero se concentran muchos más en casos negativos.\n"
       ],
-      "id": "8eec6c6c"
+      "id": "376b523a"
     },
     {
       "cell_type": "code",
@@ -237,7 +237,7 @@
         "\n",
         "El gráfico muestra el _leverage_ contra el índice del punto, lo que ayuda a identificar puntos más influyentes (en el caso de una serie temporal, se podría ver como una evolución).\n"
       ],
-      "id": "1c401478"
+      "id": "e40345b7"
     },
     {
       "cell_type": "code",
@@ -263,7 +263,7 @@
         "\n",
         "Ahora enfrentan `'medv'` a `'lstat'` y `'age'`.\n"
       ],
-      "id": "bfc44df0"
+      "id": "12ddd606"
     },
     {
       "cell_type": "code",
@@ -294,7 +294,7 @@
         "\n",
         "No conocía la función `dir()`, con la que puedes acceder a lo que hay disponible en el objeto. \n"
       ],
-      "id": "e5a926a9"
+      "id": "5053d8e4"
     },
     {
       "cell_type": "code",
@@ -315,7 +315,7 @@
         "\n",
         "Ahora cuentan una cosa interesante, y para eso ajustan un modelo con muchas más variables (todas menos la edad).\n"
       ],
-      "id": "79b73dac"
+      "id": "77df284e"
     },
     {
       "cell_type": "code",
@@ -345,7 +345,7 @@
         "\n",
         "Voy a simular unos datos y a ajustar un modelo con ellos. Como los simulo yo, sé lo que debería salir en el modelo.\n"
       ],
-      "id": "a8ae07df"
+      "id": "3f60ac8b"
     },
     {
       "cell_type": "code",
@@ -368,7 +368,7 @@
       "source": [
         "Las variables de las que depende `y_ab` no tienen nada que ver la una con la otra.\n"
       ],
-      "id": "02110ac5"
+      "id": "7908ef7f"
     },
     {
       "cell_type": "code",
@@ -391,7 +391,7 @@
       "source": [
         "Cuando hago ajusto un modelo de regresión lineal todo tiene buena pinta.\n"
       ],
-      "id": "085d1085"
+      "id": "24e9c5a8"
     },
     {
       "cell_type": "code",
@@ -416,7 +416,7 @@
       "source": [
         "Vamos a plantearlo ahora con otra variable que me invento. \n"
       ],
-      "id": "1fb9331a"
+      "id": "40353ad9"
     },
     {
       "cell_type": "code",
@@ -444,7 +444,7 @@
         "\n",
         "Veamos la regresión. \n"
       ],
-      "id": "339ac244"
+      "id": "f44bd9b0"
     },
     {
       "cell_type": "code",
@@ -458,7 +458,7 @@
         "fit_a = sm.OLS(y_a, X_a).fit()\n",
         "print(fit_a.summary())"
       ],
-      "id": "deb48a25",
+      "id": "cf83407e",
       "execution_count": null,
       "outputs": []
     },
@@ -468,7 +468,7 @@
       "source": [
         "dir(fit_a)"
       ],
-      "id": "4ba42bbe",
+      "id": "63103f1c",
       "execution_count": null,
       "outputs": []
     },
@@ -478,7 +478,7 @@
       "source": [
         "fit_a.bse"
       ],
-      "id": "6926e7a6",
+      "id": "5d94adb3",
       "execution_count": null,
       "outputs": []
     },
@@ -492,7 +492,7 @@
         "\n",
         "Calcular la matriz de correlaciones, por ello, puede no ser suficiente. Pero yo la voy a calcular de todos modos.\n"
       ],
-      "id": "1445888d"
+      "id": "c7beff32"
     },
     {
       "cell_type": "code",
@@ -511,7 +511,7 @@
       "source": [
         "Ahora bien, parece mejor calcular el _variance inflator ratio_ (VIF). \n"
       ],
-      "id": "2429010b"
+      "id": "f8c2a1ad"
     },
     {
       "cell_type": "code",
@@ -532,7 +532,7 @@
       "source": [
         "Esto siguiente no funciona. No entiendo por qué dada la explicación del libro.\n"
       ],
-      "id": "9360b36b"
+      "id": "bff566c2"
     },
     {
       "cell_type": "code",
@@ -565,7 +565,7 @@
       "source": [
         "df_vif.loc['indus', :]"
       ],
-      "id": "b69a1891",
+      "id": "16a51a15",
       "execution_count": null,
       "outputs": []
     },
@@ -575,7 +575,7 @@
       "source": [
         "boston.columns"
       ],
-      "id": "e6c99923",
+      "id": "368200e3",
       "execution_count": null,
       "outputs": []
     }

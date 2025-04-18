@@ -23,7 +23,7 @@
         "\n",
         "En un formato horrible, por supuesto.\n"
       ],
-      "id": "d1a3d1ff"
+      "id": "31174045"
     },
     {
       "cell_type": "code",
@@ -71,7 +71,7 @@
       "source": [
         "Si los tratas un poco, puedes usar mi librería favorita para hacer gráficos, matplotlib, en la que si tuviera que trabajar dejaría mi trabajo, me pagaran lo que me pagaran. \n"
       ],
-      "id": "1cc722d1"
+      "id": "915030fa"
     },
     {
       "cell_type": "code",
@@ -95,7 +95,7 @@
       "source": [
         "Dicen que construyendo más vivienda se solucionan los problemas de precios.\n"
       ],
-      "id": "258faa3e"
+      "id": "ab8a6095"
     },
     {
       "cell_type": "code",
@@ -129,7 +129,7 @@
       "source": [
         "Suerte con pillar el ritmo a la demanda."
       ],
-      "id": "c703c09b"
+      "id": "bb31641f"
     }
   ],
   "metadata": {

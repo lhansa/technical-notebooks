@@ -1,0 +1,234 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"Cuánto te afecta la semilla al resultado final\"\n",
+        "description: \"La semilla afecta a la aleatoriedad del ajuste del modelo. Esto puede generar una incertidumbre que no siempre se tiene en cuenta.\"\n",
+        "description-meta: \"La semilla afecta a la aleatoriedad del ajuste del modelo. Esto puede generar una incertidumbre que no siempre se tiene en cuenta.\"\n",
+        "author: \"Leonardo Hansa\"\n",
+        "date: \"2025-04-12\"\n",
+        "categories: [exploraciones]\n",
+        "execute: \n",
+        "  echo: true\n",
+        "  eval: true\n",
+        "  message: false\n",
+        "  warning: false\n",
+        "freeze: true\n",
+        "---\n",
+        "\n",
+        "\n",
+        "## Comentarios iniciales\n",
+        "\n",
+        "En [Cuartil](https://open.spotify.com/episode/0Bl4iZq1o5s2Kd5WESm2Cu?si=LgiczmLkTfOpc0vKREYI9w) mencionamos que cambiar la semilla puede cambiar la métrica de ajuste de tu modelo.\n",
+        "\n",
+        "Voy a ajustar un RandomForest en algún conjunto de datos varias veces. \n",
+        "\n",
+        "El objetivo es ver que, cada vez que lo ejecuto, la predicción cambia, por lo que hay cierta incertidumbre cada vez que ajustas un modelo de estos. \n"
+      ],
+      "id": "12f255fd"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: libs\n",
+        "from sklearn.datasets import load_diabetes\n",
+        "from sklearn.ensemble import RandomForestRegressor\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "from sklearn.metrics import r2_score\n",
+        "import numpy as np\n",
+        "import pandas as pd\n",
+        "import matplotlib.pyplot as plt\n",
+        "import seaborn as sns"
+      ],
+      "id": "libs",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Preparación de datos\n",
+        "\n",
+        "Los datos no me importan especialmente. Cargo unos de **sklearn** que me ha sugerido ChatGPT. Los separo en train y test. Esta separación la dejo fija: voy a estudiar cómo afecta la aleatoriedad del modelo, no la de los datos.\n"
+      ],
+      "id": "61706924"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: data\n",
+        "data = load_diabetes()\n",
+        "X = data.data\n",
+        "y = data.target\n",
+        "\n",
+        "X_train, X_test, y_train, y_test = train_test_split(\n",
+        "    X, y, test_size=0.2, random_state=42\n",
+        ")"
+      ],
+      "id": "data",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Ajuste de los modelos\n",
+        "\n",
+        "Ajusto 100 modelos. Voy a guardar algunas cosas de los ajustes para luego ver cómo varían de un caso a otro. Lo que quiero estudiar es si hay mucha dispersión entre unos resultados y otros.\n"
+      ],
+      "id": "d66e69fd"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: loop-model\n",
+        "num_trials = 200\n",
+        "l_r2 = []\n",
+        "l_preds = []\n",
+        "\n",
+        "for i in range(num_trials):\n",
+        "    random_state = np.random.randint(0, 10000)\n",
+        "\n",
+        "    model = RandomForestRegressor(random_state=random_state, n_jobs=-1)\n",
+        "\n",
+        "    model.fit(X_train, y_train)\n",
+        "\n",
+        "    y_pred = model.predict(X_test)\n",
+        "    l_r2.append(r2_score(y_test, y_pred))\n",
+        "\n",
+        "    pred_series = pd.Series(y_pred, name=f\"pred_{i}\")\n",
+        "\n",
+        "    l_preds.append(pred_series)"
+      ],
+      "id": "loop-model",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Ahora creo el data frame de predicciones:\n"
+      ],
+      "id": "6e92cb2c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: concat\n",
+        "df_preds = pd.concat(l_preds, axis=1)"
+      ],
+      "id": "concat",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Visualización\n",
+        "\n",
+        "### Métrica de ajuste\n",
+        "\n",
+        "Aquí la distribución del R2.\n"
+      ],
+      "id": "8a4faa5a"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: hist-mse\n",
+        "#| echo: false\n",
+        "plt.figure(figsize=(8, 5))\n",
+        "plt.hist(l_r2, bins=20, color=\"#800080\", edgecolor=\"black\", alpha=0.7)\n",
+        "\n",
+        "plt.title(\n",
+        "    f\"Distribución de R² en {num_trials} iteraciones\", fontsize=14, fontweight=\"bold\"\n",
+        ")\n",
+        "plt.xlabel(\"R²\", fontsize=10)\n",
+        "plt.ylabel(\"Frecuencia\", fontsize=10)\n",
+        "\n",
+        "plt.grid(True, linestyle=\"--\", alpha=0.3)\n",
+        "plt.xticks(fontsize=8)\n",
+        "plt.yticks(fontsize=8)\n",
+        "plt.tight_layout()\n",
+        "plt.show()"
+      ],
+      "id": "hist-mse",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "### Predicciones\n",
+        "\n",
+        "Ahora muestro cómo varía cada predicción observación a observación. Muestro solo unas pocas porque no se ve nada si intento ver todas una a una. \n",
+        "\n",
+        "Quizá no tenga sentido ver todas una a una, sino ver la desviación en general de todas las observación con respecto a su punto medio o su media o lo que sea. Pero paso de pensar. \n"
+      ],
+      "id": "d9894d87"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: preds-boxplots\n",
+        "df_long = df_preds.reset_index().melt(\n",
+        "    id_vars=\"index\", var_name=\"modelo\", value_name=\"pred\"\n",
+        ")\n",
+        "df_long = df_long.rename(columns={\"index\": \"id\"})\n",
+        "\n",
+        "subset_ids = df_long[\"id\"].unique()[:50]\n",
+        "subset = df_long[df_long[\"id\"].isin(subset_ids)]\n",
+        "\n",
+        "# Calcular mediana por id\n",
+        "medianas = subset.groupby(\"id\")[\"pred\"].median().sort_values()\n",
+        "\n",
+        "# Convertir 'id' a categoría ordenada según su mediana\n",
+        "subset[\"id\"] = pd.Categorical(subset[\"id\"], categories=medianas.index, ordered=True)\n",
+        "\n",
+        "plt.figure(figsize=(20, 6))\n",
+        "sns.boxplot(data=subset, x=\"id\", y=\"pred\", showfliers=False)\n",
+        "plt.xlabel(\"ID de observación (subconjunto)\")\n",
+        "plt.ylabel(\"Predicción\")\n",
+        "plt.title(\"Boxplot de predicciones por observación (unas pocas)\")\n",
+        "plt.xticks(rotation=90, fontsize=5)\n",
+        "plt.tight_layout()\n",
+        "plt.show()"
+      ],
+      "id": "preds-boxplots",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Hay alguna observación que sí presenta algo de variabilidad entre los modelos pero no me escandizaría por ello. \n"
+      ],
+      "id": "ec084fe0"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "C:\\Users\\Leonardo.Hansa\\AppData\\Roaming\\Python\\share\\jupyter\\kernels\\python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

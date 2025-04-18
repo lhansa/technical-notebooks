@@ -24,7 +24,7 @@
         "\n",
         "Además, lo voy a hacer en Python porque me gusta sufrir.\n"
       ],
-      "id": "78456753"
+      "id": "92c34874"
     },
     {
       "cell_type": "code",
@@ -52,7 +52,7 @@
         "\n",
         "donde $\\beta_0 = - 5$, $\\beta_1 = 3$ y $x ~ \\mbox{Poisson(12)}$ y $\\varepsilon \\sim \\cal{N}(0, 10)$.\n"
       ],
-      "id": "fab01442"
+      "id": "191c2807"
     },
     {
       "cell_type": "code",
@@ -75,7 +75,7 @@
       "source": [
         "Ahora ajusto la regresión lineal con **statsmodels**. ¿Se puede hacer con **sklearn**? Pues imagino que sí, pero necesitaré luego acceder a detalles del modelo a los que no sé acceder con sklearn.\n"
       ],
-      "id": "069feddf"
+      "id": "8f43ae13"
     },
     {
       "cell_type": "code",
@@ -106,7 +106,7 @@
         "\n",
         "> Cuanto mayor sea el error estándar, menor siginificatividad tendrá la variable. Por lo tanto, con un varianza del error pequeña, más fácil será que la variable aparezca significativa.\n"
       ],
-      "id": "58a08e4f"
+      "id": "5ec772f5"
     },
     {
       "cell_type": "code",
@@ -128,7 +128,7 @@
         "\n",
         "> El error estándar del intercept es más lío de calcular e interpretar; la idea intuitiva es que tiene en cuenta la varianza de todas las variables explicativas a la vez. \n"
       ],
-      "id": "05d5575b"
+      "id": "39a28fe9"
     },
     {
       "cell_type": "code",
@@ -156,7 +156,7 @@
         "- A su vez, si el coeficiente es alto (en valor absoluto), entonces también crece. \n",
         "- El estadístico decrece con coeficientes bajos o con errores altos (es decir, la variable parecerá no significativa).\n"
       ],
-      "id": "7f4060a1"
+      "id": "baf401ea"
     },
     {
       "cell_type": "code",
@@ -166,7 +166,7 @@
         "t_stat_x = np.abs(model.params[1]) / standard_error_x\n",
         "t_stat_x"
       ],
-      "id": "b24fc798",
+      "id": "eb20c0a1",
       "execution_count": null,
       "outputs": []
     },
@@ -179,7 +179,7 @@
         "\n",
         "Pon que trabajas al nivel de confianza del 90%. Hace falta calcular el $t$ que deja el 5% a un lado de la distribución, y el que lo deja al otro lado. Como la distribución es simétrica, solo calculo uno:\n"
       ],
-      "id": "2c90afe5"
+      "id": "8aadacc9"
     },
     {
       "cell_type": "code",
@@ -188,7 +188,7 @@
         "percentile = stats.t.ppf(0.95, nobs - 2)\n",
         "percentile"
       ],
-      "id": "a18b25df",
+      "id": "a36a4bef",
       "execution_count": null,
       "outputs": []
     },
@@ -198,7 +198,7 @@
       "source": [
         "Ahora tienes la distribución de $t$. Si $t$ cae en el área sombreada (el 10% extremo) entonces la probabilidad de observar tus datos en el supuesto de que la variable no sea significativa ($H_0$ o $\\beta_1 = 0$) es menor de 0,10.\n"
       ],
-      "id": "956b94c7"
+      "id": "9587a0f5"
     },
     {
       "cell_type": "code",
@@ -223,7 +223,7 @@
       "source": [
         "Concretamente, la probabilidad para el estadístico $t$ que has obtenido es muy muy baja.\n"
       ],
-      "id": "9e943cce"
+      "id": "59046cd0"
     },
     {
       "cell_type": "code",
@@ -233,7 +233,7 @@
         "# t distribution\n",
         "stats.t.sf(t_stat_x, nobs - 2) * 2"
       ],
-      "id": "5b26965d",
+      "id": "8cb03a78",
       "execution_count": null,
       "outputs": []
     },
@@ -276,7 +276,7 @@
         "\n",
         "Por ahora, la desviación típica del ruido sobre $x$ es 1.\n"
       ],
-      "id": "dc29ae36"
+      "id": "2d983525"
     },
     {
       "cell_type": "code",
@@ -331,7 +331,7 @@
       "source": [
         "Voy a poner mucho más ruido. Fíjate en cuánto decrece el estadístico $t$ (y en consecuencia cuánto aumenta el p-valor). \n"
       ],
-      "id": "3dfbce9d"
+      "id": "ccfd9989"
     },
     {
       "cell_type": "code",
