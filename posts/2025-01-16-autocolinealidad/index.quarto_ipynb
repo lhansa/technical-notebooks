@@ -18,7 +18,7 @@
         "freeze: true\n",
         "---"
       ],
-      "id": "23ed8107"
+      "id": "42c3c95f"
     },
     {
       "cell_type": "code",
@@ -41,7 +41,7 @@
         "\n",
         "Tienes una variable $y$ que depende de dos variables $x_1$ y $x_2$. Pero $x_2$ es una combinación lineal de $x_1$. \n"
       ],
-      "id": "cad7dcfe"
+      "id": "75e811e4"
     },
     {
       "cell_type": "code",
@@ -66,7 +66,7 @@
       "source": [
         "Por si hay alguna duda:\n"
       ],
-      "id": "c90d1dd0"
+      "id": "81ebd708"
     },
     {
       "cell_type": "code",
@@ -85,7 +85,7 @@
       "source": [
         "¿Qué pasa si usas $x_1$ y $x_2$ en una regresión lineal?\n"
       ],
-      "id": "0aa390b4"
+      "id": "1a1d9d15"
     },
     {
       "cell_type": "code",
@@ -112,7 +112,7 @@
         "\n",
         "Antes tenías una muestra de tamaño `{python} n`. Vamos a cambiar eso.\n"
       ],
-      "id": "37993117"
+      "id": "ad74cd35"
     },
     {
       "cell_type": "code",
@@ -134,7 +134,7 @@
       "source": [
         "Con estos datos, aparentemente los mismos pero con menor muestra, ajusto la regresión. \n"
       ],
-      "id": "b57b2bbf"
+      "id": "5b0a7e14"
     },
     {
       "cell_type": "code",
@@ -163,7 +163,7 @@
         "\n",
         "Así que vamos a generar muchas muestras, de distintos tamaños, y vemos en cada una cómo cambian los coeficientes.\n"
       ],
-      "id": "a1077d30"
+      "id": "158ecd9f"
     },
     {
       "cell_type": "code",
@@ -201,7 +201,7 @@
         "\n",
         "Fíjate cómo, cuanto menor es el tamaño muestral, menor es la precisión de la estimación. No creas que por que alguna vez salga bien con una muestra, tu estimación va a ser buena. La incertidumbre es alta, te guste o no.\n"
       ],
-      "id": "b993f515"
+      "id": "6213ea26"
     },
     {
       "cell_type": "code",

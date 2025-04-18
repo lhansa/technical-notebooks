@@ -122,14 +122,12 @@ df_long = df_long.rename(columns={"index": "id"})
 subset_ids = df_long["id"].unique()[:50]
 subset = df_long[df_long["id"].isin(subset_ids)]
 
-# Calcular mediana por id
 medianas = subset.groupby("id")["pred"].median().sort_values()
 
-# Convertir 'id' a categoría ordenada según su mediana
 subset["id"] = pd.Categorical(subset["id"], categories=medianas.index, ordered=True)
 
-plt.figure(figsize=(6, 20))
-sns.boxplot(data=subset, y="id", x="pred", showfliers=False)
+plt.figure(figsize=(8, 15))
+sns.boxplot(data=subset, y="id", x="pred", color="#800080", showfliers=False)
 plt.ylabel("ID de observación (subconjunto)")
 plt.xlabel("Predicción")
 plt.title("Boxplot de predicciones por observación (unas pocas)")

@@ -32,7 +32,7 @@
         "\n",
         "_Bootstrap_ es una solución. \n"
       ],
-      "id": "0532dbe2"
+      "id": "103fafd1"
     },
     {
       "cell_type": "code",
@@ -67,7 +67,7 @@
         "\n",
         "### Algunos datos\n"
       ],
-      "id": "3635b999"
+      "id": "ce1412d4"
     },
     {
       "cell_type": "code",
@@ -91,7 +91,7 @@
       "source": [
         "### Entrenamiento en muestras bootstrap\n"
       ],
-      "id": "58a527d3"
+      "id": "739362ca"
     },
     {
       "cell_type": "code",
@@ -110,7 +110,7 @@
       "source": [
         "Lo siguiente creo que quedaría más claro con un bucle `for`, pero en teoría no están recomendados. Así que creo una función y la llamo en una _list comprehension_. \n"
       ],
-      "id": "0a96a281"
+      "id": "b56360fa"
     },
     {
       "cell_type": "code",
@@ -141,7 +141,7 @@
       "source": [
         "Y ahora calculo todo.\n"
       ],
-      "id": "584db488"
+      "id": "5b72888d"
     },
     {
       "cell_type": "code",
@@ -162,7 +162,7 @@
         "\n",
         "El optimismo medio es lo que necesito para el próximo paso. Así que calculo la media de la lista que acabo de generar.\n"
       ],
-      "id": "ec39705c"
+      "id": "a9fbeb8a"
     },
     {
       "cell_type": "code",
@@ -182,7 +182,7 @@
       "source": [
         "Por curiosidad, así se distribuye el optimismo.\n"
       ],
-      "id": "943115b6"
+      "id": "f0d68733"
     },
     {
       "cell_type": "code",
@@ -216,7 +216,7 @@
         "\n",
         "Todos los entrenamientos anteriores estaban hechos sobre muestras _bootrstrap_, es decir, no estaban sobre el entrenamiento\n"
       ],
-      "id": "f1f29ca7"
+      "id": "64500322"
     },
     {
       "cell_type": "code",
