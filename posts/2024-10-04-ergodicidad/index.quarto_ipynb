@@ -1,0 +1,283 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"Procesos ergódicos\"\n",
+        "description: \"Pequeña práctica y ejemplo con procesos ergódicos en Python\"\n",
+        "description-meta: \"Pequeña práctica y ejemplo con procesos ergódicos en Python\"\n",
+        "author: \"Leonardo Hansa\"\n",
+        "date: \"2024-10-04\"\n",
+        "categories: [exploraciones]\n",
+        "execute: \n",
+        "  echo: true\n",
+        "  message: false\n",
+        "  warning: false\n",
+        "freeze: true\n",
+        "---\n",
+        "\n",
+        "\n",
+        "[Leo a Gil Bellosta](https://www.datanalytics.com/2024/10/03/ergodicidad-utilitarismo/) sobre ergocidad y he querido plantear lo que comenta. \n",
+        "\n",
+        "El define la ergodicidad mucho mejor de lo que lo podría hacer yo, salvo que lo copiara. Pero para copiarlo, mejor ve a su web. \n",
+        "\n",
+        "Planteo aquí el código de su ejemplo. \n"
+      ],
+      "id": "ad90abd7"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: libs\n",
+        "import numpy as np\n",
+        "import matplotlib.pyplot as plt"
+      ],
+      "id": "libs",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Lanzamiento de una moneda\n"
+      ],
+      "id": "74bbc586"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: params\n",
+        "n_individuos = 100\n",
+        "n_veces = 1000"
+      ],
+      "id": "params",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Tienes a `python n_individuos` que lanzan una moneda al aire `python n_veces` cada uno. Eso hace un total de `python n_individuos * n_veces` lanzamientos, en los que la probablidad teórica de obtener cara (resultado igual a 1 en este caso) es $0,5$.\n"
+      ],
+      "id": "5dee86d1"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: sim-lanzamientos\n",
+        "np.random.seed(10)\n",
+        "lanzamientos = np.random.randint(0, 2, size=n_individuos * n_veces)\n",
+        "lanzamientos = lanzamientos.reshape(n_individuos, n_veces)\n",
+        "lanzamientos.shape"
+      ],
+      "id": "sim-lanzamientos",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Este es un proceso estocástico ergódico porque: \n",
+        "\n",
+        "- Para cualquier individuo $i$, la probabilidad de obtener cara en todos sus lanzamientos es 0,5, y\n",
+        "- para cualquier lanzamiento $k$, la probabilidad de obtener cara entre los $k$-ésimos lanzamientos de todos los individuos es $0,5$.\n",
+        "\n",
+        "\n",
+        "Por ejemplo, la probabilidad de obtener cara para el individuo 2 (el tercero, porque esto es Python y piensan raro) es:\n"
+      ],
+      "id": "fae338b6"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: individuo2\n",
+        "np.mean(lanzamientos[2, :])"
+      ],
+      "id": "individuo2",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "A su vez, la probabilidad de que obtengan cara entre todos los individuos en el lanzamiento 50 (el 51 xD) es:\n"
+      ],
+      "id": "f7345416"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: lanzamiento50\n",
+        "np.mean(lanzamientos[:, 50])"
+      ],
+      "id": "lanzamiento50",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Ejemplo de proceso no ergódico\n",
+        "\n",
+        "Supón ahora este proceso: \n",
+        "\n",
+        "1. Partes de un capital de 1. \n",
+        "2. Tiras una moneda al aire. \n",
+        "3. Si sale cara, multiplicas el capital por 1,5; si sale cruz, por 0,6\n",
+        "4. Ve al paso 2.\n",
+        "\n",
+        "\n",
+        "La simulación de lanzamientos de monedas con sus resultados $1,5$ y $0,6$ se puede hacer así:\n"
+      ],
+      "id": "3291a565"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: multiplicadores\n",
+        "multiplicadores_capital = np.random.choice([0.6, 1.5], size=n_individuos * n_veces)\n",
+        "multiplicadores_capital = multiplicadores_capital.reshape(n_individuos, n_veces)"
+      ],
+      "id": "multiplicadores",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Y la evolución del capital se calcula así:\n"
+      ],
+      "id": "a3874fba"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: capital-evolution\n",
+        "capitales = multiplicadores_capital.cumprod(axis=1)"
+      ],
+      "id": "capital-evolution",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "El capital de cada individuo (`python n_individuos`) empezaba en 1, por lo que el capital medio por individuo era de 1. Tras el primer lanzamiento, el capital medio queda en: \n"
+      ],
+      "id": "d196ab14"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: capital1\n",
+        "capitales[:, 0].mean()"
+      ],
+      "id": "capital1",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Ten en cuenta que la media teórica sería $\\frac{1,50 + 0,60}{2} = 1,05$.\n",
+        "\n",
+        "La evolución de capitales medios: \n"
+      ],
+      "id": "e740aae4"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: capital-societario\n",
+        "\n",
+        "# compute mean per column on numpy array capitales\n",
+        "evolucion_capital_medio = capitales.mean(axis=0)\n",
+        "\n",
+        "plt.plot(evolucion_capital_medio[0:150, ], color='#800080')\n",
+        "plt.xlabel('Tiempo')\n",
+        "plt.ylabel('Capital medio')\n",
+        "plt.title('Evolución del capital medio')\n",
+        "plt.show()"
+      ],
+      "id": "capital-societario",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Si pongo de límite hasta la tirada 100, el capital medio ha crecido: "
+      ],
+      "id": "50af1741"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: tirada100\n",
+        "n_tirada = 100\n",
+        "evolucion_capital_medio[n_tirada, ]"
+      ],
+      "id": "tirada100",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Sin embargo, solo un 11% de los individuos ha visto su capital crecer:\n"
+      ],
+      "id": "83828c87"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: tirada100-2\n",
+        "(capitales[:, n_tirada] > 1).sum()"
+      ],
+      "id": "tirada100-2",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "En un proceso no ergódico (¿cuántos hay así en una sociedad occidental?), puedes ver crecimiento global, pero solo de unos pocos.\n"
+      ],
+      "id": "25898fc4"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "C:\\Users\\Leonardo.Hansa\\AppData\\Roaming\\Python\\share\\jupyter\\kernels\\python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

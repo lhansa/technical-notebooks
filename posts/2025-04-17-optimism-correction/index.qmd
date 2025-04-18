@@ -25,65 +25,106 @@ Lo malo, según Frank Harrell, es que, si tu conjunto de datos es pequeño, esa 
 
 _Bootstrap_ es una solución. 
 
-## Bootstrap para corregir el optimismo
-
-
 ```{python}
+#| label: libs
 import numpy as np
 import pandas as pd
 from sklearn.datasets import fetch_openml
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from sklearn.utils import resample
+import matplotlib.pyplot as plt
+```
 
-# Cargar los datos
+## Bootstrap para corregir el optimismo
+
+La idea es entrenar el modelo en varias muestras bootstrap y calcular la métrica de ajuste en cada par muestra bootstrap, muestra original, y luego la diferencia. Así, tendrás una lista de diferencias de longitud el número de muestras. 
+
+Luego calculas la media. 
+
+Finalmente, entrenas el modelo en la muestra original completa y le aplicas esa diferencia media. 
+
+La métrica de ajuste final será la métrica de ajuste en entrenamiento menos la diferencia, es decir, con el optimismo corregido.
+
+### Algunos datos
+
+```{python}
+#| label: load
 data = fetch_openml(name="boston", version=1, as_frame=True)
 X = data.data
 y = data.target
 
-# Convertir a numpy
 X_np = X.to_numpy()
 y_np = y.to_numpy()
+```
 
-# Definir el número de muestras bootstrap
+### Entrenamiento en muestras bootstrap
+
+```{python}
+#| label: set-up-boots
 n_bootstraps = 200
-optimism_estimates = []
+```
 
-# Bucle bootstrap
-for _ in range(n_bootstraps):
-    # Muestra bootstrap (con reemplazo)
+Lo siguiente creo que quedaría más claro con un bucle `for`, pero en teoría no están recomendados. Así que creo una función y la llamo en una _list comprehension_. 
+
+```{python}
+#| label: compute-optimism
+def compute_optimism():
     X_boot, y_boot = resample(X_np, y_np)
 
-    # Entrenar el modelo en el bootstrap
     model = LinearRegression()
     model.fit(X_boot, y_boot)
 
-    # Evaluar en el bootstrap (optimista)
     y_pred_boot = model.predict(X_boot)
     r2_boot = r2_score(y_boot, y_pred_boot)
 
-    # Evaluar en los datos originales (menos optimista)
     y_pred_orig = model.predict(X_np)
     r2_orig = r2_score(y_np, y_pred_orig)
 
-    # Guardar diferencia
-    optimism = r2_boot - r2_orig
-    optimism_estimates.append(optimism)
+    return(r2_boot - r2_orig)
+```
 
-# Estimar el optimismo medio
+Y ahora calculo todo.
+
+```{python}
+#| label: list-optimism
+optimism_estimates = [compute_optimism() for _ in range(n_bootstraps)]
+```
+
+### Cálculo del optimismo
+
+El optimismo medio es lo que necesito para el próximo paso. Así que calculo la media de la lista que acabo de generar.
+
+```{python}
+#| label: optimism
 mean_optimism = np.mean(optimism_estimates)
+mean_optimism
+```
 
-# Entrenar modelo final en todos los datos
+Por curiosidad, así se distribuye el optimismo.
+
+```{python}
+#| label: histogram
+plt.hist(optimism_estimates, color="#800080", bins=20)
+plt.show()
+```
+
+### Entrenamiento final
+
+Todos los entrenamientos anteriores estaban hechos sobre muestras _bootrstrap_, es decir, no estaban sobre el entrenamiento
+
+```{python}
+#| label: final-train
 final_model = LinearRegression()
 final_model.fit(X_np, y_np)
 final_r2 = r2_score(y_np, final_model.predict(X_np))
+```
 
-# Corregir el R² final
+```{python}
+#| label: optimism-correct
 corrected_r2 = final_r2 - mean_optimism
 
-# Mostrar resultados
 print(f"R² original: {final_r2:.4f}")
 print(f"Optimismo medio: {mean_optimism:.4f}")
 print(f"R² corregido: {corrected_r2:.4f}")
-
 ```

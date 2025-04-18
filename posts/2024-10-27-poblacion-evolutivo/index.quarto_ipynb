@@ -1,0 +1,145 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"Evolución de la población por provincias en España\"\n",
+        "description: \"Exploratorio con Python de los datos públicos de residentes por provincia en España\"\n",
+        "description-meta: \"Exploratorio con Python de los datos públicos de residentes por provincia en España\"\n",
+        "author: \"Leonardo Hansa\"\n",
+        "date: \"2024-10-27\"\n",
+        "categories: [exploraciones]\n",
+        "execute: \n",
+        "  echo: true\n",
+        "  message: false\n",
+        "  warning: false\n",
+        "freeze: true\n",
+        "---\n",
+        "\n",
+        "\n",
+        "El INE tiene datos de evolución ~~trimestral~~ semestral de la población por provincias en España. \n",
+        "\n",
+        "En un formato horrible, por supuesto.\n"
+      ],
+      "id": "6ba5f7bf"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: libs\n",
+        "import pandas as pd\n",
+        "import matplotlib.pyplot as plt\n",
+        "import locale"
+      ],
+      "id": "libs",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: read-data\n",
+        "locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')\n",
+        "\n",
+        "df_ine = pd.read_csv(\n",
+        "    'ine-poblacion-provincias.csv', \n",
+        "    sep=';', \n",
+        "    header=0, \n",
+        "    names=['edad', 'provincia', 'sexo', 'periodo', 'residentes']\n",
+        "    # usecols=['provincia', 'periodo', 'residentes']\n",
+        ")\n",
+        "\n",
+        "condicion = (df_ine['edad'] == 'Todas las edades') & (df_ine['sexo'] == 'Total')\n",
+        "df_ine = df_ine.loc[condicion, ['provincia', 'periodo', 'residentes']]\n",
+        "\n",
+        "df_ine['residentes'] = pd.to_numeric(df_ine['residentes'].str.replace('.',''))\n",
+        "df_ine['periodo'] = pd.to_datetime(df_ine['periodo'], format='%d de %B de %Y')\n",
+        "\n",
+        "df_ine.head()"
+      ],
+      "id": "read-data",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Si los tratas un poco, puedes usar mi librería favorita para hacer gráficos, matplotlib, en la que si tuviera que trabajar dejaría mi trabajo, me pagaran lo que me pagaran. \n"
+      ],
+      "id": "8eaaae8b"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: prepara-plot\n",
+        "df_solo_provincias = df_ine[df_ine['provincia'] != 'Total Nacional']\n",
+        "df_solo_provincias['residentes'] = df_solo_provincias['residentes'].fillna(method='ffill')\n",
+        "\n",
+        "provincias_destacadas = ['28 Madrid', '08 Barcelona', '46 Valencia/València', '29 Málaga']\n",
+        "\n",
+        "df_solo_provincias['destacada'] = df_solo_provincias['provincia'].apply(lambda x: x if x in provincias_destacadas else 'Otras')"
+      ],
+      "id": "prepara-plot",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Dicen que construyendo más vivienda se solucionan los problemas de precios.\n"
+      ],
+      "id": "d2591c8d"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: plot\n",
+        "colors = {'28 Madrid': 'blue', '08 Barcelona': 'red', '46 Valencia/València': 'green', '29 Málaga': 'orange', 'Otras': 'lightgray'}\n",
+        "\n",
+        "df_pivot = df_solo_provincias.pivot(index='periodo', columns='provincia', values='residentes')\n",
+        "\n",
+        "fig, ax = plt.subplots(figsize=(10, 6))\n",
+        "\n",
+        "for provincia in df_pivot.columns:\n",
+        "    color = colors[provincia] if provincia in provincias_destacadas else colors['Otras']\n",
+        "    label = provincia if provincia in provincias_destacadas else '_nolegend_'\n",
+        "    df_pivot[provincia].plot(ax=ax, color=color, label=label)\n",
+        "\n",
+        "plt.title('Evolución de la población por provincias en España')\n",
+        "plt.ylabel('Residentes (millones)')\n",
+        "plt.xlabel('')\n",
+        "plt.legend()\n",
+        "plt.show()"
+      ],
+      "id": "plot",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Suerte con pillar el ritmo a la demanda."
+      ],
+      "id": "e21ea862"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "C:\\Users\\Leonardo.Hansa\\AppData\\Roaming\\Python\\share\\jupyter\\kernels\\python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
