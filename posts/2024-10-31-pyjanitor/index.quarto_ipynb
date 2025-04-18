@@ -31,7 +31,7 @@
         "\n",
         "## `pyjanitor`\n"
       ],
-      "id": "ce750fc9"
+      "id": "cc3cca34"
     },
     {
       "cell_type": "code",
@@ -51,7 +51,7 @@
       "source": [
         "Teníamos un listado de nombres que en un proyecto real vendrían como valores de la columna de un data frame. Y están repetidos.\n"
       ],
-      "id": "1894e736"
+      "id": "8b570929"
     },
     {
       "cell_type": "code",
@@ -61,7 +61,7 @@
         "nombres = nombres * 2\n",
         "nombres"
       ],
-      "id": "b17ecb82",
+      "id": "529b4ade",
       "execution_count": null,
       "outputs": []
     },
@@ -85,7 +85,7 @@
         "\n",
         "La función es `_clean_names` y su primer argumento es la serie que quieres editar. Ninguno de los argumentos de configuración tiene valor por defecto, así que hay que especificarlos todos. \n"
       ],
-      "id": "dc4e9758"
+      "id": "69e13ce7"
     },
     {
       "cell_type": "code",
@@ -105,7 +105,7 @@
         "\n",
         "nuevos_nombres"
       ],
-      "id": "237e6f1f",
+      "id": "cd9d050f",
       "execution_count": null,
       "outputs": []
     },
@@ -117,7 +117,7 @@
         "\n",
         "Gracias, José Luis, como siempre, que incluso con Python me ayudas."
       ],
-      "id": "a7b153e4"
+      "id": "ef8c2696"
     }
   ],
   "metadata": {

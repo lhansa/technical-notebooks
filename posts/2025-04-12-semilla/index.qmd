@@ -22,68 +22,86 @@ Voy a ajustar un RandomForest en algún conjunto de datos varias veces.
 El objetivo es ver que, cada vez que lo ejecuto, la predicción cambia, por lo que hay cierta incertidumbre cada vez que ajustas un modelo de estos. 
 
 ```{python}
-#| label: libs
-from sklearn.datasets import fetch_california_housing, load_breast_cancer
-from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+# | label: libs
+from sklearn.datasets import load_diabetes
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, roc_auc_score
+from sklearn.metrics import r2_score
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 ```
 
-## Ejemplo 1. Regresión
-
-### Preparación de datos
+## Preparación de datos
 
 Los datos no me importan especialmente. Cargo unos de **sklearn** que me ha sugerido ChatGPT. Los separo en train y test. Esta separación la dejo fija: voy a estudiar cómo afecta la aleatoriedad del modelo, no la de los datos.
 
 ```{python}
-#| label: data
-data = fetch_california_housing(as_frame=True)
+# | label: data
+data = load_diabetes()
 X = data.data
 y = data.target
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 ```
 
-### Ajuste de los modelos
+## Ajuste de los modelos
 
 Ajusto 100 modelos. Voy a guardar algunas cosas de los ajustes para luego ver cómo varían de un caso a otro. Lo que quiero estudiar es si hay mucha dispersión entre unos resultados y otros.
 
 ```{python}
-#| label: loop-model
-num_trials = 100
-l_mse = []
-df_preds = pd.DataFrame()
+# | label: loop-model
+num_trials = 200
+l_r2 = []
+l_preds = []
 
 for i in range(num_trials):
-  print(f'Iteración {i+1}/{num_trials}')
-  random_state = np.random.randint(0, 10000)
+    random_state = np.random.randint(0, 10000)
 
-  model = RandomForestRegressor(
-    random_state=random_state, 
-    n_jobs=-1
-  )
+    model = RandomForestRegressor(random_state=random_state, n_jobs=-1)
 
-  model.fit(X_train, y_train)
+    model.fit(X_train, y_train)
 
-  y_pred = model.predict(X_test)
-  l_mse.append(mean_squared_error(y_test, y_pred))
+    y_pred = model.predict(X_test)
+    l_r2.append(r2_score(y_test, y_pred))
 
-  df_preds[f'pred_{i}'] = y_pred
+    pred_series = pd.Series(y_pred, name=f"pred_{i}")
+
+    l_preds.append(pred_series)
 ```
 
-### Visualización
+Ahora creo el data frame de predicciones:
 
-#### Métrica de ajuste
+```{python}
+#| label: concat
+df_preds = pd.concat(l_preds, axis=1)
+```
 
-Reconozco que esperaba más dispersión entre las métricas. Entre los 100 modelos, la métrica de ajuste (MSE) varía entre 0.25 y 0.26. Muy estable.
+## Visualización
+
+### Métrica de ajuste
+
+Aquí la distribución del R2.
 
 ```{python}
 #| label: hist-mse
-plt.hist(l_mse, bins=20)
+#| echo: false
+plt.figure(figsize=(12, 9))
+plt.hist(l_r2, bins=20, color="#800080", edgecolor="black", alpha=0.7)
+
+plt.title(
+    f"Distribución de R² en {num_trials} iteraciones", fontsize=14, fontweight="bold"
+)
+plt.xlabel("R²", fontsize=10)
+plt.ylabel("Frecuencia", fontsize=10)
+
+plt.grid(True, linestyle="--", alpha=0.3)
+plt.xticks(fontsize=8)
+plt.yticks(fontsize=8)
+plt.tight_layout()
 plt.show()
 ```
 
@@ -96,7 +114,6 @@ Quizá no tenga sentido ver todas una a una, sino ver la desviación en general 
 
 ```{python}
 #| label: preds-boxplots
-
 df_long = df_preds.reset_index().melt(id_vars='index', var_name='modelo', value_name='pred')
 df_long = df_long.rename(columns={'index': 'id'})
 
@@ -107,87 +124,11 @@ plt.figure(figsize=(20, 6))
 sns.boxplot(data=subset, x='id', y='pred', showfliers=False)
 plt.xlabel('ID de observación (subconjunto)')
 plt.ylabel('Predicción')
-plt.title('Boxplot de predicciones por observación (100 primeras)')
-plt.xticks(rotation=90)
+plt.title('Boxplot de predicciones por observación (unas pocas)')
+plt.xticks(rotation=90, fontsize=5)
 plt.tight_layout()
 plt.show()
 ```
 
 Hay alguna observación que sí presenta algo de variabilidad entre los modelos pero no me escandizaría por ello. 
 
-## Ejemplo 2. Clasificación
-
-Ahora quiero hacer algo parecido en un problema de clasificación 0-1. 
-
-### Preparación de datos
-```{python}
-#| label: data-class
-data = load_breast_cancer()
-X = data.data
-y = data.target
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-```
-
-### Ajuste de modelos
-
-```{python}
-#| label: modelos
-all_preds = []
-all_aucs = []
-
-for i in range(100):  # 100 semillas
-    model = RandomForestClassifier(random_state=i, n_jobs=-1)
-    model.fit(X_train, y_train)
-    probs = model.predict_proba(X_test)[:, 1]
-    
-    # Guardar predicciones
-    df_temp = pd.DataFrame({
-        'id': range(len(X_test)),
-        'prob': probs,
-        'seed': i,
-        'true_label': y_test
-    })
-    all_preds.append(df_temp)
-    
-    # Calcular y guardar AUC
-    auc = roc_auc_score(y_test, probs)
-    all_aucs.append(auc)
-
-```
-
-### Visualización
-
-#### Bondad de ajuste
-
-```{python}
-#| label: hist-auc
-df_all = pd.concat(all_preds, ignore_index=True)
-
-plt.figure(figsize=(8, 4))
-sns.histplot(all_aucs, bins=20, kde=True)
-plt.xlabel('AUC')
-plt.title('Distribución de AUCs sobre 100 random forests')
-plt.tight_layout()
-plt.show()
-```
-
-
-#### Probabalidad por observación
-
-```{python}
-# Unir todos los resultados
-df_all = pd.concat(all_preds, ignore_index=True)
-
-# Crear gráfico
-plt.figure(figsize=(10, 8))
-sns.stripplot(data=df_all, x='prob', y='id', hue='true_label', dodge=True, alpha=0.6, palette='Set1', jitter=0)
-plt.axvline(x=50, color='gray', linestyle='--')
-plt.xlabel('Probabilidad predicha (clase 1)')
-plt.ylabel('ID de observación')
-plt.xticks(ticks=range(0, len(df_all['id'].unique()), len(df_all['id'].unique()) // 5))
-plt.title('Variabilidad de predicciones por semilla (Random Forest)')
-plt.legend(title='Clase real', loc='lower right')
-plt.tight_layout()
-plt.show()
-```

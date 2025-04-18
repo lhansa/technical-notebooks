@@ -21,7 +21,7 @@
         "\n",
         "Para trabajar con números aleatorios en Python parece que la referencia es usar **numpy**."
       ],
-      "id": "d4e313a3"
+      "id": "b4a080e1"
     },
     {
       "cell_type": "code",
@@ -43,7 +43,7 @@
         "\n",
         "Vamos a simular muchos lanzamientos de 4 monedas y vamos a ver en qué proporción ocurre que las cuatro monedas muestran cara. O sea, lanzo 4 monedas y apunto si todas han salido cara; las lanzo otra vez y vuelvo a apuntar; las lanzo otra vez y vuelvo a apuntar; y así 10.000 veces.\n"
       ],
-      "id": "18370db1"
+      "id": "21e1b674"
     },
     {
       "cell_type": "code",
@@ -77,7 +77,7 @@
         "\n",
         "Vamos a ver cómo se distribuye el obtener cara en distintos casos. El ejemplo ahora consiste en lanzar una moneda 100 veces, y en esas 100 veces veo cuántas caras he obtenido. Así veré cómo de esperable es obtener muy pocas caras o muchas caras, en función de cuán trucada esté la moneda.\n"
       ],
-      "id": "9febc82c"
+      "id": "8177e38a"
     },
     {
       "cell_type": "code",
@@ -106,7 +106,7 @@
       "source": [
         "En `caras_obtenidas` tenemos guardado el número de caras que hemos obtenido en cada experimento (cada uno consiste en 100 lanzamientos de una moneda cuya probabilidad de cara es 0.5).\n"
       ],
-      "id": "9f8503b9"
+      "id": "54416faa"
     },
     {
       "cell_type": "code",
@@ -127,7 +127,7 @@
         "\n",
         "Vamos a cambiar la probabilidad:\n"
       ],
-      "id": "515b2ec3"
+      "id": "fb82d284"
     },
     {
       "cell_type": "code",
