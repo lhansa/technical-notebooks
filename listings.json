@@ -1,6 +1,6 @@
 [
   {
-    "listing": "/contenidos.html",
+    "listing": "/cuadernos.html",
     "items": [
       "/posts/2025-04-17-optimism-correction/index.html",
       "/posts/2025-04-12-semilla/index.html",
@@ -46,8 +46,8 @@
       "/posts/2023-09-30-tsne/index.html",
       "/posts/2023-09-28-fooled-by-randomness/index.html",
       "/posts/2023-08-14-muertes-humanas/index.html",
-      "/posts/2023-07-21-muestreo-ii/index.html",
       "/posts/2023-07-21-tidytuesday-oldest-people/index.html",
+      "/posts/2023-07-21-muestreo-ii/index.html",
       "/posts/2023-07-20-7-habitos-gente-altamente-efectiva/index.html",
       "/posts/2023-07-19-12-reglas-para-la-vida/index.html",
       "/posts/2023-07-18-muestreo/index.html",

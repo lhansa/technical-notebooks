@@ -6,15 +6,15 @@
       version="2.0">
 <channel>
 <title>Leonardo Hansa</title>
-<link>https://lhansa.github.io/contenidos.html</link>
-<atom:link href="https://lhansa.github.io/contenidos.xml" rel="self" type="application/rss+xml"/>
+<link>https://lhansa.github.io/technical-notebooks/cuadernos.html</link>
+<atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Tips sobre análisis de datos</description>
 <generator>quarto-1.6.43</generator>
-<lastBuildDate>Wed, 16 Apr 2025 22:00:00 GMT</lastBuildDate>
+<lastBuildDate>Thu, 17 Apr 2025 00:00:00 GMT</lastBuildDate>
 <item>
   <title>Cómo corregir el optimismo de tu modelo estadístico</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2025-04-17-optimism-correction/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2025-04-17-optimism-correction/</link>
   <description><![CDATA[ 
 
 
@@ -261,7 +261,7 @@ font-style: inherit;">10</span>)</span>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2025-04-17-optimism-correction/index_files/figure-html/histogram-output-1.png" id="histogram" width="759" height="470" class="figure-img"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-04-17-optimism-correction/index_files/figure-html/histogram-output-1.png" id="histogram" width="759" height="470" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -332,13 +332,13 @@ R² corregido: 0.7229</code></pre>
 
  ]]></description>
   <category>exploraciones</category>
-  <guid>https://lhansa.github.io/posts/2025-04-17-optimism-correction/</guid>
-  <pubDate>Wed, 16 Apr 2025 22:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2025-04-17-optimism-correction/</guid>
+  <pubDate>Thu, 17 Apr 2025 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Cuánto te afecta la semilla al resultado final</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2025-04-12-semilla/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2025-04-12-semilla/</link>
   <description><![CDATA[ 
 
 
@@ -507,7 +507,7 @@ font-style: inherit;">1</span>)</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2025-04-12-semilla/index_files/figure-html/hist-mse-output-1.png" id="hist-mse" width="758" height="470" class="figure-img"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-04-12-semilla/index_files/figure-html/hist-mse-output-1.png" id="hist-mse" width="758" height="470" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -629,7 +629,7 @@ font-style: inherit;">5</span>)</span>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2025-04-12-semilla/index_files/figure-html/preds-boxplots-output-1.png" id="preds-boxplots" width="759" height="1430" class="figure-img"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-04-12-semilla/index_files/figure-html/preds-boxplots-output-1.png" id="preds-boxplots" width="759" height="1430" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -642,13 +642,13 @@ font-style: inherit;">5</span>)</span>
 
  ]]></description>
   <category>exploraciones</category>
-  <guid>https://lhansa.github.io/posts/2025-04-12-semilla/</guid>
-  <pubDate>Fri, 11 Apr 2025 22:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2025-04-12-semilla/</guid>
+  <pubDate>Sat, 12 Apr 2025 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Tiempos de lectura de un fichero Excel</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2025-03-11-tiempos-lectura/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2025-03-11-tiempos-lectura/</link>
   <description><![CDATA[ 
 
 
@@ -1067,13 +1067,13 @@ font-style: inherit;">10</span></span>
 
  ]]></description>
   <category>exploraciones</category>
-  <guid>https://lhansa.github.io/posts/2025-03-11-tiempos-lectura/</guid>
-  <pubDate>Mon, 10 Mar 2025 23:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2025-03-11-tiempos-lectura/</guid>
+  <pubDate>Tue, 11 Mar 2025 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Otro experimento con relaciones espurias</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2025-01-24-mas-relaciones-espurias/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2025-01-24-mas-relaciones-espurias/</link>
   <description><![CDATA[ 
 
 
@@ -1134,7 +1134,7 @@ font-style: inherit;">"#800080"</span>)</span></code></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2025-01-24-mas-relaciones-espurias/index_files/figure-html/libs-and-data-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-01-24-mas-relaciones-espurias/index_files/figure-html/libs-and-data-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1165,7 +1165,7 @@ font-style: inherit;">"lm"</span>)</span></code></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2025-01-24-mas-relaciones-espurias/index_files/figure-html/plot-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-01-24-mas-relaciones-espurias/index_files/figure-html/plot-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1421,13 +1421,13 @@ sigma 1.2435069 0.08730279  1.10398016 1.3830336</code></pre>
 
  ]]></description>
   <category>datos</category>
-  <guid>https://lhansa.github.io/posts/2025-01-24-mas-relaciones-espurias/</guid>
-  <pubDate>Thu, 23 Jan 2025 23:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2025-01-24-mas-relaciones-espurias/</guid>
+  <pubDate>Fri, 24 Jan 2025 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Experimento con multicolinealidad</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2025-01-16-autocolinealidad/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2025-01-16-autocolinealidad/</link>
   <description><![CDATA[ 
 
 
@@ -1907,7 +1907,7 @@ font-style: inherit;">'Coeficiente de x2'</span>)</span>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2025-01-16-autocolinealidad/index_files/figure-html/grafico-output-1.png" id="grafico" width="1399" height="357" class="figure-img"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-01-16-autocolinealidad/index_files/figure-html/grafico-output-1.png" id="grafico" width="1399" height="357" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -1918,13 +1918,13 @@ font-style: inherit;">'Coeficiente de x2'</span>)</span>
 
  ]]></description>
   <category>datos</category>
-  <guid>https://lhansa.github.io/posts/2025-01-16-autocolinealidad/</guid>
-  <pubDate>Wed, 15 Jan 2025 23:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2025-01-16-autocolinealidad/</guid>
+  <pubDate>Thu, 16 Jan 2025 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Contraste de medias, estilo bayesiano</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2024-12-11-contraste-bayesiano/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2024-12-11-contraste-bayesiano/</link>
   <description><![CDATA[ 
 
 
@@ -1987,7 +1987,7 @@ font-style: inherit;">"#800080"</span>)</span></code></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-12-11-contraste-bayesiano/index_files/figure-html/libs-and-data-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-12-11-contraste-bayesiano/index_files/figure-html/libs-and-data-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -2101,13 +2101,13 @@ sigma  5.067067 0.03581597  5.009826  5.124308</code></pre>
 
  ]]></description>
   <category>exploraciones</category>
-  <guid>https://lhansa.github.io/posts/2024-12-11-contraste-bayesiano/</guid>
-  <pubDate>Tue, 10 Dec 2024 23:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-12-11-contraste-bayesiano/</guid>
+  <pubDate>Wed, 11 Dec 2024 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Regresión lineal bootstrap y bayesiana</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2024-12-06-bootstrap-and-bayes-regression/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2024-12-06-bootstrap-and-bayes-regression/</link>
   <description><![CDATA[ 
 
 
@@ -2329,7 +2329,7 @@ font-style: inherit;">0.1</span></span>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-12-06-bootstrap-and-bayes-regression/index_files/figure-html/bootstrap-plot-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-12-06-bootstrap-and-bayes-regression/index_files/figure-html/bootstrap-plot-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -2519,7 +2519,7 @@ font-style: inherit;">"#800080"</span></span>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-12-06-bootstrap-and-bayes-regression/index_files/figure-html/bayes-plot-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-12-06-bootstrap-and-bayes-regression/index_files/figure-html/bayes-plot-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -2530,13 +2530,13 @@ font-style: inherit;">"#800080"</span></span>
 
  ]]></description>
   <category>exploraciones</category>
-  <guid>https://lhansa.github.io/posts/2024-12-06-bootstrap-and-bayes-regression/</guid>
-  <pubDate>Thu, 05 Dec 2024 23:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-12-06-bootstrap-and-bayes-regression/</guid>
+  <pubDate>Fri, 06 Dec 2024 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Relaciones espurias de datos de divorcios</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2024-11-26-espurias/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2024-11-26-espurias/</link>
   <description><![CDATA[ 
 
 
@@ -2638,7 +2638,7 @@ font-style: inherit;">0.3</span>)</span></code></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-11-26-espurias/index_files/figure-html/pre-procesado-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-11-26-espurias/index_files/figure-html/pre-procesado-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -2854,7 +2854,7 @@ font-style: inherit;">"bM"</span>))</span></code></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-11-26-espurias/index_files/figure-html/modelo-ambos-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-11-26-espurias/index_files/figure-html/modelo-ambos-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -3020,7 +3020,7 @@ font-style: inherit;">"gray"</span>)</span>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-11-26-espurias/index_files/figure-html/prioris1-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-11-26-espurias/index_files/figure-html/prioris1-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -3123,7 +3123,7 @@ font-style: inherit;"># lines(rep(df_divorce$D[i], 2), D_sim[, i], col = "blue")
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-11-26-espurias/index_files/figure-html/prioris2-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-11-26-espurias/index_files/figure-html/prioris2-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -3133,13 +3133,13 @@ font-style: inherit;"># lines(rep(df_divorce$D[i], 2), D_sim[, i], col = "blue")
 
  ]]></description>
   <category>exploraciones</category>
-  <guid>https://lhansa.github.io/posts/2024-11-26-espurias/</guid>
-  <pubDate>Mon, 25 Nov 2024 23:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-11-26-espurias/</guid>
+  <pubDate>Tue, 26 Nov 2024 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Quita caracteres raros en tus variables (2)</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2024-10-31-pyjanitor/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2024-10-31-pyjanitor/</link>
   <description><![CDATA[ 
 
 
@@ -3267,13 +3267,13 @@ dtype: object</code></pre>
 
  ]]></description>
   <category>exploraciones</category>
-  <guid>https://lhansa.github.io/posts/2024-10-31-pyjanitor/</guid>
-  <pubDate>Wed, 30 Oct 2024 23:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-31-pyjanitor/</guid>
+  <pubDate>Thu, 31 Oct 2024 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Evolución de la población por provincias en España</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2024-10-27-poblacion-evolutivo/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2024-10-27-poblacion-evolutivo/</link>
   <description><![CDATA[ 
 
 
@@ -3612,7 +3612,7 @@ font-style: inherit;">''</span>)</span>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-10-27-poblacion-evolutivo/index_files/figure-html/plot-output-1.png" id="plot" width="799" height="506" class="figure-img"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-10-27-poblacion-evolutivo/index_files/figure-html/plot-output-1.png" id="plot" width="799" height="506" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -3623,13 +3623,13 @@ font-style: inherit;">''</span>)</span>
 
  ]]></description>
   <category>exploraciones</category>
-  <guid>https://lhansa.github.io/posts/2024-10-27-poblacion-evolutivo/</guid>
-  <pubDate>Sat, 26 Oct 2024 22:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-27-poblacion-evolutivo/</guid>
+  <pubDate>Sun, 27 Oct 2024 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Juego probabilístico con números aleatorios</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2024-10-23-random-numbers/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2024-10-23-random-numbers/</link>
   <description><![CDATA[ 
 
 
@@ -3782,7 +3782,7 @@ font-style: inherit;">10000</span>)</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-10-23-random-numbers/index_files/figure-html/experimento0.5-output-1.png" id="experimento0.5" width="602" height="449" class="figure-img"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-10-23-random-numbers/index_files/figure-html/experimento0.5-output-1.png" id="experimento0.5" width="602" height="449" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -3800,7 +3800,7 @@ font-style: inherit;">10000</span>)</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-10-23-random-numbers/index_files/figure-html/experimento0.1-output-1.png" id="experimento0.1" width="602" height="449" class="figure-img"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-10-23-random-numbers/index_files/figure-html/experimento0.1-output-1.png" id="experimento0.1" width="602" height="449" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -3811,13 +3811,13 @@ font-style: inherit;">10000</span>)</span></code></pre></div>
 
  ]]></description>
   <category>exploraciones</category>
-  <guid>https://lhansa.github.io/posts/2024-10-23-random-numbers/</guid>
-  <pubDate>Tue, 22 Oct 2024 22:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-23-random-numbers/</guid>
+  <pubDate>Wed, 23 Oct 2024 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Quita caracteres raros en tus variables</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2024-10-18-quita-caracteres-raros-en-tus-variables/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2024-10-18-quita-caracteres-raros-en-tus-variables/</link>
   <description><![CDATA[ 
 
 
@@ -4007,13 +4007,13 @@ font-style: inherit;">TRUE</span>)</span></code></pre></div>
 
  ]]></description>
   <category>exploraciones</category>
-  <guid>https://lhansa.github.io/posts/2024-10-18-quita-caracteres-raros-en-tus-variables/</guid>
-  <pubDate>Thu, 17 Oct 2024 22:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-18-quita-caracteres-raros-en-tus-variables/</guid>
+  <pubDate>Fri, 18 Oct 2024 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Ejemplo de regresión múltiple con Python</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2024-10-06-regresion-multiple-python/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2024-10-06-regresion-multiple-python/</link>
   <description><![CDATA[ 
 
 
@@ -4582,7 +4582,7 @@ font-style: inherit;">3</span>)</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-10-06-regresion-multiple-python/index_files/figure-html/plot-regression-output-1.png" id="plot-regression" width="585" height="429" class="figure-img"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-10-06-regresion-multiple-python/index_files/figure-html/plot-regression-output-1.png" id="plot-regression" width="585" height="429" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -4622,7 +4622,7 @@ font-style: inherit;">'--'</span>)</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-10-06-regresion-multiple-python/index_files/figure-html/residuals-output-1.png" id="residuals" width="670" height="651" class="figure-img"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-10-06-regresion-multiple-python/index_files/figure-html/residuals-output-1.png" id="residuals" width="670" height="651" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -4660,7 +4660,7 @@ font-style: inherit;">'Leverage'</span>)</span>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-10-06-regresion-multiple-python/index_files/figure-html/plot-levarage-output-2.png" id="plot-levarage-2" width="680" height="651" class="figure-img"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-10-06-regresion-multiple-python/index_files/figure-html/plot-levarage-output-2.png" id="plot-levarage-2" width="680" height="651" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -4826,13 +4826,13 @@ font-style: inherit;">=</span> model1.fit()</span>
 
  ]]></description>
   <category>exploraciones</category>
-  <guid>https://lhansa.github.io/posts/2024-10-06-regresion-multiple-python/</guid>
-  <pubDate>Sat, 05 Oct 2024 22:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-06-regresion-multiple-python/</guid>
+  <pubDate>Sun, 06 Oct 2024 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Procesos ergódicos</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2024-10-04-ergodicidad/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2024-10-04-ergodicidad/</link>
   <description><![CDATA[ 
 
 
@@ -4996,7 +4996,7 @@ font-style: inherit;">'Evolución del capital medio'</span>)</span>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-10-04-ergodicidad/index_files/figure-html/capital-societario-output-1.png" id="capital-societario" width="585" height="450" class="figure-img"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-10-04-ergodicidad/index_files/figure-html/capital-societario-output-1.png" id="capital-societario" width="585" height="450" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -5033,13 +5033,13 @@ font-style: inherit;">sum</span>()</span></code></pre></div>
 
  ]]></description>
   <category>exploraciones</category>
-  <guid>https://lhansa.github.io/posts/2024-10-04-ergodicidad/</guid>
-  <pubDate>Thu, 03 Oct 2024 22:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-04-ergodicidad/</guid>
+  <pubDate>Fri, 04 Oct 2024 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Introducción práctica a Rust</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2024-09-08-rust/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2024-09-08-rust/</link>
   <description><![CDATA[ 
 
 
@@ -5250,13 +5250,13 @@ font-style: inherit;">calcula_r2_r</span>(valor_real, valor_pred)</span>
 
  ]]></description>
   <category>datos</category>
-  <guid>https://lhansa.github.io/posts/2024-09-08-rust/</guid>
-  <pubDate>Sat, 07 Sep 2024 22:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-09-08-rust/</guid>
+  <pubDate>Sun, 08 Sep 2024 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Más sobre evaluación de expresiones en R</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2024-08-23-sin-comillas/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2024-08-23-sin-comillas/</link>
   <description><![CDATA[ 
 
 
@@ -5401,13 +5401,13 @@ font-style: inherit;">eval_tidy</span>(expr_division)</span></code></pre></div>
 
  ]]></description>
   <category>datos</category>
-  <guid>https://lhansa.github.io/posts/2024-08-23-sin-comillas/</guid>
-  <pubDate>Thu, 22 Aug 2024 22:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-08-23-sin-comillas/</guid>
+  <pubDate>Fri, 23 Aug 2024 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Evaluación de expresiones en R</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2024-08-17-evaluacion-expresiones/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2024-08-17-evaluacion-expresiones/</link>
   <description><![CDATA[ 
 
 
@@ -5589,13 +5589,13 @@ font-style: inherit;">*</span> factor)</span></code></pre></div>
 
  ]]></description>
   <category>datos</category>
-  <guid>https://lhansa.github.io/posts/2024-08-17-evaluacion-expresiones/</guid>
-  <pubDate>Fri, 16 Aug 2024 22:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-08-17-evaluacion-expresiones/</guid>
+  <pubDate>Sat, 17 Aug 2024 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Estadísticos en regresión lineal por variable</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2024-08-16-estadisticos-regresion/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2024-08-16-estadisticos-regresion/</link>
   <description><![CDATA[ 
 
 
@@ -5875,7 +5875,7 @@ font-style: inherit;">"Distribución de t"</span>)</span>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-08-16-estadisticos-regresion/index_files/figure-html/t-distribution-output-1.png" id="t-distribution" width="579" height="431" class="figure-img"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-08-16-estadisticos-regresion/index_files/figure-html/t-distribution-output-1.png" id="t-distribution" width="579" height="431" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -5933,7 +5933,7 @@ font-style: inherit;">2</span></span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-08-16-estadisticos-regresion/index_files/figure-html/genera-escenario-output-1.png" id="genera-escenario" width="579" height="431" class="figure-img"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-08-16-estadisticos-regresion/index_files/figure-html/genera-escenario-output-1.png" id="genera-escenario" width="579" height="431" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -5943,7 +5943,7 @@ font-style: inherit;">2</span></span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-08-16-estadisticos-regresion/index_files/figure-html/genera-escenario2-output-1.png" id="genera-escenario2" width="579" height="431" class="figure-img"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-08-16-estadisticos-regresion/index_files/figure-html/genera-escenario2-output-1.png" id="genera-escenario2" width="579" height="431" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -5952,7 +5952,7 @@ font-style: inherit;">2</span></span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-08-16-estadisticos-regresion/index_files/figure-html/genera-escenario3-output-1.png" id="genera-escenario3" width="579" height="431" class="figure-img"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-08-16-estadisticos-regresion/index_files/figure-html/genera-escenario3-output-1.png" id="genera-escenario3" width="579" height="431" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -5971,7 +5971,7 @@ font-style: inherit;">9998</span>)</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-08-16-estadisticos-regresion/index_files/figure-html/prueba-variables-output-1.png" id="prueba-variables" width="586" height="431" class="figure-img"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-08-16-estadisticos-regresion/index_files/figure-html/prueba-variables-output-1.png" id="prueba-variables" width="586" height="431" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -5982,13 +5982,13 @@ font-style: inherit;">9998</span>)</span></code></pre></div>
 
  ]]></description>
   <category>datos</category>
-  <guid>https://lhansa.github.io/posts/2024-08-16-estadisticos-regresion/</guid>
-  <pubDate>Thu, 15 Aug 2024 22:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-08-16-estadisticos-regresion/</guid>
+  <pubDate>Fri, 16 Aug 2024 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Encuesta de presupuestos familiares</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2024-08-09-presupuestos-familiares/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2024-08-09-presupuestos-familiares/</link>
   <description><![CDATA[ 
 
 
@@ -6286,7 +6286,7 @@ font-style: inherit;">"Carnes"</span>)</span></code></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-08-09-presupuestos-familiares/index_files/figure-html/evolucion-carnes-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-08-09-presupuestos-familiares/index_files/figure-html/evolucion-carnes-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -6348,7 +6348,7 @@ font-style: inherit;">"Bebidas"</span>)</span></code></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-08-09-presupuestos-familiares/index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-08-09-presupuestos-familiares/index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -6359,13 +6359,13 @@ font-style: inherit;">"Bebidas"</span>)</span></code></pre></div>
 
  ]]></description>
   <category>exploraciones</category>
-  <guid>https://lhansa.github.io/posts/2024-08-09-presupuestos-familiares/</guid>
-  <pubDate>Thu, 08 Aug 2024 22:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-08-09-presupuestos-familiares/</guid>
+  <pubDate>Fri, 09 Aug 2024 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Mercamadrid</title>
   <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/posts/2024-08-05-mercamadrid/</link>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2024-08-05-mercamadrid/</link>
   <description><![CDATA[ 
 
 
@@ -6662,7 +6662,7 @@ font-style: inherit;">col =</span> descripcion_variedad))</span></code></pre></d
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-08-05-mercamadrid/index_files/figure-html/evolucion-variedad-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-08-05-mercamadrid/index_files/figure-html/evolucion-variedad-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -6757,7 +6757,7 @@ font-style: inherit;">coord_flip</span>() </span></code></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-08-05-mercamadrid/index_files/figure-html/distribucion-variedad-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-08-05-mercamadrid/index_files/figure-html/distribucion-variedad-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -6834,7 +6834,7 @@ font-style: inherit;">col =</span> descripcion_variedad))</span></code></pre></d
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-08-05-mercamadrid/index_files/figure-html/evolucion-variedad2-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-08-05-mercamadrid/index_files/figure-html/evolucion-variedad2-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -6946,7 +6946,7 @@ font-style: inherit;">"free_y"</span>)</span></code></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://lhansa.github.io/posts/2024-08-05-mercamadrid/index_files/figure-html/origen-vacuno-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-08-05-mercamadrid/index_files/figure-html/origen-vacuno-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -6958,8 +6958,8 @@ font-style: inherit;">"free_y"</span>)</span></code></pre></div>
 
  ]]></description>
   <category>exploraciones</category>
-  <guid>https://lhansa.github.io/posts/2024-08-05-mercamadrid/</guid>
-  <pubDate>Sun, 04 Aug 2024 22:00:00 GMT</pubDate>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-08-05-mercamadrid/</guid>
+  <pubDate>Mon, 05 Aug 2024 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
