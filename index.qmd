@@ -4,5 +4,5 @@ page-layout: full
 title-block-banner: false
 ---
 
-_Quien tiene convicciones demasiado fuertes es porque no ha profundizado lo suficiente._ (E. M. Cioran)
+«Quien tiene convicciones demasiado fuertes es porque no ha profundizado lo suficiente.» (E. M. Cioran)
 
