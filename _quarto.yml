@@ -10,8 +10,8 @@ website:
     search: false
     pinned: true
     left: 
-      - text: "Contenidos"
-        href: "contenidos.qmd"
+      - text: "Cuadernos"
+        href: "cuardenos.qmd"
         icon: "book"
       - text: "Cu-cu-trás"
         href: "https://leonardohansa.com"
@@ -22,13 +22,13 @@ website:
   page-navigation: false
   page-footer: 
     right : 
-      - text: "Legal"
+      - text: ""
     border: false
   cookie-consent: 
     type: express
     palette: light
     prefs-text: "Cookies"
-  site-url: 'https://lhansa.github.io/'
+  site-url: 'https://lhansa.github.io/technical-notebooks'
   site-path: '/'
   
 format:
