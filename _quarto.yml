@@ -11,7 +11,7 @@ website:
     pinned: true
     left: 
       - text: "Cuadernos"
-        href: "cuardenos.qmd"
+        href: "cuadernos.qmd"
         icon: "book"
       - text: "Cu-cu-trás"
         href: "https://leonardohansa.com"
