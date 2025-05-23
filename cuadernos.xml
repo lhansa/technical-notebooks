@@ -9,8 +9,214 @@
 <link>https://lhansa.github.io/technical-notebooks/cuadernos.html</link>
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Tips sobre análisis de datos</description>
-<generator>quarto-1.6.43</generator>
-<lastBuildDate>Thu, 17 Apr 2025 00:00:00 GMT</lastBuildDate>
+<generator>quarto-1.7.31</generator>
+<lastBuildDate>Fri, 23 May 2025 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>¿Cómo defines el tamaño de una burbuja en un gráfico de dispersión?</title>
+  <dc:creator>Leonardo Hansa</dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2025-05-23-radius-vs-area/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>En un proyecto me ha surgido una duda con los gráficos de burbujas.</p>
+<p>El tamaño de la burbuja dependerá de una variable. <strong>¿Con qué tienes que relacionar esa variable? ¿Con el radio de la burbuja o con el área?</strong></p>
+<p>Uso datos típicos para un ejemplo.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(ggplot2)</span>
+<span id="cb1-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(gapminder)</span>
+<span id="cb1-3"></span>
+<span id="cb1-4"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme_set</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme_light</span>())</span></code></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">max_year <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">max</span>(gapminder<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>year)</span>
+<span id="cb2-2">df_filtered <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">subset</span>(gapminder, year <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> max_year)</span></code></pre></div>
+</div>
+<p>Por defecto, <strong>ggplot2</strong> usa el área. Las dos burbujas más gordas, son las asiáticas que ves a la izquierda que imagino serán India y China (las podría etiquetar pero paso.)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(df_filtered) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb3-2">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_point</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> gdpPercap, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> lifeExp, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">size =</span> pop, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">col =</span> continent))</span></code></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-05-23-radius-vs-area/index_files/figure-html/plot-default-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Son más grandes porque he puesto que el tamaño dependa de la población. Pero claro, esos dos países son gigantes en comparación a los demás. Y aunque las burbujas son claramente las más grandes, no <em>parece</em> que haya esa diferencia con otros países (estamos hablando de tener mil millones de habitantes a tener decenas de millones).</p>
+<p>Una alternativa es que indiques que el rango de tamaños sea más amplio. Por ejemplo, estos son los datos extremos de población:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">range</span>(df_filtered<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>pop)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]     199579 1318683096</code></pre>
+</div>
+</div>
+<p>Pero ggplot2 por defecto crea un rango entre 1 y 6. ¿Y si amplío eso?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(df_filtered) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb6-2">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_point</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> gdpPercap, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> lifeExp, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">size =</span> pop, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">col =</span> continent)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb6-3">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_size</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">range =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">30</span>))</span></code></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-05-23-radius-vs-area/index_files/figure-html/plot-range-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Totalmente distinto.</p>
+<p>Pero hay otra forma, que es tocar el radio. Sin especificar rango, ya verás que India y China son claramente más grandes que antes en proporción a las demás.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(df_filtered) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb7-2">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_point</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> gdpPercap, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> lifeExp, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">size =</span> pop, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">col =</span> continent)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb7-3">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_radius</span>()</span></code></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-05-23-radius-vs-area/index_files/figure-html/plot-radius-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Si además permito que el rango vaya incluso más lejos, la diferencia es aún más clara.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(df_filtered) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb8-2">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_point</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> gdpPercap, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> lifeExp, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">size =</span> pop, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">col =</span> continent)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb8-3">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_radius</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">range =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>))</span></code></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-05-23-radius-vs-area/index_files/figure-html/plot-radius-range-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
+
+ ]]></description>
+  <category>exploraciones</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2025-05-23-radius-vs-area/</guid>
+  <pubDate>Fri, 23 May 2025 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Cómo corregir el optimismo de tu modelo estadístico</title>
   <dc:creator>Leonardo Hansa</dc:creator>
@@ -6361,605 +6567,6 @@ font-style: inherit;">"Bebidas"</span>)</span></code></pre></div>
   <category>exploraciones</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2024-08-09-presupuestos-familiares/</guid>
   <pubDate>Fri, 09 Aug 2024 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Mercamadrid</title>
-  <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2024-08-05-mercamadrid/</link>
-  <description><![CDATA[ 
-
-
-
-
-<section id="lectura-de-datos" class="level2">
-<h2 class="anchored" data-anchor-id="lectura-de-datos">Lectura de datos</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(readr)</span>
-<span id="cb1-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(purrr)</span>
-<span id="cb1-3"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(dplyr)</span>
-<span id="cb1-4"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(stringr)</span>
-<span id="cb1-5"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(ggplot2)</span>
-<span id="cb1-6"></span>
-<span id="cb1-7">ggplot2<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">theme_set</span>(ggplot2<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">theme_light</span>())</span></code></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">link_base <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"https://datos.madrid.es/egob/catalogo/300357-%s-mercamadrid-volumen-precio.csv"</span></span>
-<span id="cb2-2">links <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sprintf</span>(link_base, <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">seq</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>))</span>
-<span id="cb2-3"></span>
-<span id="cb2-4">df_merca <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">map_dfr</span>(links, <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">function</span>(link) {</span>
-<span id="cb2-5">  <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">if</span> (RCurl<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">url.exists</span>(link)) {</span>
-<span id="cb2-6">    datos <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">read_csv2</span>(</span>
-<span id="cb2-7">      link,</span>
-<span id="cb2-8">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">locale =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">locale</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">encoding =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"latin1"</span>),</span>
-<span id="cb2-9">      <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">show_col_types =</span> <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">FALSE</span></span>
-<span id="cb2-10">    )</span>
-<span id="cb2-11"></span>
-<span id="cb2-12">    datos <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> janitor<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">clean_names</span>(datos)</span>
-<span id="cb2-13"></span>
-<span id="cb2-14">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">if</span> (<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">is.character</span>(datos<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>fecha_desde)) {</span>
-<span id="cb2-15">      datos <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> datos <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb2-16">        <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mutate</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">across</span>(</span>
-<span id="cb2-17">          <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">contains</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"precio"</span>),</span>
-<span id="cb2-18">          \(x) <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">parse_number</span>(x, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">na =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Precio Más Frecuente"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Precio Máximo"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Precio Mínimo"</span>))</span>
-<span id="cb2-19">        ))</span>
-<span id="cb2-20">    }</span>
-<span id="cb2-21"></span>
-<span id="cb2-22">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">if</span> (<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">is.character</span>(datos<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>kilos)) {</span>
-<span id="cb2-23">      datos <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> datos <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb2-24">        <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mutate</span>(</span>
-<span id="cb2-25">          <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">kilos =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">parse_number</span>(kilos, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">na =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Kilos"</span>)</span>
-<span id="cb2-26">        )</span>
-<span id="cb2-27">    }</span>
-<span id="cb2-28"></span>
-<span id="cb2-29">    datos <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> datos <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb2-30">      <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mutate</span>(</span>
-<span id="cb2-31">        <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">across</span>(</span>
-<span id="cb2-32">          <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">contains</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"fecha"</span>),</span>
-<span id="cb2-33">          \(x) <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">as.Date</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">as.character</span>(x), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">format =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"%Y%m%d"</span>)</span>
-<span id="cb2-34">        ), </span>
-<span id="cb2-35">        <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">origen =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">as.character</span>(origen)</span>
-<span id="cb2-36">      )</span>
-<span id="cb2-37"></span>
-<span id="cb2-38">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">return</span>(datos)</span>
-<span id="cb2-39">  }</span>
-<span id="cb2-40">})</span></code></pre></div>
-</div>
-<p>df_merca &lt;- select(df_merca, -origen)</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">df_merca <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> </span>
-<span id="cb3-2">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">distinct</span>(descripcion_variedad)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 754 × 1
-   descripcion_variedad 
-   &lt;chr&gt;                
- 1 VACUNO CANAL         
- 2 VACUNO DESPIECE AÑOJO
- 3 VACUNO DESPIECE VACA 
- 4 VACUNO CASQUERIA     
- 5 VACUNO ELABORADO     
- 6 VACUNO PRECOCINADO   
- 7 OVINO CANAL          
- 8 OVINO DESPIECE       
- 9 OVINO CASQUERIA      
-10 OVINO ELABORADO      
-# ℹ 744 more rows</code></pre>
-</div>
-</div>
-</section>
-<section id="vacuno" class="level2">
-<h2 class="anchored" data-anchor-id="vacuno">Vacuno</h2>
-<p>Hay mil cosas. Voy a ver qué puedo sacar solo del vacuno por ahora.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">df_vacuno <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> df_merca <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb5-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">filter</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">str_detect</span>(descripcion_variedad, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"^VACUNO"</span>))</span></code></pre></div>
-</div>
-<section id="qué-variedad-de-vacuno-se-vende-más" class="level3">
-<h3 class="anchored" data-anchor-id="qué-variedad-de-vacuno-se-vende-más">Qué variedad de vacuno se vende más</h3>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">df_vacuno <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> </span>
-<span id="cb6-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">group_by</span>(fecha_desde, descripcion_variedad) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> </span>
-<span id="cb6-3">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summarise</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">kilos =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sum</span>(kilos, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">na.rm =</span> <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">TRUE</span>), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">.groups =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"drop"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> </span>
-<span id="cb6-4">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb6-5">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_line</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x =</span> fecha_desde, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y =</span> kilos, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">col =</span> descripcion_variedad))</span></code></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-08-05-mercamadrid/index_files/figure-html/evolucion-variedad-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p><strong>¿Qué será <code>VACUNO FRESCO</code>?</strong></p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">df_vacuno_variedades <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> df_vacuno <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb7-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">group_by</span>(fecha_desde, descripcion_variedad) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb7-3">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summarise</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">kilos =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sum</span>(kilos, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">na.rm =</span> <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">TRUE</span>), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">.groups =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"drop"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb7-4">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">group_by</span>(descripcion_variedad) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb7-5">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summarise</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">kilos_mes =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sum</span>(kilos) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">n</span>())</span>
-<span id="cb7-6"></span>
-<span id="cb7-7"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>(df_vacuno_variedades) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb7-8">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_col</span>(</span>
-<span id="cb7-9">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">reorder</span>(descripcion_variedad, kilos_mes), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y =</span> kilos_mes),</span>
-<span id="cb7-10">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">fill =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"#800080"</span></span>
-<span id="cb7-11">  ) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb7-12">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">labs</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">""</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Kilos por mes"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb7-13">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">coord_flip</span>() </span></code></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-08-05-mercamadrid/index_files/figure-html/distribucion-variedad-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1">variedades_principales <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> df_vacuno_variedades <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb8-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">slice_max</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">order_by =</span> kilos_mes, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">n =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb8-3">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">pull</span>(descripcion_variedad)</span>
-<span id="cb8-4"></span>
-<span id="cb8-5">df_vacuno <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb8-6">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">filter</span>(descripcion_variedad <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%in%</span> variedades_principales) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb8-7">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">group_by</span>(fecha_desde, descripcion_variedad) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb8-8">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summarise</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">kilos =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sum</span>(kilos, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">na.rm =</span> <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">TRUE</span>), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">.groups =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"drop"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb8-9">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb8-10">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_line</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x =</span> fecha_desde, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y =</span> kilos, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">col =</span> descripcion_variedad))</span></code></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-08-05-mercamadrid/index_files/figure-html/evolucion-variedad2-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="de-dónde-ha-venido-el-vacuno" class="level3">
-<h3 class="anchored" data-anchor-id="de-dónde-ha-venido-el-vacuno">¿De dónde ha venido el vacuno?</h3>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1">df_variedades_origen <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> df_vacuno <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb9-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">filter</span>(descripcion_variedad <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%in%</span> variedades_principales) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb9-3">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">group_by</span>(descripcion_variedad, descripcion_origen) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb9-4">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summarise</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">kilos_mes =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sum</span>(kilos) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">n</span>(), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">.groups =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"drop"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb9-5">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">group_by</span>(descripcion_variedad) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb9-6">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">slice_max</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">order_by =</span> kilos_mes, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">n =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb9-7">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ungroup</span>()</span>
-<span id="cb9-8"></span>
-<span id="cb9-9">df_vacuno <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb9-10">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">semi_join</span>(</span>
-<span id="cb9-11">    df_variedades_origen,</span>
-<span id="cb9-12">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">by =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"descripcion_variedad"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"descripcion_origen"</span>)</span>
-<span id="cb9-13">  ) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> </span>
-<span id="cb9-14">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb9-15">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_line</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x =</span> fecha_desde, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y =</span> kilos, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">col =</span> descripcion_origen)) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb9-16">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">facet_wrap</span>(<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span>descripcion_variedad, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">scales =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"free_y"</span>)</span></code></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-08-05-mercamadrid/index_files/figure-html/origen-vacuno-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-
-
-</section>
-</section>
-
- ]]></description>
-  <category>exploraciones</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-08-05-mercamadrid/</guid>
-  <pubDate>Mon, 05 Aug 2024 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
