@@ -39,7 +39,7 @@ Por defecto, **ggplot2** usa el área. Las dos burbujas más gordas, son las asi
 #| label: plot-default
 ggplot(df_filtered) +
   geom_point(aes(x = gdpPercap, y = lifeExp, size = pop, col = continent)) +
-  labs(title = "Población asociada a radio")
+  labs(title = "Población asociada a área")
 ```
 
 Son más grandes porque he puesto que el tamaño dependa de la población. Pero claro, esos dos países son gigantes en comparación a los demás. Y aunque las burbujas son claramente las más grandes, no _parece_ que haya esa diferencia con otros países (estamos hablando de tener mil millones de habitantes a tener decenas de millones). 
