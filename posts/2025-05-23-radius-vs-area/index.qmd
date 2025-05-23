@@ -1,0 +1,80 @@
+---
+title: "¿Cómo defines el tamaño de una burbuja en un gráfico de dispersión?"
+description: "En los gráficos de burbujas hacerse una idea de la diferencia de tamaños es complicado porque a nuestro ojo le cuesta cuantificar diferencias en áreas. En ggplot2 los tamaños de las burbujas se definen con áreas pero con radios puedes obtener matices útiles. No tengo ni idea de qué es lo adecuado."
+description-meta: "En los gráficos de burbujas hacerse una idea de la diferencia de tamaños es complicado porque a nuestro ojo le cuesta cuantificar diferencias en áreas. En ggplot2 los tamaños de las burbujas se definen con áreas pero con radios puedes obtener matices útiles. No tengo ni idea de qué es lo adecuado."
+author: "Leonardo Hansa"
+date: "2025-05-23"
+categories: [exploraciones]
+execute: 
+  echo: true
+  eval: true
+  message: false
+  warning: false
+freeze: true
+---
+
+En un proyecto me ha surgido una duda con los gráficos de burbujas. 
+
+El tamaño de la burbuja dependerá de una variable. **¿Con qué tienes que relacionar esa variable? ¿Con el radio de la burbuja o con el área?**
+
+Uso datos típicos para un ejemplo. 
+
+```{r}
+#| label: libs
+library(ggplot2)
+library(gapminder)
+
+theme_set(theme_light())
+```
+
+```{r}
+#| label: prepare-data
+max_year <- max(gapminder$year)
+df_filtered <- subset(gapminder, year == max_year)
+```
+
+Por defecto, **ggplot2** usa el área. Las dos burbujas más gordas, son las asiáticas que ves a la izquierda que imagino serán India y China (las podría etiquetar pero paso.)
+
+```{r}
+#| label: plot-default
+ggplot(df_filtered) +
+  geom_point(aes(x = gdpPercap, y = lifeExp, size = pop, col = continent))
+```
+
+Son más grandes porque he puesto que el tamaño dependa de la población. Pero claro, esos dos países son gigantes en comparación a los demás. Y aunque las burbujas son claramente las más grandes, no _parece_ que haya esa diferencia con otros países (estamos hablando de tener mil millones de habitantes a tener decenas de millones). 
+
+Una alternativa es que indiques que el rango de tamaños sea más amplio. Por ejemplo, estos son los datos extremos de población: 
+
+```{r}
+#| label: pob-range
+range(df_filtered$pop)
+```
+
+Pero ggplot2 por defecto crea un rango entre 1 y 6. ¿Y si amplío eso?
+
+```{r}
+#| label: plot-range
+ggplot(df_filtered) +
+  geom_point(aes(x = gdpPercap, y = lifeExp, size = pop, col = continent)) + 
+  scale_size(range = c(1, 30))
+```
+
+Totalmente distinto.
+
+Pero hay otra forma, que es tocar el radio. Sin especificar rango, ya verás que India y China son claramente más grandes que antes en proporción a las demás.
+
+```{r}
+#| label: plot-radius
+ggplot(df_filtered) +
+  geom_point(aes(x = gdpPercap, y = lifeExp, size = pop, col = continent)) + 
+  scale_radius()
+```
+
+Si además permito que el rango vaya incluso más lejos, la diferencia es aún más clara. 
+
+```{r}
+#| label: plot-radius-range
+ggplot(df_filtered) +
+  geom_point(aes(x = gdpPercap, y = lifeExp, size = pop, col = continent)) + 
+  scale_radius(range = c(1, 20))
+```
