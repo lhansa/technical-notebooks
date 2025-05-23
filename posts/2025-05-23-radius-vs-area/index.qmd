@@ -38,7 +38,8 @@ Por defecto, **ggplot2** usa el área. Las dos burbujas más gordas, son las asi
 ```{r}
 #| label: plot-default
 ggplot(df_filtered) +
-  geom_point(aes(x = gdpPercap, y = lifeExp, size = pop, col = continent))
+  geom_point(aes(x = gdpPercap, y = lifeExp, size = pop, col = continent)) +
+  labs(title = "Población asociada a radio")
 ```
 
 Son más grandes porque he puesto que el tamaño dependa de la población. Pero claro, esos dos países son gigantes en comparación a los demás. Y aunque las burbujas son claramente las más grandes, no _parece_ que haya esa diferencia con otros países (estamos hablando de tener mil millones de habitantes a tener decenas de millones). 
@@ -67,7 +68,8 @@ Pero hay otra forma, que es tocar el radio. Sin especificar rango, ya verás que
 #| label: plot-radius
 ggplot(df_filtered) +
   geom_point(aes(x = gdpPercap, y = lifeExp, size = pop, col = continent)) + 
-  scale_radius()
+  scale_radius() + 
+  labs(title = "Población asociada a radio")
 ```
 
 Si además permito que el rango vaya incluso más lejos, la diferencia es aún más clara. 
