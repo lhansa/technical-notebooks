@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Leonardo Hansa">
-<meta name="description" content="Bootstrap aplicado a la corrección del optimismo de un modelo estadístico cuando tienes pocos datos.">
+<meta name="description" content="Un modelo que capture mejor el proceso real de generación de datos puede predecir peor que uno que use mal las variables. Aquí demuestro cómo.">
 
-<title>Cómo corregir el optimismo de tu modelo estadístico – Leonardo Hansa</title>
+<title>Cómo un modelo erróneo predice mejor que uno correcto – Leonardo Hansa</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -167,7 +167,7 @@ cookieconsent.run({
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Cómo corregir el optimismo de tu modelo estadístico</h1>
+<h1 class="title">Cómo un modelo erróneo predice mejor que uno correcto</h1>
   <div class="quarto-categories">
     <div class="quarto-category">exploraciones</div>
   </div>
@@ -175,7 +175,7 @@ cookieconsent.run({
 
 <div>
   <div class="description">
-    Bootstrap aplicado a la corrección del optimismo de un modelo estadístico cuando tienes pocos datos.
+    Un modelo que capture mejor el proceso real de generación de datos puede predecir peor que uno que use mal las variables. Aquí demuestro cómo.
   </div>
 </div>
 
@@ -192,7 +192,7 @@ cookieconsent.run({
     <div>
     <div class="quarto-title-meta-heading">Fecha de publicación</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">17 de abril de 2025</p>
+      <p class="date">8 de junio de 2025</p>
     </div>
   </div>
   
@@ -204,124 +204,126 @@ cookieconsent.run({
 </header>
 
 
-<section id="comentarios-iniciales" class="level2">
-<h2 class="anchored" data-anchor-id="comentarios-iniciales">Comentarios iniciales</h2>
-<p>Si entrenas un modelo en un conjunto de datos que no es muy grande, la métrica de ajuste que reportes no deberías calcularla sobre los datos de entrenamiento. Esto es porque el modelo ya conoce esos datos y se ha entrenado con ellos, intentando optimizar esa métrica de ajuste.</p>
-<p>Lo típico es reservar un conjunto de validación, unos datos que el modelo no conoce, por lo que la métrica de ajuste no tendrá ese sesgo.</p>
-<p>A ese sesgo lo llamamos <em>optimismo.</em></p>
-<p>Lo malo, según Frank Harrell, es que, si tu conjunto de datos es pequeño, esa validación no será suficiente estable.</p>
-<p><em>Bootstrap</em> es una solución.</p>
+<p>Un modelo es una aproximación a la realidad y lo puedes usar para dos o tres cosas. Las que me interesan son:</p>
+<ul>
+<li>explicar esa realidad</li>
+<li>predecir esa realidad</li>
+</ul>
+<p>Aunque las dos cosas van de la mano, curiosamente, si priorizas una, la otra saldrá peor. No tiene por qué, pero es posible que el modelo que mejor explique no sea el que mejor prediga.</p>
+<p>Vamos a verlo.</p>
 <div id="libs" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> fetch_openml</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LinearRegression</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> r2_score</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.utils <span class="im">import</span> resample</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section>
-<section id="bootstrap-para-corregir-el-optimismo" class="level2">
-<h2 class="anchored" data-anchor-id="bootstrap-para-corregir-el-optimismo">Bootstrap para corregir el optimismo</h2>
-<p>La idea es entrenar el modelo en varias muestras bootstrap y calcular la métrica de ajuste en cada par muestra bootstrap, muestra original, y luego la diferencia. Así, tendrás una lista de diferencias de longitud el número de muestras.</p>
-<p>Luego calculas la media.</p>
-<p>Finalmente, entrenas el modelo en la muestra original completa y le aplicas esa diferencia media.</p>
-<p>La métrica de ajuste final será la métrica de ajuste en entrenamiento menos la diferencia, es decir, con el optimismo corregido.</p>
-<section id="algunos-datos" class="level3">
-<h3 class="anchored" data-anchor-id="algunos-datos">Algunos datos</h3>
-<div id="load" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> fetch_openml(name<span class="op">=</span><span class="st">"boston"</span>, version<span class="op">=</span><span class="dv">1</span>, as_frame<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> data.data</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> data.target</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>X_np <span class="op">=</span> X.to_numpy()</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>y_np <span class="op">=</span> y.to_numpy()</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="entrenamiento-en-muestras-bootstrap" class="level3">
-<h3 class="anchored" data-anchor-id="entrenamiento-en-muestras-bootstrap">Entrenamiento en muestras bootstrap</h3>
-<div id="set-up-boots" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>n_bootstraps <span class="op">=</span> <span class="dv">200</span></span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Lo siguiente creo que quedaría más claro con un bucle <code>for</code>, pero en teoría no están recomendados. Así que creo una función y la llamo en una <em>list comprehension</em>.</p>
-<div id="compute-optimism" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_optimism():</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    X_boot, y_boot <span class="op">=</span> resample(X_np, y_np)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> LinearRegression()</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    model.fit(X_boot, y_boot)</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    y_pred_boot <span class="op">=</span> model.predict(X_boot)</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    r2_boot <span class="op">=</span> r2_score(y_boot, y_pred_boot)</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    y_pred_orig <span class="op">=</span> model.predict(X_np)</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    r2_orig <span class="op">=</span> r2_score(y_np, y_pred_orig)</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span>(r2_boot <span class="op">-</span> r2_orig)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Y ahora calculo todo.</p>
-<div id="list-optimism" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>optimism_estimates <span class="op">=</span> [compute_optimism() <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_bootstraps)]</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="cálculo-del-optimismo" class="level3">
-<h3 class="anchored" data-anchor-id="cálculo-del-optimismo">Cálculo del optimismo</h3>
-<p>El optimismo medio es lo que necesito para el próximo paso. Así que calculo la media de la lista que acabo de generar.</p>
-<div id="cell-optimism" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>mean_optimism <span class="op">=</span> np.mean(optimism_estimates)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>mean_optimism</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div id="optimism" class="cell-output cell-output-display" data-execution_count="6">
-<pre><code>0.017757491298340335</code></pre>
-</div>
-</div>
-<p>Por curiosidad, así se distribuye el optimismo.</p>
-<div id="cell-histogram" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>))</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>plt.hist(optimism_estimates, bins<span class="op">=</span><span class="dv">20</span>, color<span class="op">=</span><span class="st">"#800080"</span>, edgecolor<span class="op">=</span><span class="st">"black"</span>, alpha<span class="op">=</span><span class="fl">0.75</span>)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>plt.title(</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Distribución del optimismo del modelo (bootstrap)"</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">"bold"</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Optimismo estimado"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Frecuencia"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>plt.xticks(fontsize<span class="op">=</span><span class="dv">10</span>)</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>plt.yticks(fontsize<span class="op">=</span><span class="dv">10</span>)</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/histogram-output-1.png" id="histogram" width="759" height="470" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="entrenamiento-final" class="level3">
-<h3 class="anchored" data-anchor-id="entrenamiento-final">Entrenamiento final</h3>
-<p>Todos los entrenamientos anteriores estaban hechos sobre muestras <em>bootrstrap</em>, es decir, no estaban sobre el entrenamiento</p>
-<div id="final-train" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>final_model <span class="op">=</span> LinearRegression()</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>final_model.fit(X_np, y_np)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>final_r2 <span class="op">=</span> r2_score(y_np, final_model.predict(X_np))</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div id="optimism-correct" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>corrected_r2 <span class="op">=</span> final_r2 <span class="op">-</span> mean_optimism</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"R² original: </span><span class="sc">{</span>final_r2<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Optimismo medio: </span><span class="sc">{</span>mean_optimism<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"R² corregido: </span><span class="sc">{</span>corrected_r2<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="explicación-breve-de-datos" class="level2">
+<h2 class="anchored" data-anchor-id="explicación-breve-de-datos">Explicación breve de datos</h2>
+<p>Tenemos tres métricas:</p>
+<ul>
+<li>Una binaria indica si un post de Linkedin está escrito con una llamada a la acción clara, pidiendo al lector un comentario.</li>
+<li>Otra con el número de likes del post.</li>
+<li>Otra con el número de impresiones del post.</li>
+</ul>
+<div id="data-generation" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-stdout">
-<pre><code>R² original: 0.7406
-Optimismo medio: 0.0178
-R² corregido: 0.7229</code></pre>
+<pre><code>[[ 0.00000000e+00  2.18672394e+01  9.23211313e+02]
+ [ 1.00000000e+00  4.46817603e+01  6.43940827e+03]
+ [ 1.00000000e+00  6.99405738e+01  6.29213754e+03]
+ [ 1.00000000e+00  2.30548228e+01  7.26677121e+03]
+ [ 0.00000000e+00  2.87513056e+01 -2.63316760e+03]]</code></pre>
 </div>
 </div>
-
-
+<p>Quien escriba el post solo puede actuar sobre cómo escribe el post. La idea es que su petición hará que más gente interactúe con el post y así Linkedin lo favorecerá con extra de impresiones.</p>
 </section>
+<section id="modelo-1.-todas-las-variables" class="level2">
+<h2 class="anchored" data-anchor-id="modelo-1.-todas-las-variables">Modelo 1. Todas las variables</h2>
+<div id="modelo-todo" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># model_all = sm.OLS(data[:, 2], sm.add_constant(data[:, :2])).fit()</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>model_all <span class="op">=</span> sm.OLS(data[:, <span class="dv">2</span>], data[:, :<span class="dv">2</span>]).fit()</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(model_all.summary())</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                 OLS Regression Results                                
+=======================================================================================
+Dep. Variable:                      y   R-squared (uncentered):                   0.660
+Model:                            OLS   Adj. R-squared (uncentered):              0.660
+Method:                 Least Squares   F-statistic:                              969.8
+Date:                Thu, 10 Jul 2025   Prob (F-statistic):                   1.10e-234
+Time:                        16:02:58   Log-Likelihood:                         -9232.1
+No. Observations:                1000   AIC:                                  1.847e+04
+Df Residuals:                     998   BIC:                                  1.848e+04
+Df Model:                           2                                                  
+Covariance Type:            nonrobust                                                  
+==============================================================================
+                 coef    std err          t      P&gt;|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+x1          5010.2264    256.231     19.554      0.000    4507.414    5513.039
+x2            -2.4367      4.666     -0.522      0.602     -11.593       6.719
+==============================================================================
+Omnibus:                        2.645   Durbin-Watson:                   1.898
+Prob(Omnibus):                  0.267   Jarque-Bera (JB):                2.320
+Skew:                           0.014   Prob(JB):                        0.313
+Kurtosis:                       2.766   Cond. No.                         127.
+==============================================================================
+
+Notes:
+[1] R² is computed without centering (uncentered) since the model does not contain a constant.
+[2] Standard Errors assume that the covariance matrix of the errors is correctly specified.</code></pre>
+</div>
+</div>
+<p>Calculo un error cuadrático medio para ver qué tan bien predice el modelo.</p>
+<div id="mse-todo" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_squared_error</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>fitted <span class="op">=</span> model_all.predict(data[:, :<span class="dv">2</span>])</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>mse_all <span class="op">=</span> mean_squared_error(data[:, <span class="dv">2</span>], fitted)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="modelo-2.-solo-la-variable-acción" class="level2">
+<h2 class="anchored" data-anchor-id="modelo-2.-solo-la-variable-acción">Modelo 2. Solo la variable acción</h2>
+<div id="modelo-accion" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>model_action <span class="op">=</span> sm.OLS(data[:, <span class="dv">2</span>], data[:, <span class="dv">0</span>]).fit()</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(model_action.summary())</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                 OLS Regression Results                                
+=======================================================================================
+Dep. Variable:                      y   R-squared (uncentered):                   0.660
+Model:                            OLS   Adj. R-squared (uncentered):              0.660
+Method:                 Least Squares   F-statistic:                              1941.
+Date:                Thu, 10 Jul 2025   Prob (F-statistic):                   2.27e-236
+Time:                        16:02:58   Log-Likelihood:                         -9232.2
+No. Observations:                1000   AIC:                                  1.847e+04
+Df Residuals:                     999   BIC:                                  1.847e+04
+Df Model:                           1                                                  
+Covariance Type:            nonrobust                                                  
+==============================================================================
+                 coef    std err          t      P&gt;|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+x1          4889.6271    110.993     44.054      0.000    4671.821    5107.433
+==============================================================================
+Omnibus:                        2.624   Durbin-Watson:                   1.899
+Prob(Omnibus):                  0.269   Jarque-Bera (JB):                2.305
+Skew:                           0.013   Prob(JB):                        0.316
+Kurtosis:                       2.766   Cond. No.                         1.00
+==============================================================================
+
+Notes:
+[1] R² is computed without centering (uncentered) since the model does not contain a constant.
+[2] Standard Errors assume that the covariance matrix of the errors is correctly specified.</code></pre>
+</div>
+</div>
+<div id="06c57f90" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fitted <span class="op">=</span> model_action.predict(data[:, <span class="dv">0</span>])</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>mse_action <span class="op">=</span> mean_squared_error(data[:, <span class="dv">2</span>], fitted)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="526fb346" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"MSE modelo con acción:"</span>, mse_action)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"MSE modelo con todo:"</span>, mse_all)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>MSE modelo con acción: 6116622.935458791
+MSE modelo con todo: 6114951.786343323</code></pre>
+</div>
+</div>
+
+
 </section>
 
 </main> <!-- /main -->
