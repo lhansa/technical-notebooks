@@ -1,0 +1,103 @@
+---
+title: "Cómo un modelo erróneo predice mejor que uno correcto"
+description: "Un modelo que capture mejor el proceso real de generación de datos puede predecir peor que uno que use mal las variables. Aquí demuestro cómo."
+description-meta: "Un modelo que capture mejor el proceso real de generación de datos puede predecir peor que uno que use mal las variables. Aquí demuestro cómo."
+author: "Leonardo Hansa"
+date: "2025-06-08"
+categories: [exploraciones]
+execute: 
+  echo: true
+  eval: true
+  message: false
+  warning: false
+freeze: true
+---
+
+Un modelo es una aproximación a la realidad y lo puedes usar para dos o tres cosas. Las que me interesan son: 
+
+- explicar esa realidad
+- predecir esa realidad
+
+Aunque las dos cosas van de la mano, curiosamente, si priorizas una, la otra saldrá peor. No tiene por qué, pero es posible que el modelo que mejor explique no sea el que mejor prediga.
+
+Vamos a verlo.
+
+```{python}
+#| label: libs
+import numpy as np
+import statsmodels.api as sm
+```
+
+## Explicación breve de datos
+
+Tenemos tres métricas: 
+
+- Una binaria indica si un post de Linkedin está escrito con una llamada a la acción clara, pidiendo al lector un comentario.
+- Otra con el número de likes del post.
+- Otra con el número de impresiones del post.
+
+```{python}
+#| label: data-generation
+#| echo: false
+
+sample_size = 1000
+np.random.seed(42)
+
+# action is bernoulli with p=0.5  
+# likes is poisson with lambda=50  if action=1, else lambda=5
+# impressions is poisson with lambda=5000 if action=1, else lambda=100 plus some noise
+action = np.random.binomial(1, 0.5, sample_size)
+likes = np.random.poisson(50, sample_size) * action + np.random.poisson(5, 1000) * (1 - action) + np.random.normal(0, 15, sample_size)
+impressions = np.random.poisson(5000, sample_size) * action + np.random.poisson(100, 1000) * (1 - action) + np.random.normal(0, 2500, sample_size)
+
+# create numpy array with everything
+data = np.column_stack((action, likes, impressions))
+# show first 5 rows
+print(data[:5])
+```
+
+
+Quien escriba el post solo puede actuar sobre cómo escribe el post. La idea es que su petición hará que más gente interactúe con el post y así Linkedin lo favorecerá con extra de impresiones. 
+
+## Modelo 1. Todas las variables
+
+```{python}
+#| label: modelo-todo
+
+# model_all = sm.OLS(data[:, 2], sm.add_constant(data[:, :2])).fit()
+model_all = sm.OLS(data[:, 2], data[:, :2]).fit()
+print(model_all.summary())
+```
+
+Calculo un error cuadrático medio para ver qué tan bien predice el modelo.
+
+```{python}
+#| label: mse-todo
+from sklearn.metrics import mean_squared_error
+
+fitted = model_all.predict(data[:, :2])
+mse_all = mean_squared_error(data[:, 2], fitted)
+```
+
+
+## Modelo 2. Solo la variable acción
+
+```{python}
+#| label: modelo-accion
+
+model_action = sm.OLS(data[:, 2], data[:, 0]).fit()
+print(model_action.summary())
+```
+
+```{python}
+fitted = model_action.predict(data[:, 0])
+mse_action = mean_squared_error(data[:, 2], fitted)
+```
+
+```{python}
+print("MSE modelo con acción:", mse_action)
+print("MSE modelo con todo:", mse_all)
+```
+
+
+
