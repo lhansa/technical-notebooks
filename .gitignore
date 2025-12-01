@@ -14,3 +14,4 @@ data/
 doc/
 *ine-poblacion-provincias.csv*
 *quarto_ipynb
+**/*.quarto_ipynb
