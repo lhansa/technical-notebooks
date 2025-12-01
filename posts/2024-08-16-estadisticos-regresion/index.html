@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.26">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -71,14 +71,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-e06533e4238ba9f214e7c1875489ef06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-c18d56ad21aac315df35711bf3e656cc.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -93,7 +94,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   ],
   "show-item-context": false,
   "language": {
-    "search-no-results-text": "Sin resultados",
+    "search-no-results-text": "No se han encontrado resultados",
     "search-matching-documents-text": "documentos encontrados",
     "search-copy-link-title": "Copiar el enlace en la búsqueda",
     "search-hide-matches-text": "Ocultar resultados adicionales",
@@ -139,7 +140,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -238,10 +239,10 @@ window.Quarto = {
 <p>Voy a revisar aquí cómo se calcula el p-valor de una variable en una regresión lineal, porque es una cosa que siempre se me olvida. Y quiero tenerlo a mano.</p>
 <p>Además, lo voy a hacer en Python porque me gusta sufrir.</p>
 <div id="libs" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.stats <span class="im">as</span> stats</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Me invento unos datos que me sirvan para ajustar una regresión lineal:</p>
 <p><span class="math display">\[
@@ -249,17 +250,17 @@ y = \beta_0 + \beta_1 \cdot x + \varepsilon,
 \]</span></p>
 <p>donde <span class="math inline">\(\beta_0 = - 5\)</span>, <span class="math inline">\(\beta_1 = 3\)</span> y <span class="math inline">\(x ~ \mbox{Poisson(12)}\)</span> y <span class="math inline">\(\varepsilon \sim \cal{N}(0, 10)\)</span>.</p>
 <div id="generate-data" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>nobs <span class="op">=</span> <span class="dv">10000</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>nobs <span class="op">=</span> <span class="dv">10000</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.random.poisson(<span class="dv">12</span>, nobs)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>noise <span class="op">=</span> np.random.normal(<span class="dv">0</span>, <span class="dv">10</span>, nobs)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> <span class="dv">3</span> <span class="op">*</span> x <span class="op">-</span> <span class="dv">5</span> <span class="op">+</span> noise</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> <span class="dv">3</span> <span class="op">*</span> x <span class="op">-</span> <span class="dv">5</span> <span class="op">+</span> noise</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Ahora ajusto la regresión lineal con <strong>statsmodels</strong>. ¿Se puede hacer con <strong>sklearn</strong>? Pues imagino que sí, pero necesitaré luego acceder a detalles del modelo a los que no sé acceder con sklearn.</p>
 <div id="fit-model" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> sm.add_constant(x)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> sm.add_constant(x)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> sm.OLS(y, X).fit()</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(model.summary())</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(model.summary())</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                            OLS Regression Results                            
 ==============================================================================
@@ -302,15 +303,15 @@ Notes:
 <p>Cuanto mayor sea el error estándar, menor siginificatividad tendrá la variable. Por lo tanto, con un varianza del error pequeña, más fácil será que la variable aparezca significativa.</p>
 </blockquote>
 <div id="standard-error" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>standard_error <span class="op">=</span> np.sqrt(np.<span class="bu">sum</span>(model.resid <span class="op">**</span> <span class="dv">2</span>) <span class="op">/</span> (<span class="bu">len</span>(x) <span class="op">-</span> <span class="dv">2</span>))</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>standard_error_x <span class="op">=</span> standard_error <span class="op">/</span> np.sqrt(nobs)  <span class="op">/</span> np.std(x)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>standard_error <span class="op">=</span> np.sqrt(np.<span class="bu">sum</span>(model.resid <span class="op">**</span> <span class="dv">2</span>) <span class="op">/</span> (<span class="bu">len</span>(x) <span class="op">-</span> <span class="dv">2</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>standard_error_x <span class="op">=</span> standard_error <span class="op">/</span> np.sqrt(nobs)  <span class="op">/</span> np.std(x)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>El error estándar de los residuos es 9.975818941126349 y el de la variable es 0.028545857080981202.</p>
 <blockquote class="blockquote">
 <p>El error estándar del intercept es más lío de calcular e interpretar; la idea intuitiva es que tiene en cuenta la varianza de todas las variables explicativas a la vez.</p>
 </blockquote>
 <div id="cell-standard-error-int" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>standard_error <span class="op">*</span> np.sqrt(<span class="dv">1</span> <span class="op">/</span> nobs <span class="op">+</span> np.mean(x) <span class="op">**</span> <span class="dv">2</span> <span class="op">/</span> np.<span class="bu">sum</span>((x <span class="op">-</span> np.mean(x)) <span class="op">**</span> <span class="dv">2</span>))</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>standard_error <span class="op">*</span> np.sqrt(<span class="dv">1</span> <span class="op">/</span> nobs <span class="op">+</span> np.mean(x) <span class="op">**</span> <span class="dv">2</span> <span class="op">/</span> np.<span class="bu">sum</span>((x <span class="op">-</span> np.mean(x)) <span class="op">**</span> <span class="dv">2</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="standard-error-int" class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>0.3570820876215312</code></pre>
 </div>
@@ -328,9 +329,9 @@ t = \frac{\mbox{coef}\ x}{\mbox{std error}\ x}.
 <li>El estadístico decrece con coeficientes bajos o con errores altos (es decir, la variable parecerá no significativa).</li>
 </ul>
 <div id="4d9e3c12" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># label: t-stat</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># label: t-stat</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>t_stat_x <span class="op">=</span> np.<span class="bu">abs</span>(model.params[<span class="dv">1</span>]) <span class="op">/</span> standard_error_x</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>t_stat_x</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>t_stat_x</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>105.58474083439029</code></pre>
 </div>
@@ -341,21 +342,21 @@ t = \frac{\mbox{coef}\ x}{\mbox{std error}\ x}.
 <p>Ahora hay que ver qué valor es esperable para el estadístico <span class="math inline">\(t\)</span>.</p>
 <p>Pon que trabajas al nivel de confianza del 90%. Hace falta calcular el <span class="math inline">\(t\)</span> que deja el 5% a un lado de la distribución, y el que lo deja al otro lado. Como la distribución es simétrica, solo calculo uno:</p>
 <div id="8fdabede" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>percentile <span class="op">=</span> stats.t.ppf(<span class="fl">0.95</span>, nobs <span class="op">-</span> <span class="dv">2</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>percentile</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>percentile <span class="op">=</span> stats.t.ppf(<span class="fl">0.95</span>, nobs <span class="op">-</span> <span class="dv">2</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>percentile</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>1.6450060485564049</code></pre>
 </div>
 </div>
 <p>Ahora tienes la distribución de <span class="math inline">\(t\)</span>. Si <span class="math inline">\(t\)</span> cae en el área sombreada (el 10% extremo) entonces la probabilidad de observar tus datos en el supuesto de que la variable no sea significativa (<span class="math inline">\(H_0\)</span> o <span class="math inline">\(\beta_1 = 0\)</span>) es menor de 0,10.</p>
 <div id="cell-t-distribution" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>xx <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1000</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>xx <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1000</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>yy <span class="op">=</span> stats.t.pdf(xx, nobs <span class="op">-</span> <span class="dv">2</span>)</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>plt.plot(xx, yy, color<span class="op">=</span><span class="st">'#800080'</span>)</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the t distribution and fill the 5% outside </span></span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>plt.fill_between(xx, yy, where<span class="op">=</span>(xx <span class="op">&lt;</span> <span class="op">-</span>percentile) <span class="op">|</span> (xx <span class="op">&gt;</span> percentile), alpha<span class="op">=</span><span class="fl">0.5</span>, color<span class="op">=</span><span class="st">'#800080'</span>)</span>
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Distribución de t"</span>)</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -366,9 +367,9 @@ t = \frac{\mbox{coef}\ x}{\mbox{std error}\ x}.
 </div>
 <p>Concretamente, la probabilidad para el estadístico <span class="math inline">\(t\)</span> que has obtenido es muy muy baja.</p>
 <div id="0d1b6ed0" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># p value for coefficient, extracted from</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># p value for coefficient, extracted from</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># t distribution</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>stats.t.sf(t_stat_x, nobs <span class="op">-</span> <span class="dv">2</span>) <span class="op">*</span> <span class="dv">2</span></span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>stats.t.sf(t_stat_x, nobs <span class="op">-</span> <span class="dv">2</span>) <span class="op">*</span> <span class="dv">2</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>0.0</code></pre>
 </div>
@@ -430,7 +431,7 @@ t = \frac{\mbox{coef}\ x}{\mbox{std error}\ x}.
 </div>
 </div>
 <div id="cell-comprobacion-pvalor" class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>stats.t.sf(<span class="fl">0.5341</span>, <span class="dv">9998</span>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>stats.t.sf(<span class="fl">0.5341</span>, <span class="dv">9998</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="comprobacion-pvalor" class="cell-output cell-output-display" data-execution_count="13">
 <pre><code>0.29664211233560395</code></pre>
 </div>
@@ -500,13 +501,14 @@ t = \frac{\mbox{coef}\ x}{\mbox{std error}\ x}.
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

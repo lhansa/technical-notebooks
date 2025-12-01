@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.26">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -71,14 +71,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-e06533e4238ba9f214e7c1875489ef06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-c18d56ad21aac315df35711bf3e656cc.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -93,7 +94,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   ],
   "show-item-context": false,
   "language": {
-    "search-no-results-text": "Sin resultados",
+    "search-no-results-text": "No se han encontrado resultados",
     "search-matching-documents-text": "documentos encontrados",
     "search-copy-link-title": "Copiar el enlace en la búsqueda",
     "search-hide-matches-text": "Ocultar resultados adicionales",
@@ -213,7 +214,7 @@ cookieconsent.run({
 <section id="código-del-ajuste-del-modelo" class="level3">
 <h3 class="anchored" data-anchor-id="código-del-ajuste-del-modelo">Código del ajuste del modelo</h3>
 <div id="libs" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib.pyplot <span class="im">import</span> subplots</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -223,16 +224,16 @@ cookieconsent.run({
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsmodels.stats.anova <span class="im">import</span> anova_lm</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ISLP <span class="im">import</span> load_data</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ISLP.models <span class="im">import</span> (ModelSpec <span class="im">as</span> MS, summarize, poly)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ISLP.models <span class="im">import</span> (ModelSpec <span class="im">as</span> MS, summarize, poly)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="cell-load-data" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>boston <span class="op">=</span> load_data(<span class="st">'Boston'</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>boston.head()</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>boston <span class="op">=</span> load_data(<span class="st">'Boston'</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>boston.head()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="load-data" class="cell-output cell-output-display" data-execution_count="2">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -253,7 +254,7 @@ cookieconsent.run({
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
+<th data-quarto-table-cell-role="th">0</th>
 <td>0.00632</td>
 <td>18.0</td>
 <td>2.31</td>
@@ -269,7 +270,7 @@ cookieconsent.run({
 <td>24.0</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
+<th data-quarto-table-cell-role="th">1</th>
 <td>0.02731</td>
 <td>0.0</td>
 <td>7.07</td>
@@ -285,7 +286,7 @@ cookieconsent.run({
 <td>21.6</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">2</td>
+<th data-quarto-table-cell-role="th">2</th>
 <td>0.02729</td>
 <td>0.0</td>
 <td>7.07</td>
@@ -301,7 +302,7 @@ cookieconsent.run({
 <td>34.7</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">3</td>
+<th data-quarto-table-cell-role="th">3</th>
 <td>0.03237</td>
 <td>0.0</td>
 <td>2.18</td>
@@ -317,7 +318,7 @@ cookieconsent.run({
 <td>33.4</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">4</td>
+<th data-quarto-table-cell-role="th">4</th>
 <td>0.06905</td>
 <td>0.0</td>
 <td>2.18</td>
@@ -341,15 +342,15 @@ cookieconsent.run({
 <p>Estos datos son un clásico, que incluso han tenido ya <em>haters</em> por no sé qué variable que hace al conjunto racista. Pero yo voy a seguir con el ejemplo de ISLP porque no me quiero complicar ahora.</p>
 <p>El libro ajusta una regresión lineal de <code>'medv'</code> frente a <code>'lstat'</code>. Por supuesto, ni idea de qué es cada una. Pero solo quier practicar código Python; el resultado nos da igual.</p>
 <div id="cell-datos" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> pd.DataFrame({<span class="st">'intercept'</span>: np.ones(boston.shape[<span class="dv">0</span>]),</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> pd.DataFrame({<span class="st">'intercept'</span>: np.ones(boston.shape[<span class="dv">0</span>]),</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                  <span class="st">'lstat'</span>: boston[<span class="st">'lstat'</span>]})</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>X.head()                  </span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>X.head()                  </span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="datos" class="cell-output cell-output-display" data-execution_count="3">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -359,27 +360,27 @@ cookieconsent.run({
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
+<th data-quarto-table-cell-role="th">0</th>
 <td>1.0</td>
 <td>4.98</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
+<th data-quarto-table-cell-role="th">1</th>
 <td>1.0</td>
 <td>9.14</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">2</td>
+<th data-quarto-table-cell-role="th">2</th>
 <td>1.0</td>
 <td>4.03</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">3</td>
+<th data-quarto-table-cell-role="th">3</th>
 <td>1.0</td>
 <td>2.94</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">4</td>
+<th data-quarto-table-cell-role="th">4</th>
 <td>1.0</td>
 <td>5.33</td>
 </tr>
@@ -391,85 +392,85 @@ cookieconsent.run({
 </div>
 <p>En <strong>statsmodels</strong> el <em>intercept</em> no se incluye por defecto y es el usuario quien tiene que incluirlo.</p>
 <div id="cell-ols1" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> boston[<span class="st">'medv'</span>]</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> boston[<span class="st">'medv'</span>]</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> sm.OLS(y, X)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> model.fit()</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>results.summary()</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>results.summary()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="ols1" class="cell-output cell-output-display" data-execution_count="4">
-<table class="simpletable caption-top table table-sm table-striped small" data-quarto-postprocess="true">
+<table class="simpletable caption-top table table-sm table-striped small">
 <caption>OLS Regression Results</caption>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">Dep. Variable:</td>
+<th data-quarto-table-cell-role="th">Dep. Variable:</th>
 <td>medv</td>
-<td data-quarto-table-cell-role="th">R-squared:</td>
+<th data-quarto-table-cell-role="th">R-squared:</th>
 <td>0.544</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">Model:</td>
+<th data-quarto-table-cell-role="th">Model:</th>
 <td>OLS</td>
-<td data-quarto-table-cell-role="th">Adj. R-squared:</td>
+<th data-quarto-table-cell-role="th">Adj. R-squared:</th>
 <td>0.543</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">Method:</td>
+<th data-quarto-table-cell-role="th">Method:</th>
 <td>Least Squares</td>
-<td data-quarto-table-cell-role="th">F-statistic:</td>
+<th data-quarto-table-cell-role="th">F-statistic:</th>
 <td>601.6</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">Date:</td>
+<th data-quarto-table-cell-role="th">Date:</th>
 <td>Mon, 14 Oct 2024</td>
-<td data-quarto-table-cell-role="th">Prob (F-statistic):</td>
+<th data-quarto-table-cell-role="th">Prob (F-statistic):</th>
 <td>5.08e-88</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">Time:</td>
+<th data-quarto-table-cell-role="th">Time:</th>
 <td>11:25:22</td>
-<td data-quarto-table-cell-role="th">Log-Likelihood:</td>
+<th data-quarto-table-cell-role="th">Log-Likelihood:</th>
 <td>-1641.5</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">No. Observations:</td>
+<th data-quarto-table-cell-role="th">No. Observations:</th>
 <td>506</td>
-<td data-quarto-table-cell-role="th">AIC:</td>
+<th data-quarto-table-cell-role="th">AIC:</th>
 <td>3287.</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">Df Residuals:</td>
+<th data-quarto-table-cell-role="th">Df Residuals:</th>
 <td>504</td>
-<td data-quarto-table-cell-role="th">BIC:</td>
+<th data-quarto-table-cell-role="th">BIC:</th>
 <td>3295.</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">Df Model:</td>
+<th data-quarto-table-cell-role="th">Df Model:</th>
 <td>1</td>
-<td data-quarto-table-cell-role="th"></td>
+<th data-quarto-table-cell-role="th"></th>
 <td></td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">Covariance Type:</td>
+<th data-quarto-table-cell-role="th">Covariance Type:</th>
 <td>nonrobust</td>
-<td data-quarto-table-cell-role="th"></td>
+<th data-quarto-table-cell-role="th"></th>
 <td></td>
 </tr>
 </tbody>
 </table>
 
 
-<table class="simpletable caption-top table table-sm table-striped small" data-quarto-postprocess="true">
+<table class="simpletable caption-top table table-sm table-striped small">
 <tbody>
 <tr class="odd">
 <td></td>
-<td data-quarto-table-cell-role="th">coef</td>
-<td data-quarto-table-cell-role="th">std err</td>
-<td data-quarto-table-cell-role="th">t</td>
-<td data-quarto-table-cell-role="th">P&gt;|t|</td>
-<td data-quarto-table-cell-role="th">[0.025</td>
-<td data-quarto-table-cell-role="th">0.975]</td>
+<th data-quarto-table-cell-role="th">coef</th>
+<th data-quarto-table-cell-role="th">std err</th>
+<th data-quarto-table-cell-role="th">t</th>
+<th data-quarto-table-cell-role="th">P&gt;|t|</th>
+<th data-quarto-table-cell-role="th">[0.025</th>
+<th data-quarto-table-cell-role="th">0.975]</th>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">intercept</td>
+<th data-quarto-table-cell-role="th">intercept</th>
 <td>34.5538</td>
 <td>0.563</td>
 <td>61.415</td>
@@ -478,7 +479,7 @@ cookieconsent.run({
 <td>35.659</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">lstat</td>
+<th data-quarto-table-cell-role="th">lstat</th>
 <td>-0.9500</td>
 <td>0.039</td>
 <td>-24.528</td>
@@ -490,30 +491,30 @@ cookieconsent.run({
 </table>
 
 
-<table class="simpletable caption-top table table-sm table-striped small" data-quarto-postprocess="true">
+<table class="simpletable caption-top table table-sm table-striped small">
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">Omnibus:</td>
+<th data-quarto-table-cell-role="th">Omnibus:</th>
 <td>137.043</td>
-<td data-quarto-table-cell-role="th">Durbin-Watson:</td>
+<th data-quarto-table-cell-role="th">Durbin-Watson:</th>
 <td>0.892</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">Prob(Omnibus):</td>
+<th data-quarto-table-cell-role="th">Prob(Omnibus):</th>
 <td>0.000</td>
-<td data-quarto-table-cell-role="th">Jarque-Bera (JB):</td>
+<th data-quarto-table-cell-role="th">Jarque-Bera (JB):</th>
 <td>291.373</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">Skew:</td>
+<th data-quarto-table-cell-role="th">Skew:</th>
 <td>1.453</td>
-<td data-quarto-table-cell-role="th">Prob(JB):</td>
+<th data-quarto-table-cell-role="th">Prob(JB):</th>
 <td>5.36e-64</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">Kurtosis:</td>
+<th data-quarto-table-cell-role="th">Kurtosis:</th>
 <td>5.319</td>
-<td data-quarto-table-cell-role="th">Cond. No.</td>
+<th data-quarto-table-cell-role="th">Cond. No.</th>
 <td>29.7</td>
 </tr>
 </tbody>
@@ -523,15 +524,15 @@ cookieconsent.run({
 </div>
 <p>Una forma más generalizable de preparar los datos es con la función <code>MS()</code>, que funciona al estilo <code>sklearn</code>. Pero es algo propio del libro así que no sé si le haré mucho caso.</p>
 <div id="cell-fit-tranform" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>design <span class="op">=</span> MS([<span class="st">'lstat'</span>])</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>design <span class="op">=</span> MS([<span class="st">'lstat'</span>])</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>design <span class="op">=</span> design.fit(boston)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> design.transform(boston)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>X.head()</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>X.head()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="fit-tranform" class="cell-output cell-output-display" data-execution_count="5">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -541,27 +542,27 @@ cookieconsent.run({
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
+<th data-quarto-table-cell-role="th">0</th>
 <td>1.0</td>
 <td>4.98</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
+<th data-quarto-table-cell-role="th">1</th>
 <td>1.0</td>
 <td>9.14</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">2</td>
+<th data-quarto-table-cell-role="th">2</th>
 <td>1.0</td>
 <td>4.03</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">3</td>
+<th data-quarto-table-cell-role="th">3</th>
 <td>1.0</td>
 <td>2.94</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">4</td>
+<th data-quarto-table-cell-role="th">4</th>
 <td>1.0</td>
 <td>5.33</td>
 </tr>
@@ -574,14 +575,14 @@ cookieconsent.run({
 <p>También se puede acortar con <code>fit_transform()</code>.</p>
 <p>A partir del modelo, guardado en <code>results</code>, y un conjunto de datos, puedes obtener predicciones.</p>
 <div id="21a25317" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>new_df <span class="op">=</span> pd.DataFrame({<span class="st">'lstat'</span>: [<span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">15</span>]})</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>new_df <span class="op">=</span> pd.DataFrame({<span class="st">'lstat'</span>: [<span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">15</span>]})</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>newX <span class="op">=</span> design.transform(new_df)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>newX</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>newX</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -591,17 +592,17 @@ cookieconsent.run({
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
+<th data-quarto-table-cell-role="th">0</th>
 <td>1.0</td>
 <td>5</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
+<th data-quarto-table-cell-role="th">1</th>
 <td>1.0</td>
 <td>10</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">2</td>
+<th data-quarto-table-cell-role="th">2</th>
 <td>1.0</td>
 <td>15</td>
 </tr>
@@ -613,8 +614,8 @@ cookieconsent.run({
 </div>
 <p>Y ahora predices:</p>
 <div id="cell-predicciones" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>new_predictions <span class="op">=</span> results.get_prediction(newX)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>new_predictions.conf_int(alpha<span class="op">=</span><span class="fl">0.95</span>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>new_predictions <span class="op">=</span> results.get_prediction(newX)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>new_predictions.conf_int(alpha<span class="op">=</span><span class="fl">0.95</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="predicciones" class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>array([[29.7781697 , 29.82901852],
        [25.03485131, 25.07184337],
@@ -626,7 +627,7 @@ cookieconsent.run({
 <h3 class="anchored" data-anchor-id="gráfico">Gráfico</h3>
 <p>El primer gráfico muestra la regresión calculada.</p>
 <div id="cell-plot-regression" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> abline(ax, b, m, <span class="op">*</span>args, <span class="op">**</span>kwargs):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> abline(ax, b, m, <span class="op">*</span>args, <span class="op">**</span>kwargs):</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"Add a line with slope m and intercept b to ax"</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    xlim <span class="op">=</span> ax.get_xlim()</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    ylim <span class="op">=</span> [m <span class="op">*</span> xlim[<span class="dv">0</span>] <span class="op">+</span> b, m <span class="op">*</span> xlim[<span class="dv">1</span>] <span class="op">+</span> b]</span>
@@ -637,7 +638,7 @@ cookieconsent.run({
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>       results.params[<span class="dv">0</span>],</span>
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>       results.params[<span class="dv">1</span>], </span>
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>       <span class="st">'r--'</span>, </span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>       linewidth<span class="op">=</span><span class="dv">3</span>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>       linewidth<span class="op">=</span><span class="dv">3</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -649,11 +650,11 @@ cookieconsent.run({
 <p>El segundo gráfico compara los residuos frente a los valores ajustados.</p>
 <p>Parece que los valores ajustados más pequeños están asociados a residuos negativos y altos. En valores más altos de ajuste, hay residuos tanto positivos como negativos, pero se concentran muchos más en casos negativos.</p>
 <div id="cell-residuals" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> subplots(figsize<span class="op">=</span>(<span class="dv">8</span>,<span class="dv">8</span>))[<span class="dv">1</span>]</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> subplots(figsize<span class="op">=</span>(<span class="dv">8</span>,<span class="dv">8</span>))[<span class="dv">1</span>]</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>ax.scatter(results.fittedvalues, results.resid)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Fitted value'</span>)</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Residual'</span>)</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, c<span class="op">=</span><span class="st">'k'</span>, ls<span class="op">=</span> <span class="st">'--'</span>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, c<span class="op">=</span><span class="st">'k'</span>, ls<span class="op">=</span> <span class="st">'--'</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -665,12 +666,12 @@ cookieconsent.run({
 <p>El <em>leverage</em> es una métrica que indica cuánto se aleja un punto del centroide de toda la nube de puntos. Puntos muy alejados tendrán una mayor influencia en el cálculo del coeficiente que puntos cercanos.</p>
 <p>El gráfico muestra el <em>leverage</em> contra el índice del punto, lo que ayuda a identificar puntos más influyentes (en el caso de una serie temporal, se podría ver como una evolución).</p>
 <div id="plot-levarage" class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>infl <span class="op">=</span> results.get_influence()</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>infl <span class="op">=</span> results.get_influence()</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> subplots(figsize<span class="op">=</span>(<span class="dv">8</span>,<span class="dv">8</span>))[<span class="dv">1</span>]</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>ax.scatter(np.arange(X.shape[<span class="dv">0</span>]), infl.hat_matrix_diag)</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Index'</span>)</span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Leverage'</span>)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>np.argmax(infl.hat_matrix_diag)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>np.argmax(infl.hat_matrix_diag)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="plot-levarage-1" class="cell-output cell-output-display" data-execution_count="10">
 <pre><code>374</code></pre>
 </div>
@@ -688,85 +689,85 @@ cookieconsent.run({
 <h2 class="anchored" data-anchor-id="regresión-múltiple">Regresión múltiple</h2>
 <p>Ahora enfrentan <code>'medv'</code> a <code>'lstat'</code> y <code>'age'</code>.</p>
 <div id="cell-multiple" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> MS([<span class="st">'lstat'</span>, <span class="st">'age'</span>]).fit_transform(boston)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> MS([<span class="st">'lstat'</span>, <span class="st">'age'</span>]).fit_transform(boston)</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>model1 <span class="op">=</span> sm.OLS(y, X)</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>results1 <span class="op">=</span> model1.fit()</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>results1.summary()</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>results1.summary()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="multiple" class="cell-output cell-output-display" data-execution_count="11">
-<table class="simpletable caption-top table table-sm table-striped small" data-quarto-postprocess="true">
+<table class="simpletable caption-top table table-sm table-striped small">
 <caption>OLS Regression Results</caption>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">Dep. Variable:</td>
+<th data-quarto-table-cell-role="th">Dep. Variable:</th>
 <td>medv</td>
-<td data-quarto-table-cell-role="th">R-squared:</td>
+<th data-quarto-table-cell-role="th">R-squared:</th>
 <td>0.551</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">Model:</td>
+<th data-quarto-table-cell-role="th">Model:</th>
 <td>OLS</td>
-<td data-quarto-table-cell-role="th">Adj. R-squared:</td>
+<th data-quarto-table-cell-role="th">Adj. R-squared:</th>
 <td>0.549</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">Method:</td>
+<th data-quarto-table-cell-role="th">Method:</th>
 <td>Least Squares</td>
-<td data-quarto-table-cell-role="th">F-statistic:</td>
+<th data-quarto-table-cell-role="th">F-statistic:</th>
 <td>309.0</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">Date:</td>
+<th data-quarto-table-cell-role="th">Date:</th>
 <td>Mon, 14 Oct 2024</td>
-<td data-quarto-table-cell-role="th">Prob (F-statistic):</td>
+<th data-quarto-table-cell-role="th">Prob (F-statistic):</th>
 <td>2.98e-88</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">Time:</td>
+<th data-quarto-table-cell-role="th">Time:</th>
 <td>11:25:23</td>
-<td data-quarto-table-cell-role="th">Log-Likelihood:</td>
+<th data-quarto-table-cell-role="th">Log-Likelihood:</th>
 <td>-1637.5</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">No. Observations:</td>
+<th data-quarto-table-cell-role="th">No. Observations:</th>
 <td>506</td>
-<td data-quarto-table-cell-role="th">AIC:</td>
+<th data-quarto-table-cell-role="th">AIC:</th>
 <td>3281.</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">Df Residuals:</td>
+<th data-quarto-table-cell-role="th">Df Residuals:</th>
 <td>503</td>
-<td data-quarto-table-cell-role="th">BIC:</td>
+<th data-quarto-table-cell-role="th">BIC:</th>
 <td>3294.</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">Df Model:</td>
+<th data-quarto-table-cell-role="th">Df Model:</th>
 <td>2</td>
-<td data-quarto-table-cell-role="th"></td>
+<th data-quarto-table-cell-role="th"></th>
 <td></td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">Covariance Type:</td>
+<th data-quarto-table-cell-role="th">Covariance Type:</th>
 <td>nonrobust</td>
-<td data-quarto-table-cell-role="th"></td>
+<th data-quarto-table-cell-role="th"></th>
 <td></td>
 </tr>
 </tbody>
 </table>
 
 
-<table class="simpletable caption-top table table-sm table-striped small" data-quarto-postprocess="true">
+<table class="simpletable caption-top table table-sm table-striped small">
 <tbody>
 <tr class="odd">
 <td></td>
-<td data-quarto-table-cell-role="th">coef</td>
-<td data-quarto-table-cell-role="th">std err</td>
-<td data-quarto-table-cell-role="th">t</td>
-<td data-quarto-table-cell-role="th">P&gt;|t|</td>
-<td data-quarto-table-cell-role="th">[0.025</td>
-<td data-quarto-table-cell-role="th">0.975]</td>
+<th data-quarto-table-cell-role="th">coef</th>
+<th data-quarto-table-cell-role="th">std err</th>
+<th data-quarto-table-cell-role="th">t</th>
+<th data-quarto-table-cell-role="th">P&gt;|t|</th>
+<th data-quarto-table-cell-role="th">[0.025</th>
+<th data-quarto-table-cell-role="th">0.975]</th>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">intercept</td>
+<th data-quarto-table-cell-role="th">intercept</th>
 <td>33.2228</td>
 <td>0.731</td>
 <td>45.458</td>
@@ -775,7 +776,7 @@ cookieconsent.run({
 <td>34.659</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">lstat</td>
+<th data-quarto-table-cell-role="th">lstat</th>
 <td>-1.0321</td>
 <td>0.048</td>
 <td>-21.416</td>
@@ -784,7 +785,7 @@ cookieconsent.run({
 <td>-0.937</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">age</td>
+<th data-quarto-table-cell-role="th">age</th>
 <td>0.0345</td>
 <td>0.012</td>
 <td>2.826</td>
@@ -796,30 +797,30 @@ cookieconsent.run({
 </table>
 
 
-<table class="simpletable caption-top table table-sm table-striped small" data-quarto-postprocess="true">
+<table class="simpletable caption-top table table-sm table-striped small">
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">Omnibus:</td>
+<th data-quarto-table-cell-role="th">Omnibus:</th>
 <td>124.288</td>
-<td data-quarto-table-cell-role="th">Durbin-Watson:</td>
+<th data-quarto-table-cell-role="th">Durbin-Watson:</th>
 <td>0.945</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">Prob(Omnibus):</td>
+<th data-quarto-table-cell-role="th">Prob(Omnibus):</th>
 <td>0.000</td>
-<td data-quarto-table-cell-role="th">Jarque-Bera (JB):</td>
+<th data-quarto-table-cell-role="th">Jarque-Bera (JB):</th>
 <td>244.026</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">Skew:</td>
+<th data-quarto-table-cell-role="th">Skew:</th>
 <td>1.362</td>
-<td data-quarto-table-cell-role="th">Prob(JB):</td>
+<th data-quarto-table-cell-role="th">Prob(JB):</th>
 <td>1.02e-53</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">Kurtosis:</td>
+<th data-quarto-table-cell-role="th">Kurtosis:</th>
 <td>5.038</td>
-<td data-quarto-table-cell-role="th">Cond. No.</td>
+<th data-quarto-table-cell-role="th">Cond. No.</th>
 <td>201.</td>
 </tr>
 </tbody>
@@ -883,13 +884,14 @@ cookieconsent.run({
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
