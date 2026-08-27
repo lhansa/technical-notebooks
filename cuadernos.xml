@@ -9,7 +9,7 @@
 <link>https://lhansa.github.io/technical-notebooks/cuadernos.html</link>
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Tips sobre análisis de datos</description>
-<generator>quarto-1.8.26</generator>
+<generator>quarto-1.10.18</generator>
 <lastBuildDate>Mon, 01 Dec 2025 00:00:00 GMT</lastBuildDate>
 <item>
   <title>Cálculo de medias con distribuciones tramposas</title>
