@@ -112,6 +112,16 @@ después. Un cuaderno no es una sucesión de celdas con un comentario encima.
 - Los títulos son afirmaciones o preguntas concretas ("Cómo un modelo erróneo predice mejor que uno
   correcto"), no etiquetas de temario.
 
+## Autoría cuando escribe Claude
+
+Todo post que redacte Claude tiene que dejarlo dicho. Elige una de estas dos formas:
+
+- Pon `author: "Claude"` en el front matter, en vez de `"Leonardo Hansa"`.
+- Deja `author: "Leonardo Hansa"` y añade, justo debajo del front matter, antes del primer párrafo,
+  la línea `*Escrito por Claude.*`.
+
+No hace falta combinar las dos. Cualquiera de ellas es suficiente, pero una de ellas es obligatoria.
+
 ## Código
 
 - **Python por defecto.** El repo tiene posts antiguos en R; se quedan como están. No escribas R
@@ -148,6 +158,7 @@ El push a `main` dispara `.github/workflows/publish.yml`, que renderiza y public
 
 - [ ] `quarto render posts/<slug>/index.qmd` termina sin errores.
 - [ ] `description` y `description-meta` rellenas e iguales.
+- [ ] Si lo ha escrito Claude, autoría marcada (`author: "Claude"` o nota `*Escrito por Claude.*`).
 - [ ] Categoría de la lista permitida.
 - [ ] Fecha del front matter igual a la del slug.
 - [ ] Si ejecuta código, `_freeze/` actualizado y añadido al commit.
