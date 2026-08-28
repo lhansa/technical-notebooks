@@ -10,7 +10,81 @@
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Tips sobre análisis de datos</description>
 <generator>quarto-1.10.18</generator>
-<lastBuildDate>Mon, 01 Dec 2025 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Fri, 28 Aug 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>De dónde sale el log-loss</title>
+  <dc:creator>Leonardo Hansa</dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-08-28-de-donde-sale-el-log-loss/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Entrenas un clasificador y minimizas el log-loss.</p>
+<p>¿Por qué el log-loss?</p>
+<p>Porque es lo que venía por defecto. Porque lo pone en la documentación. Porque es lo que usa todo el mundo.</p>
+<p>Yo estuve años así. Sabía usarla, sabía que penalizaba mucho equivocarte con confianza, y hasta ahí. La fórmula tenía toda la pinta de que alguien la había elegido porque le funcionaba bien, no porque tuviera un motivo.</p>
+<p>Pues resulta que hay un motivo. Y es bastante bonito.</p>
+<section id="cuánto-te-sorprende-algo" class="level2">
+<h2 class="anchored" data-anchor-id="cuánto-te-sorprende-algo">Cuánto te sorprende algo</h2>
+<p>Empieza por una pregunta que no parece de machine learning: <strong>¿cómo mides cuánta información te da un mensaje?</strong></p>
+<p>Si mañana te digo que ha salido el sol, no te he contado nada. Lo sabías.</p>
+<p>Si te digo que ha nevado en Madrid en agosto, te acabo de contar bastante.</p>
+<p>Esa es la intuición de Shannon: la información que lleva un suceso es <strong>cuánto te sorprende que ocurra.</strong> Y la sorpresa depende de la probabilidad. Cuanto menos probable era, más te dice que haya pasado.</p>
+<p>Ahora hay que convertir eso en un número. Pídele a esa medida de sorpresa dos cosas razonables:</p>
+<ul>
+<li>Si algo es menos probable, sorprende más. Y algo de probabilidad 1 no sorprende nada.</li>
+<li>Si te pasan dos cosas independientes, la sorpresa total es la suma de las dos sorpresas.</li>
+</ul>
+<p>La segunda es la interesante. Las probabilidades de sucesos independientes se multiplican, pero las sorpresas quieres sumarlas, porque enterarte de dos cosas es enterarte de una y luego de otra.</p>
+<p>Necesitas algo que convierta productos en sumas.</p>
+<p>O sea, un logaritmo.</p>
+<p>Y de ahí sale que la sorpresa de un suceso de probabilidad <img src="https://latex.codecogs.com/png.latex?p"> sea <img src="https://latex.codecogs.com/png.latex?-%5Clog%20p">. El signo menos está solo para que salga un número positivo, porque el logaritmo de algo menor que 1 es negativo.</p>
+<p><strong>El logaritmo no es un truco de cálculo para que las cuentas queden cómodas.</strong> Es la única forma de que sumar sorpresas signifique algo.</p>
+</section>
+<section id="la-sorpresa-media" class="level2">
+<h2 class="anchored" data-anchor-id="la-sorpresa-media">La sorpresa media</h2>
+<p>Un suceso suelto está bien, pero normalmente te interesa una distribución entera.</p>
+<p>Ahí lo que haces es la sorpresa media: coges la sorpresa de cada resultado posible y la ponderas por su probabilidad. A eso se le llama <strong>entropía.</strong></p>
+<p>Míralo con una moneda.</p>
+<p>Una moneda justa tiene probabilidad <img src="https://latex.codecogs.com/png.latex?0,5"> de cada cara. Nunca sabes qué va a salir, así que cada lanzamiento te sorprende. Su entropía es la máxima posible con dos resultados.</p>
+<p>Una moneda cargada que saca cara el 99% de las veces casi no te sorprende nunca. Ya sabes lo que va a pasar. Su entropía es bajísima.</p>
+<p>La entropía es, entonces, <strong>cuánta incertidumbre hay ahí dentro.</strong></p>
+<p>Y de paso, cuánto ocupa contarlo. Si tienes que enviar por mensajes el resultado de mil lanzamientos de la moneda cargada, no necesitas mil datos: te basta con decir “todo caras salvo el 43 y el 792”. Con la moneda justa no puedes hacer ese truco, porque no hay nada repetido a lo que agarrarse. Comprimir bien y no sorprenderse son la misma cosa mirada desde dos sitios.</p>
+</section>
+<section id="y-ahora-el-modelo" class="level2">
+<h2 class="anchored" data-anchor-id="y-ahora-el-modelo">Y ahora el modelo</h2>
+<p>Hasta aquí solo hemos hablado de una distribución, la real.</p>
+<p>Pero tú no tienes la distribución real. Tú tienes un modelo, que es tu apuesta sobre cómo funciona el mundo.</p>
+<p>Entonces pasan dos cosas a la vez:</p>
+<ul>
+<li>La realidad reparte los sucesos con una distribución <img src="https://latex.codecogs.com/png.latex?p">, la de verdad.</li>
+<li>Tu modelo espera que se repartan con otra, <img src="https://latex.codecogs.com/png.latex?q">, la que él se cree.</li>
+</ul>
+<p>La sorpresa que te llevas no la mide la realidad: la mides tú, con las creencias de tu modelo. Ocurre lo que ocurre según <img src="https://latex.codecogs.com/png.latex?p">, pero cada vez que ocurre te sorprendes lo que diga <img src="https://latex.codecogs.com/png.latex?q">.</p>
+<p>Eso es la <strong>entropía cruzada</strong>: la sorpresa media que se lleva tu modelo viendo pasar la realidad.</p>
+<p><img src="https://latex.codecogs.com/png.latex?H(p,%20q)%20=%20-%5Csum_i%20p_i%20%5Clog%20q_i"></p>
+<p>Y ahora escribe esa fórmula para un problema de clasificación binaria.</p>
+<p>La realidad, para una observación concreta, no tiene medias tintas: la etiqueta es 0 o 1. Tu modelo, en cambio, ha dicho una probabilidad. Si la etiqueta es 1, el único término que sobrevive es <img src="https://latex.codecogs.com/png.latex?-%5Clog%20q">; si es 0, es <img src="https://latex.codecogs.com/png.latex?-%5Clog(1-q)">. Promedias sobre todas las observaciones.</p>
+<p>Eso es el log-loss. Literalmente. No se parece a la entropía cruzada: <strong>es la entropía cruzada</strong>, escrita para el caso en que las etiquetas son ceros y unos.</p>
+<p>Y de regalo te explica esa manía suya que ya conocías. Como <img src="https://latex.codecogs.com/png.latex?-%5Clog%20p"> se dispara cuando <img src="https://latex.codecogs.com/png.latex?p"> se acerca a cero, un modelo que dice 0,99 y falla no se ha equivocado un poquito: se ha llevado una sorpresa descomunal, y la métrica te lo cobra.</p>
+<p>No es que el log-loss castigue la confianza mal puesta porque alguien decidiera castigarla. Es que estar muy seguro y fallar <strong>es</strong> llevarse mucha sorpresa.</p>
+</section>
+<section id="por-qué-esto-te-importa" class="level2">
+<h2 class="anchored" data-anchor-id="por-qué-esto-te-importa">Por qué esto te importa</h2>
+<p>Entrenar un clasificador con log-loss es buscar la distribución que menos se sorprenda viendo tus datos.</p>
+<p>Dicho de otra forma: no estás buscando el modelo que más acierte, estás buscando el que menos se equivoque de creencias.</p>
+<p>Que no es lo mismo, y por eso te puedes encontrar un modelo con muy buen accuracy y un log-loss horrible. Acierta el lado correcto de 0,5 casi siempre, pero sus probabilidades son mentira. Y al revés también pasa.</p>
+<p>Si lo que te vas a llevar del modelo es la probabilidad, y no la etiqueta, esa diferencia te la vas a comer entera.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>datos</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-08-28-de-donde-sale-el-log-loss/</guid>
+  <pubDate>Fri, 28 Aug 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Cálculo de medias con distribuciones tramposas</title>
   <dc:creator>Leonardo Hansa</dc:creator>
@@ -8495,194 +8569,6 @@ font-style: inherit;">eval_tidy</span>(expr_division)</span></code></pre></div><
   <category>datos</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2024-08-23-sin-comillas/</guid>
   <pubDate>Fri, 23 Aug 2024 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Evaluación de expresiones en R</title>
-  <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2024-08-17-evaluacion-expresiones/</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>Levanta la mano si a ti también te gusta concatenar caracteres con <code>+</code> como en Python.</p>
-<p>Me refiero a que en Python puedes hacer <code>'Hola ' + ' Leo'</code> pero en R no.</p>
-<p>¿O sí?</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"hola, puedo "</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"concatenar"</span></span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "hola, puedo concatenar"</code></pre>
-</div>
-</div>
-<p>Pero:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span></span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 4</code></pre>
-</div>
-</div>
-<section id="justificación-de-quosures" class="level2">
-<h2 class="anchored" data-anchor-id="justificación-de-quosures">Justificación de <code>quosures</code></h2>
-<p>La idea detrás de funciones como <code>base::subset()</code> o <code>dplyr::mutate()</code> es que puedes escribir operaciones dentro de data frames haciendo referencia directamente a las columnas, sin usar la sintaxis <code>df$columna</code>.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(rlang)</span>
-<span id="cb5-2">opera <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">function</span>(data, entrada) {</span>
-<span id="cb5-3">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">eval_tidy</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">enexpr</span>(entrada), data)</span>
-<span id="cb5-4">}</span>
-<span id="cb5-5"></span>
-<span id="cb5-6">nuevo_calculo <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">opera</span>(iris, Sepal.Length <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> Sepal.Width)</span>
-<span id="cb5-7"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">head</span>(nuevo_calculo)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 8.6 7.9 7.9 7.7 8.6 9.3</code></pre>
-</div>
-</div>
-<p>El inconveniente es que <code>enexpr()</code> puede no ser suficiente porque no tiene en cuenta información del entorno.</p>
-<p>Por ejemplo:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">df <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">data.frame</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">col1 =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">6</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">7</span>))</span>
-<span id="cb7-2">factor <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span></span>
-<span id="cb7-3"></span>
-<span id="cb7-4">opera2 <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">function</span>(data, entrada) {</span>
-<span id="cb7-5">  factor <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span></span>
-<span id="cb7-6">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">eval_tidy</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">enexpr</span>(entrada), data)</span>
-<span id="cb7-7">}</span>
-<span id="cb7-8"></span>
-<span id="cb7-9"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Con enquo no sabes cuál es el entorno original de la variable</span></span>
-<span id="cb7-10"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">opera2</span>(df, col1 <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> factor)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 50 60 70</code></pre>
-</div>
-</div>
-<p>Una solución que se te puede ocurrir es: <em>no pongas en la expresión variables que estén definidas en la función</em>. Ya, ¿y si no sabes lo que hay en la función? ¿Y si el código es tan largo que no te da para revisarlo?</p>
-<p>Pues lo arreglas con <code>enquo()</code>.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1">df <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">data.frame</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">col1 =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">6</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">7</span>))</span>
-<span id="cb9-2">factor <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span></span>
-<span id="cb9-3"></span>
-<span id="cb9-4">opera3 <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">function</span>(data, entrada) {</span>
-<span id="cb9-5">  factor <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span></span>
-<span id="cb9-6">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">eval_tidy</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">enquo</span>(entrada), data)</span>
-<span id="cb9-7">}</span>
-<span id="cb9-8"></span>
-<span id="cb9-9"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Con enquo usas el entorno donde se definió la variable original</span></span>
-<span id="cb9-10"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">opera3</span>(df, col1 <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> factor)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 10 12 14</code></pre>
-</div>
-</div>
-
-
-</section>
-
- ]]></description>
-  <category>datos</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-08-17-evaluacion-expresiones/</guid>
-  <pubDate>Sat, 17 Aug 2024 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
