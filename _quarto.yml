@@ -1,5 +1,9 @@
 project:
   type: website
+  render:
+    - "*.qmd"
+    - "posts/**"
+    - "!CLAUDE.md"
 
 website:
   title: "Leonardo Hansa"
