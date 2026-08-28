@@ -1,0 +1,96 @@
+---
+title: "De dónde sale el log-loss"
+description: "La función de pérdida que usas en clasificación no es una fórmula arbitraria: sale de medir sorpresa. Te cuento el camino."
+description-meta: "La función de pérdida que usas en clasificación no es una fórmula arbitraria: sale de medir sorpresa. Te cuento el camino."
+author: "Leonardo Hansa"
+date: "2026-08-28"
+categories: [datos]
+---
+
+Entrenas un clasificador y minimizas el log-loss.
+
+¿Por qué el log-loss?
+
+Porque es lo que venía por defecto. Porque lo pone en la documentación. Porque es lo que usa todo el mundo.
+
+Yo estuve años así. Sabía usarla, sabía que penalizaba mucho equivocarte con confianza, y hasta ahí. La fórmula tenía toda la pinta de que alguien la había elegido porque le funcionaba bien, no porque tuviera un motivo.
+
+Pues resulta que hay un motivo. Y es bastante bonito.
+
+## Cuánto te sorprende algo
+
+Empieza por una pregunta que no parece de machine learning: **¿cómo mides cuánta información te da un mensaje?**
+
+Si mañana te digo que ha salido el sol, no te he contado nada. Lo sabías.
+
+Si te digo que ha nevado en Madrid en agosto, te acabo de contar bastante.
+
+Esa es la intuición de Shannon: la información que lleva un suceso es **cuánto te sorprende que ocurra.** Y la sorpresa depende de la probabilidad. Cuanto menos probable era, más te dice que haya pasado.
+
+Ahora hay que convertir eso en un número. Pídele a esa medida de sorpresa dos cosas razonables:
+
+- Si algo es menos probable, sorprende más. Y algo de probabilidad 1 no sorprende nada.
+- Si te pasan dos cosas independientes, la sorpresa total es la suma de las dos sorpresas.
+
+La segunda es la interesante. Las probabilidades de sucesos independientes se multiplican, pero las sorpresas quieres sumarlas, porque enterarte de dos cosas es enterarte de una y luego de otra.
+
+Necesitas algo que convierta productos en sumas.
+
+O sea, un logaritmo.
+
+Y de ahí sale que la sorpresa de un suceso de probabilidad $p$ sea $-\log p$. El signo menos está solo para que salga un número positivo, porque el logaritmo de algo menor que 1 es negativo.
+
+**El logaritmo no es un truco de cálculo para que las cuentas queden cómodas.** Es la única forma de que sumar sorpresas signifique algo.
+
+## La sorpresa media
+
+Un suceso suelto está bien, pero normalmente te interesa una distribución entera.
+
+Ahí lo que haces es la sorpresa media: coges la sorpresa de cada resultado posible y la ponderas por su probabilidad. A eso se le llama **entropía.**
+
+Míralo con una moneda.
+
+Una moneda justa tiene probabilidad $0,5$ de cada cara. Nunca sabes qué va a salir, así que cada lanzamiento te sorprende. Su entropía es la máxima posible con dos resultados.
+
+Una moneda cargada que saca cara el 99% de las veces casi no te sorprende nunca. Ya sabes lo que va a pasar. Su entropía es bajísima.
+
+La entropía es, entonces, **cuánta incertidumbre hay ahí dentro.**
+
+Y de paso, cuánto ocupa contarlo. Si tienes que enviar por mensajes el resultado de mil lanzamientos de la moneda cargada, no necesitas mil datos: te basta con decir "todo caras salvo el 43 y el 792". Con la moneda justa no puedes hacer ese truco, porque no hay nada repetido a lo que agarrarse. Comprimir bien y no sorprenderse son la misma cosa mirada desde dos sitios.
+
+## Y ahora el modelo
+
+Hasta aquí solo hemos hablado de una distribución, la real.
+
+Pero tú no tienes la distribución real. Tú tienes un modelo, que es tu apuesta sobre cómo funciona el mundo.
+
+Entonces pasan dos cosas a la vez:
+
+- La realidad reparte los sucesos con una distribución $p$, la de verdad.
+- Tu modelo espera que se repartan con otra, $q$, la que él se cree.
+
+La sorpresa que te llevas no la mide la realidad: la mides tú, con las creencias de tu modelo. Ocurre lo que ocurre según $p$, pero cada vez que ocurre te sorprendes lo que diga $q$.
+
+Eso es la **entropía cruzada**: la sorpresa media que se lleva tu modelo viendo pasar la realidad.
+
+$$H(p, q) = -\sum_i p_i \log q_i$$
+
+Y ahora escribe esa fórmula para un problema de clasificación binaria.
+
+La realidad, para una observación concreta, no tiene medias tintas: la etiqueta es 0 o 1. Tu modelo, en cambio, ha dicho una probabilidad. Si la etiqueta es 1, el único término que sobrevive es $-\log q$; si es 0, es $-\log(1-q)$. Promedias sobre todas las observaciones.
+
+Eso es el log-loss. Literalmente. No se parece a la entropía cruzada: **es la entropía cruzada**, escrita para el caso en que las etiquetas son ceros y unos.
+
+Y de regalo te explica esa manía suya que ya conocías. Como $-\log p$ se dispara cuando $p$ se acerca a cero, un modelo que dice 0,99 y falla no se ha equivocado un poquito: se ha llevado una sorpresa descomunal, y la métrica te lo cobra.
+
+No es que el log-loss castigue la confianza mal puesta porque alguien decidiera castigarla. Es que estar muy seguro y fallar **es** llevarse mucha sorpresa.
+
+## Por qué esto te importa
+
+Entrenar un clasificador con log-loss es buscar la distribución que menos se sorprenda viendo tus datos.
+
+Dicho de otra forma: no estás buscando el modelo que más acierte, estás buscando el que menos se equivoque de creencias.
+
+Que no es lo mismo, y por eso te puedes encontrar un modelo con muy buen accuracy y un log-loss horrible. Acierta el lado correcto de 0,5 casi siempre, pero sus probabilidades son mentira. Y al revés también pasa.
+
+Si lo que te vas a llevar del modelo es la probabilidad, y no la etiqueta, esa diferencia te la vas a comer entera.
