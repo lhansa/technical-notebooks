@@ -25,6 +25,10 @@ Reglas:
 - **Empieza en seco.** La primera frase ya está dentro del tema. Nada de "En este artículo vamos a
   explorar" ni de contextualizar la importancia del asunto.
 - **Frases cortas. Párrafos de una o dos líneas.** El texto respira; se lee bajando rápido.
+- **Sujeto, verbo y complementos.** Una idea por frase. Antes tres frases seguidas que una oración
+  con dos subordinadas dentro. Si una frase lleva un "que" y dos comas, pártela.
+- **Nada de "no es X, es Y".** Las construcciones de contraste ("no es un truco de cálculo, es la
+  única forma") se gastan enseguida y acaban sonando a tic. Di lo que la cosa es y sigue.
 - **Primera persona para lo tuyo.** "Yo estuve años así", "los datos no me importan especialmente".
   La experiencia propia y las dudas propias son parte del texto.
 - **Negrita para la idea que sostiene el post**, una o dos veces por sección, no más.
@@ -37,14 +41,14 @@ Reglas:
 
 Referencia de tono, de `posts/2026-08-28-de-donde-sale-el-log-loss/index.qmd`:
 
-> Yo estuve años así. Sabía usarla, sabía que penalizaba mucho equivocarte con confianza, y hasta
-> ahí. La fórmula tenía toda la pinta de que alguien la había elegido porque le funcionaba bien, no
-> porque tuviera un motivo.
+> Yo estuve años así. Sabía usarla. Sabía que penalizaba mucho equivocarte con confianza. Y hasta
+> ahí llegaba. La fórmula tenía pinta de capricho: alguien la eligió porque le funcionaba bien y ya
+> está.
 
-> Pues resulta que hay un motivo. Y es bastante bonito.
+> Pues resulta que hay un motivo detrás. Y es bastante bonito.
 
-> No es que el log-loss castigue la confianza mal puesta porque alguien decidiera castigarla. Es que
-> estar muy seguro y fallar **es** llevarse mucha sorpresa.
+> Estar muy seguro y fallar **es** llevarse mucha sorpresa. El castigo sale de ahí, de la propia
+> definición. Nadie lo puso a mano.
 
 Cuando dudes de cómo suena algo, lee un post reciente entero antes de escribir.
 
@@ -60,8 +64,8 @@ Front matter:
 ```yaml
 ---
 title: "De dónde sale el log-loss"
-description: "La función de pérdida que usas en clasificación no es una fórmula arbitraria: sale de medir sorpresa. Te cuento el camino."
-description-meta: "La función de pérdida que usas en clasificación no es una fórmula arbitraria: sale de medir sorpresa. Te cuento el camino."
+description: "La función de pérdida que usas en clasificación sale de medir sorpresa. Te cuento el camino."
+description-meta: "La función de pérdida que usas en clasificación sale de medir sorpresa. Te cuento el camino."
 author: "Leonardo Hansa"
 date: "2026-08-28"
 categories: [datos]
