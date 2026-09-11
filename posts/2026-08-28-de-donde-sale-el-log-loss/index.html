@@ -6,8 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Leonardo Hansa">
-<meta name="description" content="La función de pérdida que usas en clasificación no es una fórmula arbitraria: sale de medir sorpresa. Te cuento el camino.">
+<meta name="author" content="Claude">
+<meta name="description" content="La función de pérdida que usas en clasificación sale de medir sorpresa. Te cuento el camino.">
 
 <title>De dónde sale el log-loss – Leonardo Hansa</title>
 <style>
@@ -49,7 +49,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-b855f156e6b600d6c9382fa97f794a0c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-f3a1002b4edc062c023a1a43691369fb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -175,7 +175,7 @@ window.Quarto = {
 
 <div>
   <div class="description">
-    La función de pérdida que usas en clasificación no es una fórmula arbitraria: sale de medir sorpresa. Te cuento el camino.
+    La función de pérdida que usas en clasificación sale de medir sorpresa. Te cuento el camino.
   </div>
 </div>
 
@@ -185,7 +185,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Autor/a</div>
     <div class="quarto-title-meta-contents">
-             <p>Leonardo Hansa </p>
+             <p>Claude </p>
           </div>
   </div>
     
@@ -204,62 +204,63 @@ window.Quarto = {
 </header>
 
 
+<p><em>Escrito por Claude.</em></p>
 <p>Entrenas un clasificador y minimizas el log-loss.</p>
 <p>¿Por qué el log-loss?</p>
 <p>Porque es lo que venía por defecto. Porque lo pone en la documentación. Porque es lo que usa todo el mundo.</p>
-<p>Yo estuve años así. Sabía usarla, sabía que penalizaba mucho equivocarte con confianza, y hasta ahí. La fórmula tenía toda la pinta de que alguien la había elegido porque le funcionaba bien, no porque tuviera un motivo.</p>
-<p>Pues resulta que hay un motivo. Y es bastante bonito.</p>
+<p>Yo estuve años así. Sabía usarla. Sabía que penalizaba mucho equivocarte con confianza. Y hasta ahí llegaba. La fórmula tenía pinta de capricho: alguien la eligió porque le funcionaba bien y ya está.</p>
+<p>Pues resulta que hay un motivo detrás. Y es bastante bonito.</p>
 <section id="cuánto-te-sorprende-algo" class="level2">
 <h2 class="anchored" data-anchor-id="cuánto-te-sorprende-algo">Cuánto te sorprende algo</h2>
 <p>Empieza por una pregunta que no parece de machine learning: <strong>¿cómo mides cuánta información te da un mensaje?</strong></p>
 <p>Si mañana te digo que ha salido el sol, no te he contado nada. Lo sabías.</p>
 <p>Si te digo que ha nevado en Madrid en agosto, te acabo de contar bastante.</p>
-<p>Esa es la intuición de Shannon: la información que lleva un suceso es <strong>cuánto te sorprende que ocurra.</strong> Y la sorpresa depende de la probabilidad. Cuanto menos probable era, más te dice que haya pasado.</p>
+<p>Esa es la intuición de Shannon. La información de un suceso es <strong>cuánto te sorprende que ocurra.</strong> Y la sorpresa depende de la probabilidad. Cuanto menos probable era, más te dice que haya pasado.</p>
 <p>Ahora hay que convertir eso en un número. Pídele a esa medida de sorpresa dos cosas razonables:</p>
 <ul>
 <li>Si algo es menos probable, sorprende más. Y algo de probabilidad 1 no sorprende nada.</li>
 <li>Si te pasan dos cosas independientes, la sorpresa total es la suma de las dos sorpresas.</li>
 </ul>
-<p>La segunda es la interesante. Las probabilidades de sucesos independientes se multiplican, pero las sorpresas quieres sumarlas, porque enterarte de dos cosas es enterarte de una y luego de otra.</p>
+<p>La segunda es la interesante. Las probabilidades de sucesos independientes se multiplican. Las sorpresas quieres sumarlas. Enterarte de dos cosas es enterarte de una y luego de otra.</p>
 <p>Necesitas algo que convierta productos en sumas.</p>
 <p>O sea, un logaritmo.</p>
-<p>Y de ahí sale que la sorpresa de un suceso de probabilidad <span class="math inline">\(p\)</span> sea <span class="math inline">\(-\log p\)</span>. El signo menos está solo para que salga un número positivo, porque el logaritmo de algo menor que 1 es negativo.</p>
-<p><strong>El logaritmo no es un truco de cálculo para que las cuentas queden cómodas.</strong> Es la única forma de que sumar sorpresas signifique algo.</p>
+<p>De ahí sale la fórmula. La sorpresa de un suceso de probabilidad <span class="math inline">\(p\)</span> vale <span class="math inline">\(-\log p\)</span>. El signo menos cumple una función humilde: el logaritmo de algo menor que 1 sale negativo, y así el resultado queda positivo.</p>
+<p><strong>El logaritmo aparece aquí por obligación.</strong> Es la única forma de que sumar sorpresas signifique algo.</p>
 </section>
 <section id="la-sorpresa-media" class="level2">
 <h2 class="anchored" data-anchor-id="la-sorpresa-media">La sorpresa media</h2>
-<p>Un suceso suelto está bien, pero normalmente te interesa una distribución entera.</p>
-<p>Ahí lo que haces es la sorpresa media: coges la sorpresa de cada resultado posible y la ponderas por su probabilidad. A eso se le llama <strong>entropía.</strong></p>
+<p>Un suceso suelto está bien. Pero normalmente te interesa una distribución entera.</p>
+<p>Ahí haces la sorpresa media. Coges la sorpresa de cada resultado posible y la ponderas por su probabilidad. A eso se le llama <strong>entropía.</strong></p>
 <p>Míralo con una moneda.</p>
-<p>Una moneda justa tiene probabilidad <span class="math inline">\(0,5\)</span> de cada cara. Nunca sabes qué va a salir, así que cada lanzamiento te sorprende. Su entropía es la máxima posible con dos resultados.</p>
-<p>Una moneda cargada que saca cara el 99% de las veces casi no te sorprende nunca. Ya sabes lo que va a pasar. Su entropía es bajísima.</p>
-<p>La entropía es, entonces, <strong>cuánta incertidumbre hay ahí dentro.</strong></p>
-<p>Y de paso, cuánto ocupa contarlo. Si tienes que enviar por mensajes el resultado de mil lanzamientos de la moneda cargada, no necesitas mil datos: te basta con decir “todo caras salvo el 43 y el 792”. Con la moneda justa no puedes hacer ese truco, porque no hay nada repetido a lo que agarrarse. Comprimir bien y no sorprenderse son la misma cosa mirada desde dos sitios.</p>
+<p>Una moneda justa tiene probabilidad <span class="math inline">\(0,5\)</span> de cada cara. Nunca sabes qué va a salir. Cada lanzamiento te sorprende. Su entropía es la máxima posible con dos resultados.</p>
+<p>Una moneda cargada saca cara el 99% de las veces. Casi nunca te sorprende. Ya sabes lo que va a pasar. Su entropía es bajísima.</p>
+<p>La entropía mide, entonces, <strong>cuánta incertidumbre hay ahí dentro.</strong></p>
+<p>Y de paso, cuánto ocupa contarlo. Imagina que tienes que enviar por mensajes el resultado de mil lanzamientos de la moneda cargada. Te basta con decir “todo caras salvo el 43 y el 792”. Con la moneda justa ese truco se te cae. Ahí no hay nada repetido a lo que agarrarse. Comprimir bien y no sorprenderse son la misma cosa mirada desde dos sitios.</p>
 </section>
 <section id="y-ahora-el-modelo" class="level2">
 <h2 class="anchored" data-anchor-id="y-ahora-el-modelo">Y ahora el modelo</h2>
 <p>Hasta aquí solo hemos hablado de una distribución, la real.</p>
-<p>Pero tú no tienes la distribución real. Tú tienes un modelo, que es tu apuesta sobre cómo funciona el mundo.</p>
+<p>Pero tú no tienes la distribución real. Tú tienes un modelo. Y tu modelo es una apuesta sobre cómo funciona el mundo.</p>
 <p>Entonces pasan dos cosas a la vez:</p>
 <ul>
 <li>La realidad reparte los sucesos con una distribución <span class="math inline">\(p\)</span>, la de verdad.</li>
 <li>Tu modelo espera que se repartan con otra, <span class="math inline">\(q\)</span>, la que él se cree.</li>
 </ul>
-<p>La sorpresa que te llevas no la mide la realidad: la mides tú, con las creencias de tu modelo. Ocurre lo que ocurre según <span class="math inline">\(p\)</span>, pero cada vez que ocurre te sorprendes lo que diga <span class="math inline">\(q\)</span>.</p>
+<p>La sorpresa la mides tú, con las creencias de tu modelo. Ocurre lo que ocurre según <span class="math inline">\(p\)</span>. Y cada vez que ocurre te sorprendes lo que diga <span class="math inline">\(q\)</span>.</p>
 <p>Eso es la <strong>entropía cruzada</strong>: la sorpresa media que se lleva tu modelo viendo pasar la realidad.</p>
 <p><span class="math display">\[H(p, q) = -\sum_i p_i \log q_i\]</span></p>
-<p>Y ahora escribe esa fórmula para un problema de clasificación binaria.</p>
-<p>La realidad, para una observación concreta, no tiene medias tintas: la etiqueta es 0 o 1. Tu modelo, en cambio, ha dicho una probabilidad. Si la etiqueta es 1, el único término que sobrevive es <span class="math inline">\(-\log q\)</span>; si es 0, es <span class="math inline">\(-\log(1-q)\)</span>. Promedias sobre todas las observaciones.</p>
-<p>Eso es el log-loss. Literalmente. No se parece a la entropía cruzada: <strong>es la entropía cruzada</strong>, escrita para el caso en que las etiquetas son ceros y unos.</p>
-<p>Y de regalo te explica esa manía suya que ya conocías. Como <span class="math inline">\(-\log p\)</span> se dispara cuando <span class="math inline">\(p\)</span> se acerca a cero, un modelo que dice 0,99 y falla no se ha equivocado un poquito: se ha llevado una sorpresa descomunal, y la métrica te lo cobra.</p>
-<p>No es que el log-loss castigue la confianza mal puesta porque alguien decidiera castigarla. Es que estar muy seguro y fallar <strong>es</strong> llevarse mucha sorpresa.</p>
+<p>Ahora escribe esa fórmula para un problema de clasificación binaria.</p>
+<p>La realidad reparte etiquetas de 0 y de 1, sin términos medios. Tu modelo responde con una probabilidad. Si la etiqueta es 1, el único término que sobrevive es <span class="math inline">\(-\log q\)</span>. Si es 0, sobrevive <span class="math inline">\(-\log(1-q)\)</span>. Promedias sobre todas las observaciones.</p>
+<p>Eso es el log-loss. Literalmente. <strong>El log-loss es la entropía cruzada</strong>, escrita para el caso en que las etiquetas son ceros y unos.</p>
+<p>Y de regalo te explica esa manía suya que ya conocías. El término <span class="math inline">\(-\log p\)</span> se dispara cuando <span class="math inline">\(p\)</span> se acerca a cero. Un modelo que dice 0,99 y falla se lleva una sorpresa descomunal. La métrica se la cobra entera.</p>
+<p>Estar muy seguro y fallar <strong>es</strong> llevarse mucha sorpresa. El castigo sale de ahí, de la propia definición. Nadie lo puso a mano.</p>
 </section>
 <section id="por-qué-esto-te-importa" class="level2">
 <h2 class="anchored" data-anchor-id="por-qué-esto-te-importa">Por qué esto te importa</h2>
 <p>Entrenar un clasificador con log-loss es buscar la distribución que menos se sorprenda viendo tus datos.</p>
-<p>Dicho de otra forma: no estás buscando el modelo que más acierte, estás buscando el que menos se equivoque de creencias.</p>
-<p>Que no es lo mismo, y por eso te puedes encontrar un modelo con muy buen accuracy y un log-loss horrible. Acierta el lado correcto de 0,5 casi siempre, pero sus probabilidades son mentira. Y al revés también pasa.</p>
-<p>Si lo que te vas a llevar del modelo es la probabilidad, y no la etiqueta, esa diferencia te la vas a comer entera.</p>
+<p>Dicho de otra forma: buscas el modelo con las mejores creencias. Acertar la etiqueta es otro objetivo distinto.</p>
+<p>Y por eso te puedes encontrar un modelo con muy buen accuracy y un log-loss horrible. Acierta el lado correcto de 0,5 casi siempre. Pero sus probabilidades son mentira. Al revés también pasa.</p>
+<p>Si del modelo te vas a llevar la probabilidad, esa diferencia te la comes entera.</p>
 
 
 </section>
