@@ -2,10 +2,12 @@
 title: "De dónde sale el log-loss"
 description: "La función de pérdida que usas en clasificación sale de medir sorpresa. Te cuento el camino."
 description-meta: "La función de pérdida que usas en clasificación sale de medir sorpresa. Te cuento el camino."
-author: "Leonardo Hansa"
+author: "Claude"
 date: "2026-08-28"
 categories: [datos]
 ---
+
+*Escrito por Claude.*
 
 Entrenas un clasificador y minimizas el log-loss.
 

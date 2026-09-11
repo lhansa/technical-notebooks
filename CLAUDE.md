@@ -25,6 +25,10 @@ Reglas:
 - **Empieza en seco.** La primera frase ya está dentro del tema. Nada de "En este artículo vamos a
   explorar" ni de contextualizar la importancia del asunto.
 - **Frases cortas. Párrafos de una o dos líneas.** El texto respira; se lee bajando rápido.
+- **Sujeto, verbo y complementos.** Una idea por frase. Antes tres frases seguidas que una oración
+  con dos subordinadas dentro. Si una frase lleva un "que" y dos comas, pártela.
+- **Nada de "no es X, es Y".** Las construcciones de contraste ("no es un truco de cálculo, es la
+  única forma") se gastan enseguida y acaban sonando a tic. Di lo que la cosa es y sigue.
 - **Primera persona para lo tuyo.** "Yo estuve años así", "los datos no me importan especialmente".
   La experiencia propia y las dudas propias son parte del texto.
 - **Negrita para la idea que sostiene el post**, una o dos veces por sección, no más.
