@@ -10,7 +10,325 @@
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Tips sobre análisis de datos</description>
 <generator>quarto-1.10.18</generator>
-<lastBuildDate>Fri, 28 Aug 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Tue, 15 Sep 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Controlar por más variables no es ser más riguroso</title>
+  <dc:creator>Claude </dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-09-15-collider/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Coges a los futbolistas de primera división y les mides dos cosas: técnica y físico.</p>
+<p>Salen correlacionados en negativo. Los más fuertes son los menos técnicos.</p>
+<p>Suena a teoría de bar. El que se pasa la vida en el gimnasio descuida el balón. Tiene su lógica hasta que vas a la población general y buscas la misma correlación. Ahí no está. En el fútbol de barrio, la técnica y el físico se ignoran mutuamente.</p>
+<p>Entre los de primera, se odian.</p>
+<p>Y a los datos no les ha pasado nada raro. Les ha pasado una cosa concreta que tiene nombre.</p>
+<section id="por-qué-aparece-la-correlación" class="level2">
+<h2 class="anchored" data-anchor-id="por-qué-aparece-la-correlación">Por qué aparece la correlación</h2>
+<p>Para llegar a primera hace falta mucho de algo.</p>
+<p>Si eres un portento físico te fichan aunque el control te salga regular. Si eres un fenómeno con el balón te fichan aunque pierdas todos los duelos. Lo que no pasa es que llegues sin ninguna de las dos.</p>
+<p>Piensa entonces en quién compone esa lista. Los que van sobrados de las dos cosas existen, pero son cuatro. La mayoría entró por una sola puerta.</p>
+<p>Dentro del grupo, saber que un jugador va justo de físico te dice algo. Tiene que ir sobradísimo de técnica, porque de otra forma no estaría ahí.</p>
+<p>Ahí tienes la correlación. <strong>La ha puesto el criterio de selección.</strong></p>
+<p>Joseph Berkson contó esto en 1946 revisando historiales de hospital. Dos enfermedades sin relación ninguna entre sí aparecían asociadas entre los ingresados. El motivo: cada una, por su cuenta, ya era razón suficiente para ingresar. Entre los ingresados, librarte de una te dejaba con más papeletas de tener la otra.</p>
+<p>A la variable por la que condicionas —jugar en primera, estar ingresado— se la llama <strong>collider</strong>. Es hija de las otras dos. Las dos flechas apuntan hacia ella.</p>
+</section>
+<section id="la-simulación" class="level2">
+<h2 class="anchored" data-anchor-id="la-simulación">La simulación</h2>
+<p>Genero una población entera. Técnica y físico independientes por construcción: los saco por separado y no se miran.</p>
+<div id="cell-poblacion" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-2"></span>
+<span id="cb1-3">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">42</span>)</span>
+<span id="cb1-4"></span>
+<span id="cb1-5">n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5_000</span></span>
+<span id="cb1-6">tecnica <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.normal(size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>n)</span>
+<span id="cb1-7">fisico <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.normal(size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>n)</span>
+<span id="cb1-8"></span>
+<span id="cb1-9">np.corrcoef(tecnica, fisico)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>)</span></code></pre></div></div>
+<div id="poblacion" class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>-0.002</code></pre>
+</div>
+</div>
+<p>Cero, como tenía que ser.</p>
+<p>Ahora el filtro. Sumo las dos cualidades y me quedo con el 2% de arriba. Es un criterio generoso: da igual de dónde venga el talento mientras haya mucho.</p>
+<div id="cell-seleccion" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">talento <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> tecnica <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> fisico</span>
+<span id="cb3-2">primera <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> talento <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> np.quantile(talento, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.98</span>)</span>
+<span id="cb3-3"></span>
+<span id="cb3-4">np.corrcoef(tecnica[primera], fisico[primera])[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>)</span></code></pre></div></div>
+<div id="seleccion" class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>-0.879</code></pre>
+</div>
+</div>
+<p>No he tocado ninguna de las dos variables. Solo he mirado a un subgrupo.</p>
+<p>En el gráfico se ve de dónde sale.</p>
+<div id="cell-scatter" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb5-2"></span>
+<span id="cb5-3">umbral <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.quantile(talento, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.98</span>)</span>
+<span id="cb5-4">x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([fisico.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">min</span>(), fisico.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>()])</span>
+<span id="cb5-5">pendiente, corte <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.polyfit(fisico[primera], tecnica[primera], <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb5-6"></span>
+<span id="cb5-7">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots(figsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">7</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>))</span>
+<span id="cb5-8">ax.scatter(fisico, tecnica, s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lightgrey"</span>)</span>
+<span id="cb5-9">ax.scatter(fisico[primera], tecnica[primera], s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#800080"</span>)</span>
+<span id="cb5-10">ax.plot(x, umbral <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> x, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"black"</span>, linewidth<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb5-11">ax.plot(x, corte <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> pendiente <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> x, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#800080"</span>, linestyle<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"--"</span>, linewidth<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.5</span>)</span>
+<span id="cb5-12"></span>
+<span id="cb5-13">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Físico"</span>)</span>
+<span id="cb5-14">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Técnica"</span>)</span>
+<span id="cb5-15">ax.set_ylim(tecnica.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">min</span>(), tecnica.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>())</span>
+<span id="cb5-16">ax.set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"La población entera y los que llegan a primera"</span>)</span>
+<span id="cb5-17">plt.show()</span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-09-15-collider/index_files/figure-html/scatter-output-1.png" id="scatter" width="587" height="524" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>La nube gris es redonda. Ahí dentro no hay relación ninguna.</p>
+<p>La recta negra es el corte. Lo que queda por encima es un triángulo, una esquina. Y en una esquina solo cabe una cosa: lo que subes por un lado lo bajas por el otro.</p>
+</section>
+<section id="lo-mismo-pero-dentro-del-modelo" class="level2">
+<h2 class="anchored" data-anchor-id="lo-mismo-pero-dentro-del-modelo">Lo mismo, pero dentro del modelo</h2>
+<p>Filtrar es una forma de condicionar. Hay otra que usas mucho más y que no parece lo mismo. Meter la variable en el modelo.</p>
+<p>Ajusto la técnica en función del físico, con la población entera.</p>
+<div id="regresion-simple" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> statsmodels.api <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> sm</span>
+<span id="cb6-2"></span>
+<span id="cb6-3">simple <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> sm.OLS(tecnica, sm.add_constant(fisico)).fit()</span>
+<span id="cb6-4"></span>
+<span id="cb6-5"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"coeficiente: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>simple<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>params[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">   p-valor: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>simple<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>pvalues[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>coeficiente: -0.002   p-valor: 0.898</code></pre>
+</div>
+</div>
+<p>Nada, como esperabas.</p>
+<p>Ahora hago lo que hace todo el mundo: añadir una variable más porque está ahí y porque cuesta cero. Añado si el jugador llegó a primera.</p>
+<div id="regresion-collider" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">X <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.column_stack([fisico, primera.astype(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">int</span>)])</span>
+<span id="cb8-2">con_collider <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> sm.OLS(tecnica, sm.add_constant(X)).fit()</span>
+<span id="cb8-3"></span>
+<span id="cb8-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"coeficiente: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>con_collider<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>params[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">   p-valor: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>con_collider<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>pvalues[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>coeficiente: -0.065   p-valor: 0.000</code></pre>
+</div>
+</div>
+<p>El coeficiente del físico se ha ido a negativo. Con un p-valor que te invita a contarlo en la reunión.</p>
+<p>Es un coeficiente pequeño, y se entiende: primera división son cien jugadores de cinco mil, así que el estropicio vive en el 2% de las filas. Si el filtro fuera menos exigente, el 20% de arriba pongamos, el coeficiente se iría a −0,32.</p>
+<p>He añadido una columna a la matriz. El efecto que ha salido es invención del modelo.</p>
+</section>
+<section id="lo-que-falta-y-lo-que-sobra" class="level2">
+<h2 class="anchored" data-anchor-id="lo-que-falta-y-lo-que-sobra">Lo que falta y lo que sobra</h2>
+<p>En el blog hay unos cuantos posts sobre el caso contrario. En <a href="../../posts/2024-11-26-espurias/index.html">las relaciones espurias</a> y en <a href="../../posts/2025-01-16-autocolinealidad/index.html">los experimentos con multicolinealidad</a> el problema era una variable que faltaba. La metías en el modelo y el coeficiente falso se venía abajo.</p>
+<p>Aquí funciona al revés. La variable sobra, la metes, y el coeficiente falso aparece.</p>
+<p>Lo incómodo es que desde dentro las dos situaciones se ven igual. En las dos, añadir una variable mueve el coeficiente de otra. En las dos, el modelo nuevo ajusta mejor que el viejo. Y el R² sube, porque llegar a primera explica de verdad parte de la técnica.</p>
+<p><strong>Ningún R², ningún p-valor y ningún VIF te van a avisar de que has metido un collider.</strong> El diagnóstico sale limpio. El modelo está encantado.</p>
+<p>La diferencia entre un caso y otro está en por dónde van las flechas. Si la variable causa a las otras dos, controlar por ella te arregla el modelo. Si la causan las otras dos, te lo estropea.</p>
+<p>Esa dirección no viene en el fichero. La pones tú, con lo que sepas del mundo del que salieron los datos.</p>
+</section>
+<section id="por-qué-esto-te-importa" class="level2">
+<h2 class="anchored" data-anchor-id="por-qué-esto-te-importa">Por qué esto te importa</h2>
+<p>“Mete todas las variables que puedas, por si acaso” es de los consejos que más se repiten y más caros salen. Cada columna que añades es una decisión sobre la estructura causal, la tomes a conciencia o la tomes por acumulación.</p>
+<p>Y hay un caso peor, que además es el habitual. El collider no lo metes tú. Ya venía puesto.</p>
+<p>Tus datos son clientes que compraron. Pacientes que ingresaron. Empleados que siguen en la empresa. Usuarios que llegaron al final del formulario.</p>
+<p>Alguien filtró por el resultado antes de que tú abrieras el fichero. Todas las correlaciones que encuentres ahí dentro son correlaciones dentro de una esquina.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>exploraciones</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-09-15-collider/</guid>
+  <pubDate>Tue, 15 Sep 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>De dónde sale el log-loss</title>
   <dc:creator>Claude </dc:creator>
@@ -8419,157 +8737,6 @@ font-style: inherit;">calcula_r2_r</span>(valor_real, valor_pred)</span>
   <category>datos</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2024-09-08-rust/</guid>
   <pubDate>Sun, 08 Sep 2024 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Más sobre evaluación de expresiones en R</title>
-  <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2024-08-23-sin-comillas/</link>
-  <description><![CDATA[ 
-
-
-
-
-<section id="orden-de-operaciones" class="level2">
-<h2 class="anchored" data-anchor-id="orden-de-operaciones">Orden de operaciones</h2>
-<p>En R puedes evaluar una expresión a partir de texto (o sea, como si la expresión fuera un objeto de tipo <code>character</code>).</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">a <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span></span>
-<span id="cb1-2">b <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span></span>
-<span id="cb1-3"></span>
-<span id="cb1-4">expr1 <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"a + b"</span></span>
-<span id="cb1-5"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">eval</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">parse</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">text =</span> expr1))</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 4</code></pre>
-</div>
-</div>
-<p>Esa expresión es la operación <img src="https://latex.codecogs.com/png.latex?a%20+%20b">. También podrías tener la operación <img src="https://latex.codecogs.com/png.latex?2%5Ccdot%20a%20-%203%20%5Ccdot%20b">, que podrías guardar en un objeto <code>character</code> de forma parecida a la anterior.</p>
-<p>De manera intuitiva, si quieres <em>juntar</em> o <em>concatenar</em> las dos operaciones mediante una división, ¿qué operación te sale?</p>
-<p>A mí me sale esta: <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7Ba%20+%20b%7D%7B2%5Ccdot%20a%20-%203%20%5Ccdot%20b%7D">, que no es la misma que <img src="https://latex.codecogs.com/png.latex?a%20+%20%5Cfrac%7Bb%7D%7B2%5Ccdot%20a%7D%20-%203%20%5Ccdot%20b">.</p>
-<p>Pero si no tienes cuidado, para R sí lo será:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">expr2 <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"2 * a - 3 * b"</span></span>
-<span id="cb3-2"></span>
-<span id="cb3-3">expr_division <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">paste</span>(expr1, expr2, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">sep =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">" / "</span>)</span>
-<span id="cb3-4">expr_division</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "a + b / 2 * a - 3 * b"</code></pre>
-</div>
-</div>
-<p>El resultado de esa operación es -6.5, que no es lo mismo que:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">(a <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> b) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> (<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> a <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> b)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] -0.5714286</code></pre>
-</div>
-</div>
-</section>
-<section id="solución-con-rlang" class="level1">
-<h1>Solución con rlang</h1>
-<p>Si trabajas con operaciones puedes hacer esto sin gestionar los paréntesis.</p>
-<p>Tampoco te voy a decir que sea fácil, la verdad, pero me parece más práctico:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(rlang)</span>
-<span id="cb7-2">expr1 <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">expr</span>(a <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> b)</span>
-<span id="cb7-3">expr2 <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">expr</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> a <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> b)</span>
-<span id="cb7-4">expr_division  <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">expr</span>(<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">!!</span>expr1 <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">!!</span>expr2) </span>
-<span id="cb7-5">expr_division</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>(a + b)/(2 * a - 3 * b)</code></pre>
-</div>
-</div>
-<p>Ahora evalúas la expresión:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">eval_tidy</span>(expr_division)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] -0.5714286</code></pre>
-</div>
-</div>
-
-
-</section>
-
- ]]></description>
-  <category>datos</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-08-23-sin-comillas/</guid>
-  <pubDate>Fri, 23 Aug 2024 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
