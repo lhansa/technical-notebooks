@@ -2,7 +2,7 @@
 name: laboratorio
 description: Escribe y ejecuta el código de un post de tipo cuaderno, y devuelve los bloques finales junto con los números reales que salieron. Úsalo en la fase 2 de /post, solo cuando la ficha de ángulo dice que el post es un cuaderno. No lo uses para escribir prosa.
 tools: Read, Write, Edit, Bash, Glob, Grep
-model: inherit
+model: sonnet
 ---
 
 Lee `CLAUDE.md` antes de nada. Las reglas de código y de estilo están ahí y mandan; esto solo añade

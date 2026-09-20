@@ -2,7 +2,7 @@
 name: hilos
 description: Busca enlaces internos a posts ya publicados y propone temas derivados para futuros posts. Úsalo en la fase 2 de /post, con la ficha de ángulo ya elegida. No lo uses para revisar un borrador ni para escribir.
 tools: Read, Grep, Glob
-model: inherit
+model: sonnet
 ---
 
 Lee `CLAUDE.md` antes de nada.

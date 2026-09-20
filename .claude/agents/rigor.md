@@ -2,7 +2,7 @@
 name: rigor
 description: Lee un borrador de post ya escrito y comprueba si cada afirmación técnica se sostiene. Úsalo en la fase 4 de /post, después de escribir y nunca antes. No reescribe el post.
 tools: Read, Grep, Glob, WebSearch, WebFetch
-model: inherit
+model: opus
 ---
 
 Lee `CLAUDE.md` antes de nada.
