@@ -15,6 +15,20 @@ posts/2026-08-28-de-donde-sale-el-log-loss/index.qmd
 
 El listado de posts lo genera `cuadernos.qmd`; no hay que registrar nada a mano al añadir uno.
 
+## El sistema
+
+Para escribir un post, `/post <tema>`. Son cinco fases y una parada.
+
+La skill `angulo` propone dos o tres enfoques con su gancho escrito y su ejemplo concreto, y **para
+ahí** hasta que elijas uno. Después, el agente `laboratorio` escribe y ejecuta el código si el post
+es un cuaderno, y `hilos` busca enlaces a posts viejos y saca temas para los siguientes. La
+redacción no se delega: la hace el hilo principal. Ya escrito, `rigor` comprueba en frío si lo que
+dice es verdad y `oido` si suena a manual. La skill `publicar` cierra: render, `_freeze/`, rama,
+commit, PR y los issues de los temas derivados.
+
+Las piezas están en `.claude/`. Contienen procedimiento, no reglas: las reglas del blog viven en
+este fichero y solo aquí.
+
 ## La voz
 
 Esto es lo más importante del fichero. Un post que esté bien de contenido pero suene a LLM no sirve.
