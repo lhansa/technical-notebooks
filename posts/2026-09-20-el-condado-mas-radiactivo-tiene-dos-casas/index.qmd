@@ -163,53 +163,9 @@ Los dos condados de una sola casa se descuelgan: Murray baja del tercer puesto a
 del quinto al veintiocho. Lac Qui Parle pierde más de un punto y aun así aguanta el segundo, porque
 sus dos casas dan muy alto. Los dos grandes se quedan exactamente donde estaban.
 
-## De dónde sale el encogimiento
-
-Lo que hace el modelo con cada condado es una media ponderada entre dos cosas que ya tenías: la
-media de ese condado y la media global. Lo único que hay que decidir es el peso.
-
-El peso es la precisión, la inversa de la varianza. La media de $n_j$ casas tiene varianza
-$\sigma_y^2/n_j$, así que pesa $n_j/\sigma_y^2$. Cuantas más casas, más pesa el condado.
-
-El otro peso es $1/\sigma_\alpha^2$, y ahí dentro no hay ningún tamaño de muestra. Sale de cuánto se
-parecen los condados entre ellos. Si se parecen mucho, la media global tira fuerte.
-
-$$\hat\alpha_j = \frac{\frac{n_j}{\sigma_y^2}\,\bar y_j + \frac{1}{\sigma_\alpha^2}\,\mu}{\frac{n_j}{\sigma_y^2} + \frac{1}{\sigma_\alpha^2}}$$
-
-Una salvedad sobre $\bar y_j$. El piso está dentro del modelo, así que no promedio el log-radón a
-pelo. Le quito antes lo que explica el piso. Es la media del condado traducida a sótano.
-
-Lo calculo a mano y lo comparo con lo que devuelve el ajuste.
-
-```{python}
-#| label: encogimiento
-resid_fijo = radon["log_radon"] - mixto.fe_params["floor"] * radon["floor"]
-media_j = resid_fijo.groupby(radon["county"]).mean()
-peso = (n_j / sigma_y**2) / (n_j / sigma_y**2 + 1 / sigma_a**2)
-a_mano = peso * media_j + (1 - peso) * mu
-
-comp = pd.DataFrame({"n": n_j, "peso": peso, "a_mano": a_mano,
-                     "mixedlm": mu + efectos})
-print(comp.loc[["WILKIN", "ST LOUIS"]].round(4))
-print("error maximo en los 85 condados:",
-      f"{(comp['a_mano'] - comp['mixedlm']).abs().max():.1e}")
-```
-
-Coincide en todos, con error de precisión de máquina. Lo iterativo de REML es estimar las dos
-varianzas; una vez estimadas, esto es todo lo que queda.
-
-El peso se simplifica a $n_j / (n_j + \sigma_y^2/\sigma_\alpha^2)$, y ese cociente aquí vale 5,3.
-**Un condado necesita cinco casas y pico para pesar lo mismo que la media global.** Y son solo cinco
-porque los condados de Minnesota se parecen bastante entre ellos. Si se parecieran menos, harían
-falta más.
-
-Wilkin tiene una, así que su estimación es un 16% suya y un 84% media global. St Louis tiene ciento
-dieciséis y es un 96% él mismo.
-
 Bajarle el número a Lac Qui Parle suena a tapar el dato. Es lo mismo que pasaba con
 [las alturas de padres e hijos](../2023-06-12-regresion-a-la-media/index.qmd): cuando un valor sale
-extremo, una parte de lo extremo es ruido, y la siguiente medición cae más cerca del centro. El
-modelo descuenta eso antes de darte el número.
+extremo, una parte de lo extremo es ruido, y la siguiente medición cae más cerca del centro.
 
 En el gráfico se ve el embudo.
 
@@ -235,30 +191,6 @@ Pasadas las veinticinco casas la diferencia ya es de centésimas. A partir de ah
 ganado que le crean.
 
 El rango entero de intercepts pasa de 2,46 a 1,07.
-
-## Dónde se queda corto
-
-Todo esto ha salido sin prioris y sin cadenas. Se nota en un sitio.
-
-$\sigma_\alpha$ sostiene el encogimiento de todos los condados, y el `summary` te lo da con su error
-estándar y nada más. Si pides el intervalo, lo que sale es de Wald, o sea simétrico. Y una varianza
-no baja de cero, así que pegado al cero ese intervalo no dice nada. El bueno es el de perfil de
-verosimilitud, `profile_re`, y hay que ir a buscarlo.
-
-Hay algo peor. Con pocos grupos, la verosimilitud puede tener su máximo justo en cero. Entonces
-REML te devuelve $\hat\sigma_\alpha = 0$, el encogimiento se hace total y el tercer modelo se
-convierte en el primero, el del intercept único.
-
-Has pedido partial pooling y te han dado complete pooling. Sin avisar.
-
-Aquí no ha pasado. Pero depende de dónde caiga el máximo de la verosimilitud y no del número de
-grupos, así que tener ochenta y cinco condados no te vacuna.
-
-Alarma hay: statsmodels tira un `ConvergenceWarning` en cuanto la varianza estimada baja de 0,01. Lo
-que pasa es que el front matter de este cuaderno lleva `warning: false`, así que aquí no la habrías
-visto. En un notebook se pierde entre otras diez.
-
-Mírate el componente de varianza antes de contar nada.
 
 ## Por qué esto te importa
 
