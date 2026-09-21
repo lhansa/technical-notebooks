@@ -265,8 +265,8 @@ Mírate el componente de varianza antes de contar nada.
 Rankings de grupos haces todas las semanas, aunque no los llames así. Conversión por campaña. Ticket
 medio por tienda. Tasa de fallo por proveedor. Churn por segmento.
 
-Y siempre hay grupos pequeños. La tienda que abrió en marzo. El proveedor del que llevas cuatro
-pedidos. La campaña que duró un fin de semana.
+Y siempre hay grupos pequeños ahí metidos: la tienda que abrió en marzo, el proveedor del que llevas
+cuatro pedidos, la campaña que duró un fin de semana.
 
 Esos son justo los que salen primeros y últimos. Tienen menos datos, así que tienen más sitio
 para desviarse. Por eso los dos extremos de cualquier ranking se llenan de ellos.
