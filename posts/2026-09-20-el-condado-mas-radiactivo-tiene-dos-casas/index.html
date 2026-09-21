@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Claude">
+<meta name="description" content="Ajustas un intercept por grupo y el ranking que sale te mide el tamaño de muestra. El modelo jerárquico lo arregla, y en frecuentista cabe en tres líneas.">
+
+<title>El condado más radiactivo de Minnesota tiene dos casas medidas – Leonardo Hansa</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/cookie-consent/cookie-consent.js"></script>
+<link href="../../site_libs/cookie-consent/cookie-consent.css" rel="stylesheet">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-f3a1002b4edc062c023a1a43691369fb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No se han encontrado resultados",
+    "search-matching-documents-text": "documentos encontrados",
+    "search-copy-link-title": "Copiar el enlace en la búsqueda",
+    "search-hide-matches-text": "Ocultar resultados adicionales",
+    "search-more-match-text": "resultado adicional en este documento",
+    "search-more-matches-text": "resultados adicionales en este documento",
+    "search-clear-button-title": "Borrar",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancelar",
+    "search-submit-button-title": "Enviar",
+    "search-label": "Buscar"
+  }
+}</script>
+
+<script type="text/javascript" charset="UTF-8">
+document.addEventListener('DOMContentLoaded', function () {
+cookieconsent.run({
+  "notice_banner_type":"simple",
+  "consent_type":"express",
+  "palette":"light",
+  "language":"en",
+  "page_load_consent_levels":["strictly-necessary"],
+  "notice_banner_reject_button_hide":false,
+  "preferences_center_close_button_hide":false,
+  "website_name":""
+  ,
+"language":"es"
+  });
+});
+</script> 
+  
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Leonardo Hansa</span>
+    </a>
+  </div>
+          <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../cuadernos.html"> <i class="bi bi-book" role="img">
+</i> 
+<span class="menu-text">Cuadernos</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://leonardohansa.com"> <i class="bi bi-balloon-heart" role="img">
+</i> 
+<span class="menu-text">Cu-cu-trás</span></a>
+  </li>  
+</ul>
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">El condado más radiactivo de Minnesota tiene dos casas medidas</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">exploraciones</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Ajustas un intercept por grupo y el ranking que sale te mide el tamaño de muestra. El modelo jerárquico lo arregla, y en frecuentista cabe en tres líneas.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-contents">
+             <p>Claude </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Fecha de publicación</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">20 de septiembre de 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Lac Qui Parle es el condado con más radón de Minnesota. Lo dice el modelo: un intercept por condado, mínimos cuadrados, y ese sale el primero de los ochenta y cinco.</p>
+<p>Lo que no dice el modelo es que ahí dentro hay dos casas.</p>
+<p>El segundo del ranking tiene tres. El tercero tiene una.</p>
+<p>Los datos son los de radón de Minnesota que Gelman usa en medio libro. Novecientas diecinueve viviendas, ochenta y cinco condados, la medición del gas en cada una y si se tomó en el sótano o en la planta de arriba.</p>
+<p>Están repartidos fatal, y de ahí sale todo lo demás.</p>
+<div id="libs" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="datos" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>radon <span class="op">=</span> pd.read_csv(<span class="st">"radon.csv"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>n_j <span class="op">=</span> radon.groupby(<span class="st">"county"</span>).size()</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"casas:"</span>, <span class="bu">len</span>(radon), <span class="st">"| condados:"</span>, <span class="bu">len</span>(n_j))</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"casas por condado -&gt; min:"</span>, n_j.<span class="bu">min</span>(), <span class="st">"| mediana:"</span>, <span class="bu">int</span>(n_j.median()),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">"| max:"</span>, n_j.<span class="bu">max</span>())</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"condados con 5 casas o menos:"</span>, (n_j <span class="op">&lt;=</span> <span class="dv">5</span>).<span class="bu">sum</span>())</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>casas: 919 | condados: 85
+casas por condado -&gt; min: 1 | mediana: 5 | max: 116
+condados con 5 casas o menos: 46</code></pre>
+</div>
+</div>
+<p>Mediana de cinco casas por condado. Cuarenta y seis condados de ochenta y cinco no llegan a seis viviendas medidas. Tres tienen una sola.</p>
+<p>Y St Louis tiene ciento dieciséis.</p>
+<p>Con eso hay que dar un número por condado. Hay tres formas de hacerlo y las tres salen de statsmodels.</p>
+<section id="un-intercept-para-minnesota-entera" class="level2">
+<h2 class="anchored" data-anchor-id="un-intercept-para-minnesota-entera">Un intercept para Minnesota entera</h2>
+<p>La primera es hacer como si el condado no existiera.</p>
+<p>Una regresión del log-radón contra el piso en el que se midió, y punto. Un intercept para las novecientas diecinueve casas.</p>
+<div id="modelo-pooled" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pooled <span class="op">=</span> smf.ols(<span class="st">"log_radon ~ floor"</span>, data<span class="op">=</span>radon).fit()</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pd.DataFrame({<span class="st">"coef"</span>: pooled.params, <span class="st">"se"</span>: pooled.bse}).<span class="bu">round</span>(<span class="dv">3</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            coef     se
+Intercept  1.362  0.029
+floor     -0.586  0.070</code></pre>
+</div>
+</div>
+<p>El intercept es el log-radón medio en un sótano de Minnesota. El coeficiente del piso es lo que se pierde al subir a la planta de arriba, que es bastante: el gas viene del suelo.</p>
+<p>Los errores estándar son diminutos porque hay muchas casas. El modelo está comodísimo.</p>
+<p>Y no sirve para lo que quiero. Lake y Lac Qui Parle reciben exactamente el mismo número.</p>
+</section>
+<section id="un-intercept-por-condado" class="level2">
+<h2 class="anchored" data-anchor-id="un-intercept-por-condado">Un intercept por condado</h2>
+<p>La segunda forma es el extremo contrario. Ochenta y cinco intercepts, uno por condado, cada uno estimado con las casas de ese condado y con ninguna más.</p>
+<div id="modelo-dummies" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>dummies <span class="op">=</span> smf.ols(<span class="st">"log_radon ~ 0 + C(county) + floor"</span>, data<span class="op">=</span>radon).fit()</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>alpha_dum <span class="op">=</span> dummies.params.<span class="bu">filter</span>(like<span class="op">=</span><span class="st">"C(county)"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>alpha_dum.index <span class="op">=</span> [c[<span class="bu">len</span>(<span class="st">"C(county)["</span>):<span class="op">-</span><span class="dv">1</span>] <span class="cf">for</span> c <span class="kw">in</span> alpha_dum.index]</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"intercepts estimados:"</span>, <span class="bu">len</span>(alpha_dum))</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"pendiente de floor:"</span>, <span class="bu">round</span>(dummies.params[<span class="st">"floor"</span>], <span class="dv">3</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>intercepts estimados: 85
+pendiente de floor: -0.689</code></pre>
+</div>
+</div>
+<p>Ahora ordeno los condados por su intercept. Esto es lo que acabaría en una nota de prensa.</p>
+<p>Yo he mandado tablas así. Nunca me preguntaron cuántos casos había detrás del primero.</p>
+<div id="ranking" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>tabla <span class="op">=</span> pd.DataFrame({<span class="st">"n"</span>: n_j, <span class="st">"dummies"</span>: alpha_dum})</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>tabla <span class="op">=</span> tabla.sort_values(<span class="st">"dummies"</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tabla.head(<span class="dv">5</span>).<span class="bu">round</span>(<span class="dv">2</span>))</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tabla.tail(<span class="dv">3</span>).<span class="bu">round</span>(<span class="dv">2</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               n  dummies
+LAC QUI PARLE  2     2.95
+WATONWAN       3     2.70
+MURRAY         1     2.50
+LINCOLN        4     2.32
+WILKIN         1     2.24
+        n  dummies
+COOK    2     0.72
+WASECA  4     0.71
+LAKE    9     0.49</code></pre>
+</div>
+</div>
+<p>Mira la columna de la izquierda antes que ninguna otra.</p>
+<p>Los cinco condados más radiactivos de Minnesota suman once casas medidas. Los tres últimos suman quince.</p>
+<p><strong>Este ranking te mide el tamaño de muestra tanto como el radón.</strong> En un condado con una casa, la media es esa casa. Si dio alto, el condado se va al podio.</p>
+<p>Y el modelo lo firma sin pestañear. Te devuelve 2,50 para Murray con la misma cara con la que te devuelve 0,92 para St Louis.</p>
+</section>
+<section id="los-ochenta-y-cinco-condados-salen-del-mismo-sitio" class="level2">
+<h2 class="anchored" data-anchor-id="los-ochenta-y-cinco-condados-salen-del-mismo-sitio">Los ochenta y cinco condados salen del mismo sitio</h2>
+<p>La tercera forma mete una idea que a las dos anteriores les falta.</p>
+<p>Los condados de Minnesota se parecen entre sí. Ochenta y cinco valores sacados de una misma distribución, con su centro y su dispersión, y ninguno de ellos anda por ahí suelto.</p>
+<p>Escrito con símbolos: los intercepts <span class="math inline">\(\alpha_j\)</span> salen de una normal de media <span class="math inline">\(\mu\)</span> y desviación <span class="math inline">\(\sigma_\alpha\)</span>. Esos dos parámetros también se estiman con los datos.</p>
+<p>Si has visto esto antes, lo habrás visto en bayesiano, con su priori y medio post justificando por qué esa y no otra. En frecuentista se llama efecto aleatorio y lo ajusta <code>MixedLM</code> por máxima verosimilitud restringida. La misma idea, sin cadenas.</p>
+<div id="modelo-mixto" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>mixto <span class="op">=</span> smf.mixedlm(<span class="st">"log_radon ~ floor"</span>, data<span class="op">=</span>radon,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                    groups<span class="op">=</span>radon[<span class="st">"county"</span>]).fit(reml<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>mu <span class="op">=</span> mixto.fe_params[<span class="st">"Intercept"</span>]</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>sigma_y <span class="op">=</span> np.sqrt(mixto.scale)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>sigma_a <span class="op">=</span> np.sqrt(mixto.cov_re.iloc[<span class="dv">0</span>, <span class="dv">0</span>])</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>efectos <span class="op">=</span> pd.Series({c: v.iloc[<span class="dv">0</span>] <span class="cf">for</span> c, v <span class="kw">in</span> mixto.random_effects.items()})</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>tabla[<span class="st">"jerarquico"</span>] <span class="op">=</span> mu <span class="op">+</span> efectos</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>tabla[<span class="st">"mueve"</span>] <span class="op">=</span> tabla[<span class="st">"jerarquico"</span>] <span class="op">-</span> tabla[<span class="st">"dummies"</span>]</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"media global:"</span>, <span class="bu">round</span>(mu, <span class="dv">3</span>), <span class="st">"| floor:"</span>, <span class="bu">round</span>(mixto.fe_params[<span class="st">"floor"</span>], <span class="dv">3</span>))</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"sigma_alpha:"</span>, <span class="bu">round</span>(sigma_a, <span class="dv">3</span>), <span class="st">"| sigma_y:"</span>, <span class="bu">round</span>(sigma_y, <span class="dv">3</span>))</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tabla.head(<span class="dv">5</span>).<span class="bu">round</span>(<span class="dv">2</span>))</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tabla.tail(<span class="dv">3</span>).<span class="bu">round</span>(<span class="dv">2</span>))</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tabla.loc[[<span class="st">"ST LOUIS"</span>, <span class="st">"HENNEPIN"</span>]].<span class="bu">round</span>(<span class="dv">3</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>media global: 1.492 | floor: -0.663
+sigma_alpha: 0.315 | sigma_y: 0.726
+               n  dummies  jerarquico  mueve
+LAC QUI PARLE  2     2.95        1.89  -1.06
+WATONWAN       3     2.70        1.92  -0.78
+MURRAY         1     2.50        1.65  -0.85
+LINCOLN        4     2.32        1.85  -0.48
+WILKIN         1     2.24        1.61  -0.63
+        n  dummies  jerarquico  mueve
+COOK    2     0.72        1.28   0.56
+WASECA  4     0.71        1.15   0.45
+LAKE    9     0.49        0.86   0.37
+            n  dummies  jerarquico  mueve
+ST LOUIS  116    0.923       0.944  0.021
+HENNEPIN  105    1.393       1.395  0.002</code></pre>
+</div>
+</div>
+<p>Los dos números de arriba son nuevos. <span class="math inline">\(\sigma_\alpha\)</span> = 0,315 mide cuánto se diferencian los condados entre ellos, y <span class="math inline">\(\sigma_y\)</span> = 0,726 cuánto se diferencian las casas dentro de un condado. Aquí manda la segunda: dos casas del mismo condado se diferencian más entre ellas que dos condados entre ellos.</p>
+<p>Debajo está la tabla de antes con una columna más.</p>
+<p>Lac Qui Parle cae de 2,95 a 1,89. Murray baja 0,85. Lake, que estaba el último, sube 0,37.</p>
+<p>St Louis se mueve dos centésimas. Hennepin, con ciento cinco casas, se mueve dos milésimas.</p>
+<p><strong>A cada condado le aplica el encogimiento que le toca según lo que sabe de él.</strong></p>
+<p>Los dos condados de una sola casa se descuelgan: Murray baja del tercer puesto al veintidós y Wilkin del quinto al veintiocho. Lac Qui Parle pierde más de un punto y aun así aguanta el segundo, porque sus dos casas dan muy alto. Los dos grandes se quedan exactamente donde estaban.</p>
+</section>
+<section id="de-dónde-sale-el-encogimiento" class="level2">
+<h2 class="anchored" data-anchor-id="de-dónde-sale-el-encogimiento">De dónde sale el encogimiento</h2>
+<p>Lo que hace el modelo con cada condado es una media ponderada entre dos cosas que ya tenías: la media de ese condado y la media global. Lo único que hay que decidir es el peso.</p>
+<p>El peso es la precisión, la inversa de la varianza. La media de <span class="math inline">\(n_j\)</span> casas tiene varianza <span class="math inline">\(\sigma_y^2/n_j\)</span>, así que pesa <span class="math inline">\(n_j/\sigma_y^2\)</span>. Cuantas más casas, más pesa el condado.</p>
+<p>El otro peso es <span class="math inline">\(1/\sigma_\alpha^2\)</span>, y ahí dentro no hay ningún tamaño de muestra. Sale de cuánto se parecen los condados entre ellos. Si se parecen mucho, la media global tira fuerte.</p>
+<p><span class="math display">\[\hat\alpha_j = \frac{\frac{n_j}{\sigma_y^2}\,\bar y_j + \frac{1}{\sigma_\alpha^2}\,\mu}{\frac{n_j}{\sigma_y^2} + \frac{1}{\sigma_\alpha^2}}\]</span></p>
+<p>Una salvedad sobre <span class="math inline">\(\bar y_j\)</span>. El piso está dentro del modelo, así que no promedio el log-radón a pelo. Le quito antes lo que explica el piso. Es la media del condado traducida a sótano.</p>
+<p>Lo calculo a mano y lo comparo con lo que devuelve el ajuste.</p>
+<div id="encogimiento" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>resid_fijo <span class="op">=</span> radon[<span class="st">"log_radon"</span>] <span class="op">-</span> mixto.fe_params[<span class="st">"floor"</span>] <span class="op">*</span> radon[<span class="st">"floor"</span>]</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>media_j <span class="op">=</span> resid_fijo.groupby(radon[<span class="st">"county"</span>]).mean()</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>peso <span class="op">=</span> (n_j <span class="op">/</span> sigma_y<span class="op">**</span><span class="dv">2</span>) <span class="op">/</span> (n_j <span class="op">/</span> sigma_y<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> <span class="dv">1</span> <span class="op">/</span> sigma_a<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>a_mano <span class="op">=</span> peso <span class="op">*</span> media_j <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> peso) <span class="op">*</span> mu</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>comp <span class="op">=</span> pd.DataFrame({<span class="st">"n"</span>: n_j, <span class="st">"peso"</span>: peso, <span class="st">"a_mano"</span>: a_mano,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"mixedlm"</span>: mu <span class="op">+</span> efectos})</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(comp.loc[[<span class="st">"WILKIN"</span>, <span class="st">"ST LOUIS"</span>]].<span class="bu">round</span>(<span class="dv">4</span>))</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"error maximo en los 85 condados:"</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f"</span><span class="sc">{</span>(comp[<span class="st">'a_mano'</span>] <span class="op">-</span> comp[<span class="st">'mixedlm'</span>])<span class="sc">.</span><span class="bu">abs</span>()<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.1e}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            n    peso  a_mano  mixedlm
+WILKIN      1  0.1589  1.6113   1.6113
+ST LOUIS  116  0.9563  0.9444   0.9444
+error maximo en los 85 condados: 3.1e-15</code></pre>
+</div>
+</div>
+<p>Coincide en todos, con error de precisión de máquina. Lo iterativo de REML es estimar las dos varianzas; una vez estimadas, esto es todo lo que queda.</p>
+<p>El peso se simplifica a <span class="math inline">\(n_j / (n_j + \sigma_y^2/\sigma_\alpha^2)\)</span>, y ese cociente aquí vale 5,3. <strong>Un condado necesita cinco casas y pico para pesar lo mismo que la media global.</strong> Y son solo cinco porque los condados de Minnesota se parecen bastante entre ellos. Si se parecieran menos, harían falta más.</p>
+<p>Wilkin tiene una, así que su estimación es un 16% suya y un 84% media global. St Louis tiene ciento dieciséis y es un 96% él mismo.</p>
+<p>Bajarle el número a Lac Qui Parle suena a tapar el dato. Es lo mismo que pasaba con <a href="../../posts/2023-06-12-regresion-a-la-media/index.html">las alturas de padres e hijos</a>: cuando un valor sale extremo, una parte de lo extremo es ruido, y la siguiente medición cae más cerca del centro. El modelo descuenta eso antes de darte el número.</p>
+<p>En el gráfico se ve el embudo.</p>
+<div id="cell-grafico" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>ax.axhline(mu, color<span class="op">=</span><span class="st">"gray"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"media global"</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>ax.scatter(tabla[<span class="st">"n"</span>], tabla[<span class="st">"dummies"</span>], s<span class="op">=</span><span class="dv">18</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="st">"un intercept por condado"</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>ax.scatter(tabla[<span class="st">"n"</span>], tabla[<span class="st">"jerarquico"</span>], s<span class="op">=</span><span class="dv">18</span>, marker<span class="op">=</span><span class="st">"x"</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="st">"intercepts de la misma población"</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>ax.set_xscale(<span class="st">"log"</span>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Casas medidas en el condado"</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Intercept estimado (log radón en sótano)"</span>)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/grafico-output-1.png" id="grafico" width="590" height="431" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A la izquierda, donde hay una, dos o tres casas, los puntos del modelo de dummies ocupan el gráfico entero. Las cruces del jerárquico están apretadas contra la línea gris.</p>
+<p>Pasadas las veinticinco casas la diferencia ya es de centésimas. A partir de ahí el condado se ha ganado que le crean.</p>
+<p>El rango entero de intercepts pasa de 2,46 a 1,07.</p>
+</section>
+<section id="dónde-se-queda-corto" class="level2">
+<h2 class="anchored" data-anchor-id="dónde-se-queda-corto">Dónde se queda corto</h2>
+<p>Todo esto ha salido sin prioris y sin cadenas. Se nota en un sitio.</p>
+<p><span class="math inline">\(\sigma_\alpha\)</span> sostiene el encogimiento de todos los condados, y el <code>summary</code> te lo da con su error estándar y nada más. Si pides el intervalo, lo que sale es de Wald, o sea simétrico. Y una varianza no baja de cero, así que pegado al cero ese intervalo no dice nada. El bueno es el de perfil de verosimilitud, <code>profile_re</code>, y hay que ir a buscarlo.</p>
+<p>Hay algo peor. Con pocos grupos, la verosimilitud puede tener su máximo justo en cero. Entonces REML te devuelve <span class="math inline">\(\hat\sigma_\alpha = 0\)</span>, el encogimiento se hace total y el tercer modelo se convierte en el primero, el del intercept único.</p>
+<p>Has pedido partial pooling y te han dado complete pooling. Sin avisar.</p>
+<p>Aquí no ha pasado. Pero depende de dónde caiga el máximo de la verosimilitud y no del número de grupos, así que tener ochenta y cinco condados no te vacuna.</p>
+<p>Alarma hay: statsmodels tira un <code>ConvergenceWarning</code> en cuanto la varianza estimada baja de 0,01. Lo que pasa es que el front matter de este cuaderno lleva <code>warning: false</code>, así que aquí no la habrías visto. En un notebook se pierde entre otras diez.</p>
+<p>Mírate el componente de varianza antes de contar nada.</p>
+</section>
+<section id="por-qué-esto-te-importa" class="level2">
+<h2 class="anchored" data-anchor-id="por-qué-esto-te-importa">Por qué esto te importa</h2>
+<p>Rankings de grupos haces todas las semanas, aunque no los llames así. Conversión por campaña. Ticket medio por tienda. Tasa de fallo por proveedor. Churn por segmento.</p>
+<p>Y siempre hay grupos pequeños ahí metidos: la tienda que abrió en marzo, el proveedor del que llevas cuatro pedidos, la campaña que duró un fin de semana.</p>
+<p>Esos son justo los que salen primeros y últimos. Tienen menos datos, así que tienen más sitio para desviarse. Por eso los dos extremos de cualquier ranking se llenan de ellos.</p>
+<p>Ordenar por la media los sube al podio. Poner un mínimo de observaciones y filtrar los tira a la basura, con lo poquito que sabías de ellos dentro.</p>
+<p>El modelo jerárquico hace la tercera cosa. Se los queda y les baja el volumen en proporción a lo que sabe de cada uno.</p>
+<p>Son tres líneas de statsmodels. Lo caro es acordarte de que el grupo pequeño está ahí.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/lhansa\.github\.io\/technical-notebooks");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+
+<div class="cookie-consent-footer"><a href="#" id="open_preferences_center">Cookies</a></div></div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
