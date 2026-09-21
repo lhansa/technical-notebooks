@@ -411,145 +411,13 @@ HENNEPIN  105    1.393       1.395  0.002</code></pre>
 <p>St Louis se mueve dos centésimas. Hennepin, con ciento cinco casas, se mueve dos milésimas.</p>
 <p><strong>A cada condado le aplica el encogimiento que le toca según lo que sabe de él.</strong></p>
 <p>Los dos condados de una sola casa se descuelgan: Murray baja del tercer puesto al veintidós y Wilkin del quinto al veintiocho. Lac Qui Parle pierde más de un punto y aun así aguanta el segundo, porque sus dos casas dan muy alto. Los dos grandes se quedan exactamente donde estaban.</p>
-</section>
-<section id="de-dónde-sale-el-encogimiento" class="level2">
-<h2 class="anchored" data-anchor-id="de-dónde-sale-el-encogimiento">De dónde sale el encogimiento</h2>
-<p>Lo que hace el modelo con cada condado es una media ponderada entre dos cosas que ya tenías: la media de ese condado y la media global. Lo único que hay que decidir es el peso.</p>
-<p>El peso es la precisión, la inversa de la varianza. La media de <img src="https://latex.codecogs.com/png.latex?n_j"> casas tiene varianza <img src="https://latex.codecogs.com/png.latex?%5Csigma_y%5E2/n_j">, así que pesa <img src="https://latex.codecogs.com/png.latex?n_j/%5Csigma_y%5E2">. Cuantas más casas, más pesa el condado.</p>
-<p>El otro peso es <img src="https://latex.codecogs.com/png.latex?1/%5Csigma_%5Calpha%5E2">, y ahí dentro no hay ningún tamaño de muestra. Sale de cuánto se parecen los condados entre ellos. Si se parecen mucho, la media global tira fuerte.</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Chat%5Calpha_j%20=%20%5Cfrac%7B%5Cfrac%7Bn_j%7D%7B%5Csigma_y%5E2%7D%5C,%5Cbar%20y_j%20+%20%5Cfrac%7B1%7D%7B%5Csigma_%5Calpha%5E2%7D%5C,%5Cmu%7D%7B%5Cfrac%7Bn_j%7D%7B%5Csigma_y%5E2%7D%20+%20%5Cfrac%7B1%7D%7B%5Csigma_%5Calpha%5E2%7D%7D"></p>
-<p>Una salvedad sobre <img src="https://latex.codecogs.com/png.latex?%5Cbar%20y_j">. El piso está dentro del modelo, así que no promedio el log-radón a pelo. Le quito antes lo que explica el piso. Es la media del condado traducida a sótano.</p>
-<p>Lo calculo a mano y lo comparo con lo que devuelve el ajuste.</p>
-<div id="encogimiento" class="cell" data-execution_count="7">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">resid_fijo <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> radon[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"log_radon"</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> mixto.fe_params[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"floor"</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> radon[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"floor"</span>]</span>
-<span id="cb12-2">media_j <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> resid_fijo.groupby(radon[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"county"</span>]).mean()</span>
-<span id="cb12-3">peso <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> (n_j <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> sigma_y<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> (n_j <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> sigma_y<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> sigma_a<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span>
-<span id="cb12-4">a_mano <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> peso <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> media_j <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> (<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> peso) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> mu</span>
-<span id="cb12-5"></span>
-<span id="cb12-6">comp <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pd.DataFrame({<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"n"</span>: n_j, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"peso"</span>: peso, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"a_mano"</span>: a_mano,</span>
-<span id="cb12-7">                     <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"mixedlm"</span>: mu <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> efectos})</span>
-<span id="cb12-8"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(comp.loc[[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"WILKIN"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"ST LOUIS"</span>]].<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">round</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>))</span>
-<span id="cb12-9"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"error maximo en los 85 condados:"</span>,</span>
-<span id="cb12-10">      <span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>(comp[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'a_mano'</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> comp[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'mixedlm'</span>])<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">abs</span>()<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">max</span>()<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.1e}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>            n    peso  a_mano  mixedlm
-WILKIN      1  0.1589  1.6113   1.6113
-ST LOUIS  116  0.9563  0.9444   0.9444
-error maximo en los 85 condados: 3.1e-15</code></pre>
-</div>
-</div>
-<p>Coincide en todos, con error de precisión de máquina. Lo iterativo de REML es estimar las dos varianzas; una vez estimadas, esto es todo lo que queda.</p>
-<p>El peso se simplifica a <img src="https://latex.codecogs.com/png.latex?n_j%20/%20(n_j%20+%20%5Csigma_y%5E2/%5Csigma_%5Calpha%5E2)">, y ese cociente aquí vale 5,3. <strong>Un condado necesita cinco casas y pico para pesar lo mismo que la media global.</strong> Y son solo cinco porque los condados de Minnesota se parecen bastante entre ellos. Si se parecieran menos, harían falta más.</p>
-<p>Wilkin tiene una, así que su estimación es un 16% suya y un 84% media global. St Louis tiene ciento dieciséis y es un 96% él mismo.</p>
-<p>Bajarle el número a Lac Qui Parle suena a tapar el dato. Es lo mismo que pasaba con <a href="../../posts/2023-06-12-regresion-a-la-media/index.html">las alturas de padres e hijos</a>: cuando un valor sale extremo, una parte de lo extremo es ruido, y la siguiente medición cae más cerca del centro. El modelo descuenta eso antes de darte el número.</p>
+<p>Bajarle el número a Lac Qui Parle suena a tapar el dato. Es lo mismo que pasaba con <a href="../../posts/2023-06-12-regresion-a-la-media/index.html">las alturas de padres e hijos</a>: cuando un valor sale extremo, una parte de lo extremo es ruido, y la siguiente medición cae más cerca del centro.</p>
 <p>En el gráfico se ve el embudo.</p>
-<div id="cell-grafico" class="cell" data-execution_count="8">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">fig, ax <span class="op" style="color: #5E5E5E;
+<div id="cell-grafico" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">fig, ax <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> plt.subplots()</span>
-<span id="cb14-2">ax.axhline(mu, color<span class="op" style="color: #5E5E5E;
+<span id="cb12-2">ax.axhline(mu, color<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
@@ -562,7 +430,7 @@ background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"media global"</span>)</span>
-<span id="cb14-3">ax.scatter(tabla[<span class="st" style="color: #20794D;
+<span id="cb12-3">ax.scatter(tabla[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"n"</span>], tabla[<span class="st" style="color: #20794D;
 background-color: null;
@@ -571,12 +439,12 @@ background-color: null;
 font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">18</span>,</span>
-<span id="cb14-4">           label<span class="op" style="color: #5E5E5E;
+<span id="cb12-4">           label<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"un intercept por condado"</span>)</span>
-<span id="cb14-5">ax.scatter(tabla[<span class="st" style="color: #20794D;
+<span id="cb12-5">ax.scatter(tabla[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"n"</span>], tabla[<span class="st" style="color: #20794D;
 background-color: null;
@@ -589,22 +457,22 @@ background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"x"</span>,</span>
-<span id="cb14-6">           label<span class="op" style="color: #5E5E5E;
+<span id="cb12-6">           label<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"intercepts de la misma población"</span>)</span>
-<span id="cb14-7">ax.set_xscale(<span class="st" style="color: #20794D;
+<span id="cb12-7">ax.set_xscale(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"log"</span>)</span>
-<span id="cb14-8">ax.set_xlabel(<span class="st" style="color: #20794D;
+<span id="cb12-8">ax.set_xlabel(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"Casas medidas en el condado"</span>)</span>
-<span id="cb14-9">ax.set_ylabel(<span class="st" style="color: #20794D;
+<span id="cb12-9">ax.set_ylabel(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"Intercept estimado (log radón en sótano)"</span>)</span>
-<span id="cb14-10">ax.legend()</span>
-<span id="cb14-11">plt.show()</span></code></pre></div></div>
+<span id="cb12-10">ax.legend()</span>
+<span id="cb12-11">plt.show()</span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -616,16 +484,6 @@ font-style: inherit;">"Intercept estimado (log radón en sótano)"</span>)</span
 <p>A la izquierda, donde hay una, dos o tres casas, los puntos del modelo de dummies ocupan el gráfico entero. Las cruces del jerárquico están apretadas contra la línea gris.</p>
 <p>Pasadas las veinticinco casas la diferencia ya es de centésimas. A partir de ahí el condado se ha ganado que le crean.</p>
 <p>El rango entero de intercepts pasa de 2,46 a 1,07.</p>
-</section>
-<section id="dónde-se-queda-corto" class="level2">
-<h2 class="anchored" data-anchor-id="dónde-se-queda-corto">Dónde se queda corto</h2>
-<p>Todo esto ha salido sin prioris y sin cadenas. Se nota en un sitio.</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Csigma_%5Calpha"> sostiene el encogimiento de todos los condados, y el <code>summary</code> te lo da con su error estándar y nada más. Si pides el intervalo, lo que sale es de Wald, o sea simétrico. Y una varianza no baja de cero, así que pegado al cero ese intervalo no dice nada. El bueno es el de perfil de verosimilitud, <code>profile_re</code>, y hay que ir a buscarlo.</p>
-<p>Hay algo peor. Con pocos grupos, la verosimilitud puede tener su máximo justo en cero. Entonces REML te devuelve <img src="https://latex.codecogs.com/png.latex?%5Chat%5Csigma_%5Calpha%20=%200">, el encogimiento se hace total y el tercer modelo se convierte en el primero, el del intercept único.</p>
-<p>Has pedido partial pooling y te han dado complete pooling. Sin avisar.</p>
-<p>Aquí no ha pasado. Pero depende de dónde caiga el máximo de la verosimilitud y no del número de grupos, así que tener ochenta y cinco condados no te vacuna.</p>
-<p>Alarma hay: statsmodels tira un <code>ConvergenceWarning</code> en cuanto la varianza estimada baja de 0,01. Lo que pasa es que el front matter de este cuaderno lleva <code>warning: false</code>, así que aquí no la habrías visto. En un notebook se pierde entre otras diez.</p>
-<p>Mírate el componente de varianza antes de contar nada.</p>
 </section>
 <section id="por-qué-esto-te-importa" class="level2">
 <h2 class="anchored" data-anchor-id="por-qué-esto-te-importa">Por qué esto te importa</h2>

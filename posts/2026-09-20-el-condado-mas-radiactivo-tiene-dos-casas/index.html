@@ -372,50 +372,20 @@ HENNEPIN  105    1.393       1.395  0.002</code></pre>
 <p>St Louis se mueve dos centésimas. Hennepin, con ciento cinco casas, se mueve dos milésimas.</p>
 <p><strong>A cada condado le aplica el encogimiento que le toca según lo que sabe de él.</strong></p>
 <p>Los dos condados de una sola casa se descuelgan: Murray baja del tercer puesto al veintidós y Wilkin del quinto al veintiocho. Lac Qui Parle pierde más de un punto y aun así aguanta el segundo, porque sus dos casas dan muy alto. Los dos grandes se quedan exactamente donde estaban.</p>
-</section>
-<section id="de-dónde-sale-el-encogimiento" class="level2">
-<h2 class="anchored" data-anchor-id="de-dónde-sale-el-encogimiento">De dónde sale el encogimiento</h2>
-<p>Lo que hace el modelo con cada condado es una media ponderada entre dos cosas que ya tenías: la media de ese condado y la media global. Lo único que hay que decidir es el peso.</p>
-<p>El peso es la precisión, la inversa de la varianza. La media de <span class="math inline">\(n_j\)</span> casas tiene varianza <span class="math inline">\(\sigma_y^2/n_j\)</span>, así que pesa <span class="math inline">\(n_j/\sigma_y^2\)</span>. Cuantas más casas, más pesa el condado.</p>
-<p>El otro peso es <span class="math inline">\(1/\sigma_\alpha^2\)</span>, y ahí dentro no hay ningún tamaño de muestra. Sale de cuánto se parecen los condados entre ellos. Si se parecen mucho, la media global tira fuerte.</p>
-<p><span class="math display">\[\hat\alpha_j = \frac{\frac{n_j}{\sigma_y^2}\,\bar y_j + \frac{1}{\sigma_\alpha^2}\,\mu}{\frac{n_j}{\sigma_y^2} + \frac{1}{\sigma_\alpha^2}}\]</span></p>
-<p>Una salvedad sobre <span class="math inline">\(\bar y_j\)</span>. El piso está dentro del modelo, así que no promedio el log-radón a pelo. Le quito antes lo que explica el piso. Es la media del condado traducida a sótano.</p>
-<p>Lo calculo a mano y lo comparo con lo que devuelve el ajuste.</p>
-<div id="encogimiento" class="cell" data-execution_count="7">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>resid_fijo <span class="op">=</span> radon[<span class="st">"log_radon"</span>] <span class="op">-</span> mixto.fe_params[<span class="st">"floor"</span>] <span class="op">*</span> radon[<span class="st">"floor"</span>]</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>media_j <span class="op">=</span> resid_fijo.groupby(radon[<span class="st">"county"</span>]).mean()</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>peso <span class="op">=</span> (n_j <span class="op">/</span> sigma_y<span class="op">**</span><span class="dv">2</span>) <span class="op">/</span> (n_j <span class="op">/</span> sigma_y<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> <span class="dv">1</span> <span class="op">/</span> sigma_a<span class="op">**</span><span class="dv">2</span>)</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>a_mano <span class="op">=</span> peso <span class="op">*</span> media_j <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> peso) <span class="op">*</span> mu</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>comp <span class="op">=</span> pd.DataFrame({<span class="st">"n"</span>: n_j, <span class="st">"peso"</span>: peso, <span class="st">"a_mano"</span>: a_mano,</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"mixedlm"</span>: mu <span class="op">+</span> efectos})</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(comp.loc[[<span class="st">"WILKIN"</span>, <span class="st">"ST LOUIS"</span>]].<span class="bu">round</span>(<span class="dv">4</span>))</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"error maximo en los 85 condados:"</span>,</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>      <span class="ss">f"</span><span class="sc">{</span>(comp[<span class="st">'a_mano'</span>] <span class="op">-</span> comp[<span class="st">'mixedlm'</span>])<span class="sc">.</span><span class="bu">abs</span>()<span class="sc">.</span><span class="bu">max</span>()<span class="sc">:.1e}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>            n    peso  a_mano  mixedlm
-WILKIN      1  0.1589  1.6113   1.6113
-ST LOUIS  116  0.9563  0.9444   0.9444
-error maximo en los 85 condados: 3.1e-15</code></pre>
-</div>
-</div>
-<p>Coincide en todos, con error de precisión de máquina. Lo iterativo de REML es estimar las dos varianzas; una vez estimadas, esto es todo lo que queda.</p>
-<p>El peso se simplifica a <span class="math inline">\(n_j / (n_j + \sigma_y^2/\sigma_\alpha^2)\)</span>, y ese cociente aquí vale 5,3. <strong>Un condado necesita cinco casas y pico para pesar lo mismo que la media global.</strong> Y son solo cinco porque los condados de Minnesota se parecen bastante entre ellos. Si se parecieran menos, harían falta más.</p>
-<p>Wilkin tiene una, así que su estimación es un 16% suya y un 84% media global. St Louis tiene ciento dieciséis y es un 96% él mismo.</p>
-<p>Bajarle el número a Lac Qui Parle suena a tapar el dato. Es lo mismo que pasaba con <a href="../../posts/2023-06-12-regresion-a-la-media/index.html">las alturas de padres e hijos</a>: cuando un valor sale extremo, una parte de lo extremo es ruido, y la siguiente medición cae más cerca del centro. El modelo descuenta eso antes de darte el número.</p>
+<p>Bajarle el número a Lac Qui Parle suena a tapar el dato. Es lo mismo que pasaba con <a href="../../posts/2023-06-12-regresion-a-la-media/index.html">las alturas de padres e hijos</a>: cuando un valor sale extremo, una parte de lo extremo es ruido, y la siguiente medición cae más cerca del centro.</p>
 <p>En el gráfico se ve el embudo.</p>
-<div id="cell-grafico" class="cell" data-execution_count="8">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots()</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>ax.axhline(mu, color<span class="op">=</span><span class="st">"gray"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"media global"</span>)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>ax.scatter(tabla[<span class="st">"n"</span>], tabla[<span class="st">"dummies"</span>], s<span class="op">=</span><span class="dv">18</span>,</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="st">"un intercept por condado"</span>)</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>ax.scatter(tabla[<span class="st">"n"</span>], tabla[<span class="st">"jerarquico"</span>], s<span class="op">=</span><span class="dv">18</span>, marker<span class="op">=</span><span class="st">"x"</span>,</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="st">"intercepts de la misma población"</span>)</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>ax.set_xscale(<span class="st">"log"</span>)</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Casas medidas en el condado"</span>)</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Intercept estimado (log radón en sótano)"</span>)</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="cell-grafico" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>ax.axhline(mu, color<span class="op">=</span><span class="st">"gray"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, label<span class="op">=</span><span class="st">"media global"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>ax.scatter(tabla[<span class="st">"n"</span>], tabla[<span class="st">"dummies"</span>], s<span class="op">=</span><span class="dv">18</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="st">"un intercept por condado"</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>ax.scatter(tabla[<span class="st">"n"</span>], tabla[<span class="st">"jerarquico"</span>], s<span class="op">=</span><span class="dv">18</span>, marker<span class="op">=</span><span class="st">"x"</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>           label<span class="op">=</span><span class="st">"intercepts de la misma población"</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>ax.set_xscale(<span class="st">"log"</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Casas medidas en el condado"</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Intercept estimado (log radón en sótano)"</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -427,16 +397,6 @@ error maximo en los 85 condados: 3.1e-15</code></pre>
 <p>A la izquierda, donde hay una, dos o tres casas, los puntos del modelo de dummies ocupan el gráfico entero. Las cruces del jerárquico están apretadas contra la línea gris.</p>
 <p>Pasadas las veinticinco casas la diferencia ya es de centésimas. A partir de ahí el condado se ha ganado que le crean.</p>
 <p>El rango entero de intercepts pasa de 2,46 a 1,07.</p>
-</section>
-<section id="dónde-se-queda-corto" class="level2">
-<h2 class="anchored" data-anchor-id="dónde-se-queda-corto">Dónde se queda corto</h2>
-<p>Todo esto ha salido sin prioris y sin cadenas. Se nota en un sitio.</p>
-<p><span class="math inline">\(\sigma_\alpha\)</span> sostiene el encogimiento de todos los condados, y el <code>summary</code> te lo da con su error estándar y nada más. Si pides el intervalo, lo que sale es de Wald, o sea simétrico. Y una varianza no baja de cero, así que pegado al cero ese intervalo no dice nada. El bueno es el de perfil de verosimilitud, <code>profile_re</code>, y hay que ir a buscarlo.</p>
-<p>Hay algo peor. Con pocos grupos, la verosimilitud puede tener su máximo justo en cero. Entonces REML te devuelve <span class="math inline">\(\hat\sigma_\alpha = 0\)</span>, el encogimiento se hace total y el tercer modelo se convierte en el primero, el del intercept único.</p>
-<p>Has pedido partial pooling y te han dado complete pooling. Sin avisar.</p>
-<p>Aquí no ha pasado. Pero depende de dónde caiga el máximo de la verosimilitud y no del número de grupos, así que tener ochenta y cinco condados no te vacuna.</p>
-<p>Alarma hay: statsmodels tira un <code>ConvergenceWarning</code> en cuanto la varianza estimada baja de 0,01. Lo que pasa es que el front matter de este cuaderno lleva <code>warning: false</code>, así que aquí no la habrías visto. En un notebook se pierde entre otras diez.</p>
-<p>Mírate el componente de varianza antes de contar nada.</p>
 </section>
 <section id="por-qué-esto-te-importa" class="level2">
 <h2 class="anchored" data-anchor-id="por-qué-esto-te-importa">Por qué esto te importa</h2>
