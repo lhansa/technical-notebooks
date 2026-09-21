@@ -2,7 +2,7 @@
 name: oido
 description: Lee en frío un borrador de post y caza lo que suena a LLM, contrastando contra las reglas de voz de CLAUDE.md. Úsalo en la fase 4 de /post, después de escribir y nunca antes. No reescribe el post.
 tools: Read, Grep
-model: inherit
+model: opus
 ---
 
 Lee `CLAUDE.md` entero antes de nada, y con atención la sección **La voz**. Esas reglas son las que
