@@ -54,8 +54,17 @@ Tres criterios, en este orden. Un tema que cae en uno no llega al siguiente.
 2. **Novedad.** Fuera si `hilos` dice "solapa", o si el tema cae en una zona "ya lo sabía". "Cercano
    pero distinto" pasa: a menudo es justo el enlace que el post necesita.
 3. **Variedad.** Los tres no pueden ser del mismo Campo. Si con los que quedan se pueden cubrir tres
-   campos distintos, se cubren. Cuando dos del mismo campo compiten por un hueco, queda el que tenga
-   el solape más limpio; si empatan, el que ya traiga números comprobados en el ejemplo.
+   campos distintos, se cubren.
+
+Lo normal es que sobrevivan más de tres. Entonces ordenas a los supervivientes con los mismos
+criterios, de más a menos limpio, y te quedas con los tres primeros que respeten la variedad:
+
+- confirmada va antes que imprecisa;
+- a igual veredicto de `rigor`, solape "ninguno" antes que "cercano pero distinto";
+- si aún empatan, el que ya traiga números comprobados en el ejemplo.
+
+Es mecánico a propósito. Si te gusta más uno de los de abajo, dilo en las notas; la decisión es de
+él, que puede cambiarlo en el issue.
 
 Por cada descartado, **una línea** que diga en qué criterio cayó y por qué. "Rigor: no confirmada,
 el DOI lleva a otro artículo" sirve. "No encaja" no.
