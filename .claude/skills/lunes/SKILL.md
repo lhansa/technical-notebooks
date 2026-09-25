@@ -1,17 +1,17 @@
 ---
 name: lunes
-description: Filtra las cinco fichas de `temas` - lanza rigor y hilos en paralelo, comprueba los "ya lo sabía" y elige tres, con una línea por cada descartado. Úsala el lunes, justo después de `temas`. No abre el issue semanal ni escribe posts.
+description: Filtra las cinco fichas de `temas` - lanza rigor y hilos en paralelo, comprueba los "ya lo sabía" y propone tres, con una línea por cada descartado. Úsala el lunes, justo después de `temas`. La elección la valida él en el issue semanal; esta skill no lo abre ni escribe posts.
 allowed-tools: Read, Grep, Glob, Bash, Agent, mcp__github__list_issues, mcp__github__issue_read, mcp__github__search_issues
 ---
 
 Lee `CLAUDE.md` antes de nada, y luego `.claude/skills/temas/SKILL.md`: los campos de la ficha son
 los que vas a consumir.
 
-Tienes cinco fichas. Salen tres. Este es el sitio donde un tema bonito con la cita inventada se
+Tienes cinco fichas. Propones tres, y él decide. Este es el sitio donde un tema bonito con la cita inventada se
 queda fuera, y donde se evita escribir tres semanas seguidas de machine learning.
 
-Tú no juzgas las referencias ni el solape. Para eso están `rigor` y `hilos`. Tú eliges con lo que
-ellos devuelven.
+Tú no juzgas las referencias ni el solape. Para eso están `rigor` y `hilos`. Tú ordenas con lo que
+ellos devuelven y propones. La última palabra es suya, con un comentario en el issue semanal.
 
 ## 1. La entrada
 
@@ -44,7 +44,7 @@ Lánzalos en un solo mensaje, como en la fase 4 de `/post`. No les cuentes qué 
   **solapa**), los posts que lo justifican con su ruta, y los enlaces que el post sostendría, entre
   cero y dos. Si te da temas derivados igualmente, ignóralos.
 
-## 4. La elección
+## 4. La propuesta
 
 Tres criterios, en este orden. Un tema que cae en uno no llega al siguiente.
 
@@ -63,8 +63,8 @@ criterios, de más a menos limpio, y te quedas con los tres primeros que respete
 - a igual veredicto de `rigor`, solape "ninguno" antes que "cercano pero distinto";
 - si aún empatan, el que ya traiga números comprobados en el ejemplo.
 
-Es mecánico a propósito. Si te gusta más uno de los de abajo, dilo en las notas; la decisión es de
-él, que puede cambiarlo en el issue.
+Es mecánico a propósito. Si te gusta más uno de los de abajo, dilo en las notas. Tú no decides: él
+valida o cambia la propuesta en el issue.
 
 Por cada descartado, **una línea** que diga en qué criterio cayó y por qué. "Rigor: no confirmada,
 el DOI lleva a otro artículo" sirve. "No encaja" no.
@@ -91,7 +91,7 @@ Esto va tal cual al cuerpo del issue `[semana]`, así que el formato es fijo.
 - Hilos: <ninguno | cercano pero distinto | solapa> — <posts con su ruta; enlaces propuestos, si hay>
 ```
 
-**Los elegidos.** Los tres, con el número de ficha, en el orden en que propones publicarlos
+**La propuesta.** Los tres, con el número de ficha, en el orden en que propones publicarlos
 (martes, jueves, sábado). Una línea por cada uno con lo que lo sostiene.
 
 **Los descartados.** Una línea por cada uno, con el criterio en que cayó.
@@ -99,8 +99,20 @@ Esto va tal cual al cuerpo del issue `[semana]`, así que el formato es fijo.
 **Notas.** Los "ya lo sabía" que se aplicaron, o que no había ninguno. Si se pidió una segunda
 tanda a `temas`. Si salieron menos de tres.
 
+**Cómo validar.** Este bloque va siempre, tal cual, al final:
+
+```
+Contesta con un comentario:
+- `vale` para aceptar la propuesta.
+- Los números en orden de martes, jueves y sábado para elegir tú, por ejemplo `2, 5, 1`.
+- Si alguno ya lo sabías, añade `la N ya lo sabía`. Lo lee `temas` la semana que viene.
+
+Hasta que contestes no se crean sub-issues ni se escribe nada.
+```
+
 ## Lo que no haces
 
-No abres el issue `[semana]` ni los sub-issues: eso es otro paso, con tu salida delante. No
-escribes posts. No verificas referencias por tu cuenta ni relanzas `rigor` para regatearle un
-veredicto: si dice no confirmada, es no confirmada.
+No abres el issue `[semana]` ni los sub-issues: eso es otro paso, con tu salida delante. No das la
+propuesta por aceptada: sin su comentario no hay elección. No escribes posts. No verificas
+referencias por tu cuenta ni relanzas `rigor` para regatearle un veredicto: si dice no confirmada,
+es no confirmada.
