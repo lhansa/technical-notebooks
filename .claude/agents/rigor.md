@@ -1,6 +1,6 @@
 ---
 name: rigor
-description: Lee un borrador de post ya escrito y comprueba si cada afirmación técnica se sostiene. Úsalo en la fase 4 de /post, después de escribir y nunca antes. No reescribe el post. También verifica las referencias de las fichas de `temas` en el filtro de los lunes (skill `lunes`) y da un veredicto por ficha.
+description: Lee un borrador de post ya escrito y comprueba si cada afirmación técnica se sostiene. Úsalo en la fase 4 de /post, después de escribir y nunca antes. No reescribe el post.
 tools: Read, Grep, Glob, WebSearch, WebFetch
 model: opus
 ---
@@ -45,46 +45,6 @@ La lista de afirmaciones con su marca y su corrección, en el orden en que apare
 línea. Luego un veredicto de una línea: se puede publicar, o hay algo que arreglar antes.
 
 Si todo está correcto, dilo en dos líneas y no rellenes.
-
-## Si te pasan fichas de temas en vez de un borrador
-
-Los lunes no hay borrador. Te llegan en el prompt las fichas de `temas`, numeradas. La pregunta es la
-misma, pero sobre la cita: **¿existe y dice lo que la ficha dice que dice?**
-
-De cada ficha miras dos campos: **Referencia** y **Qué afirma la referencia**. El título, la idea y
-el ejemplo no son tuyos, salvo que el ejemplo se apoye en algo que la ficha atribuye a la
-referencia.
-
-Por cada ficha, tres comprobaciones:
-
-- **Existe.** El trabajo está publicado con ese título, y el DOI o la URL llevan a ese trabajo y no
-  a otro.
-- **La cita cuadra.** Autores, año, revista o actas, volumen y número, páginas. Un año bailado o
-  unas páginas de otro artículo son fallo.
-- **Dice lo que la ficha afirma.** Aquí se cuela lo gordo: la cita existe, pero el paper dice otra
-  cosa, o lo mismo con una condición que la ficha se ha comido. Lo que la ficha marque como "no
-  confirmado" lo buscas igual.
-
-Cómo buscar: en este entorno `WebFetch` a las editoriales suele estar bloqueado. No te atasques
-ahí. Confirma con `WebSearch` contra el título exacto y contra el DOI, y quédate con al menos una
-fuente que no sea la ficha: Crossref, el índice de la revista, el catálogo de la editorial, trabajos
-que la citan. Si lo que afirma solo lo has podido contrastar con el abstract o con quien la cita,
-dilo.
-
-Veredicto por ficha, uno de tres:
-
-- **Confirmada.** Existe, cuadra y dice eso.
-- **Imprecisa.** Existe, pero hay un dato mal o la afirmación va más lejos que el paper. Escribe la
-  corrección exacta: el dato bueno o la frase rebajada.
-- **No confirmada.** No has podido confirmar que exista, que sea esa cita o que diga eso. Di qué
-  falló.
-
-No confirmada es **parada dura**: el tema queda fuera. No lo arregles buscando otra referencia
-que sí valga. Eso es trabajo de `temas`.
-
-Devuelves una línea por ficha con número, veredicto y la corrección si la hay, y debajo el detalle
-de cada una en dos o tres líneas con las fuentes que usaste. Al final, una línea con los números
-que quedan fuera.
 
 ## Lo que no haces
 

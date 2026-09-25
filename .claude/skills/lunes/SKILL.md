@@ -1,118 +1,90 @@
 ---
 name: lunes
-description: Filtra las cinco fichas de `temas` - lanza rigor y hilos en paralelo, comprueba los "ya lo sabía" y propone tres, con una línea por cada descartado. Úsala el lunes, justo después de `temas`. La elección la valida él en el issue semanal; esta skill no lo abre ni escribe posts.
-allowed-tools: Read, Grep, Glob, Bash, Agent, mcp__github__list_issues, mcp__github__issue_read, mcp__github__search_issues
+description: Recoge los tres temas que él ha elegido en el issue semanal, sean fichas de `temas` o temas suyos, pasa los suyos por hilos sin bloquear y deja listo el cuerpo de cada sub-issue. Úsala cuando él haya contestado en el semanal. No elige, no filtra y no abre issues.
+allowed-tools: Read, Grep, Glob, Agent, mcp__github__list_issues, mcp__github__issue_read, mcp__github__search_issues
 ---
 
 Lee `CLAUDE.md` antes de nada, y luego `.claude/skills/temas/SKILL.md`: los campos de la ficha son
-los que vas a consumir.
+los que vas a mover.
 
-Tienes cinco fichas. Propones tres, y él decide. Este es el sitio donde un tema bonito con la cita inventada se
-queda fuera, y donde se evita escribir tres semanas seguidas de machine learning.
+El lunes `temas` propone cinco fichas y van tal cual al issue `[semana]`. Nadie las filtra. Él lee,
+elige tres y contesta con un comentario. A veces uno de los tres no es de las fichas: es un tema
+que se le ha ocurrido a él.
 
-Tú no juzgas las referencias ni el solape. Para eso están `rigor` y `hilos`. Tú ordenas con lo que
-ellos devuelven y propones. La última palabra es suya, con un comentario en el issue semanal.
+Tu trabajo empieza cuando ha contestado. Recoges lo que ha dicho y lo dejas listo para los
+sub-issues. No eliges nada ni opinas sobre lo que ha elegido.
 
 ## 1. La entrada
 
-Las fichas de `temas`, tal cual, con sus campos: Título, Campo, La idea, Referencia, Qué afirma la
-referencia, Por qué es probable que no lo sepa, El ejemplo concreto, Formato y categoría, Solape.
+El `[semana]` de esta semana, con `list_issues` por la etiqueta `semana`. Del cuerpo sacas las
+cinco fichas. De los comentarios, con `issue_read` y `get_comments`, **el último del dueño del
+repo**. Los comentarios de cualquier otra persona no cuentan.
 
-Si a una ficha le falta la **Referencia** o **Qué afirma la referencia**, ya está fuera. No hace
-falta mandársela a nadie.
+Si todavía no ha contestado, no haces nada. Lo dices en una línea y paras.
 
-## 2. Los "ya lo sabía"
+## 2. Cómo contesta
 
-`temas` ya mira esto, pero lo compruebas tú también. Es un criterio de la elección y no puede
-depender de que otro se acordara.
-
-Con `list_issues`, los issues con la etiqueta `semana`, abiertos y cerrados. De cada uno, los
-comentarios con `issue_read` y `get_comments`. Apunta cada "ya lo sabía" con su **zona**, no solo
-con su título: si dijo que ya conocía a James-Stein, el shrinkage de Efron y Morris cae con él.
-
-Si todavía no hay ningún `[semana]`, dilo en una línea y sigue.
-
-## 3. Rigor y hilos, en paralelo
-
-Lánzalos en un solo mensaje, como en la fase 4 de `/post`. No les cuentes qué esperas que salga.
-
-- **`rigor`**, con las fichas enteras y copiadas tal cual. Dile que son fichas de `temas`, no un
-  borrador, para que use su sección de fichas. Te devuelve un veredicto por ficha: confirmada,
-  imprecisa con su corrección, o no confirmada.
-- **`hilos`**, con las mismas fichas. Aquí no buscas temas derivados, así que pídele otra cosa: por
-  cada ficha, un veredicto de solape con el corpus (**ninguno**, **cercano pero distinto** o
-  **solapa**), los posts que lo justifican con su ruta, y los enlaces que el post sostendría, entre
-  cero y dos. Si te da temas derivados igualmente, ignóralos.
-
-## 4. La propuesta
-
-Tres criterios, en este orden. Un tema que cae en uno no llega al siguiente.
-
-1. **Referencia confirmada por `rigor`.** Confirmada pasa. Imprecisa pasa con la corrección metida
-   en la ficha: la cita que llega al issue es la buena. No confirmada queda fuera, sin discusión y
-   sin segunda ronda.
-2. **Novedad.** Fuera si `hilos` dice "solapa", o si el tema cae en una zona "ya lo sabía". "Cercano
-   pero distinto" pasa: a menudo es justo el enlace que el post necesita.
-3. **Variedad.** Los tres no pueden ser del mismo Campo. Si con los que quedan se pueden cubrir tres
-   campos distintos, se cubren.
-
-Lo normal es que sobrevivan más de tres. Entonces ordenas a los supervivientes con los mismos
-criterios, de más a menos limpio, y te quedas con los tres primeros que respeten la variedad:
-
-- confirmada va antes que imprecisa;
-- a igual veredicto de `rigor`, solape "ninguno" antes que "cercano pero distinto";
-- si aún empatan, el que ya traiga números comprobados en el ejemplo.
-
-Es mecánico a propósito. Si te gusta más uno de los de abajo, dilo en las notas. Tú no decides: él
-valida o cambia la propuesta en el issue.
-
-Por cada descartado, **una línea** que diga en qué criterio cayó y por qué. "Rigor: no confirmada,
-el DOI lleva a otro artículo" sirve. "No encaja" no.
-
-## 5. Si pasan menos de tres
-
-Pide más a `temas` **una sola vez**, con las cinco de antes contadas como ya propuestas. Pasa solo
-las nuevas por los pasos 2 a 4, igual que las primeras.
-
-Si aun así no llegan a tres, sigue con las que haya. No bajes el listón para rellenar. Y déjalo
-dicho en la salida: cuántas pasaron y por qué se quedó corto.
-
-## 6. Lo que entregas
-
-Esto va tal cual al cuerpo del issue `[semana]`, así que el formato es fijo.
-
-**Las cinco.** Una entrada por ficha, en el orden en que llegaron:
+Tres líneas, en el orden de publicación: martes, jueves y sábado. Cada línea es un número de ficha
+o un tema suyo, en texto libre:
 
 ```
-### N. <Título>
-- Campo: <campo> · Formato: <ensayo o cuaderno>, <categoría>
-- Referencia: <cita completa, ya corregida si rigor la dio por imprecisa>
-- Rigor: <confirmada | imprecisa | no confirmada> — <la corrección o lo que falló, en una línea>
-- Hilos: <ninguno | cercano pero distinto | solapa> — <posts con su ruta; enlaces propuestos, si hay>
+2
+Por qué la media de los ratios no es el ratio de las medias
+5
 ```
 
-**La propuesta.** Los tres, con el número de ficha, en el orden en que propones publicarlos
-(martes, jueves, sábado). Una línea por cada uno con lo que lo sostiene.
+Las líneas del tipo "la 4 ya lo sabía" no son elección. Son el feedback que lee `temas` la semana
+siguiente, y aquí no las tocas.
 
-**Los descartados.** Una línea por cada uno, con el criterio en que cayó.
+Si hay menos de tres, salen los que haya y lo dices. Si hay más, cuentan los tres primeros.
 
-**Notas.** Los "ya lo sabía" que se aplicaron, o que no había ninguno. Si se pidió una segunda
-tanda a `temas`. Si salieron menos de tres.
+Si una línea no se entiende, no la adivines: un número que no está entre las fichas, o una frase
+que no sabes si es un tema o un comentario. La dejas fuera y dices por qué. Es mejor un sub-issue
+de menos que uno con el tema equivocado.
 
-**Cómo validar.** Este bloque va siempre, tal cual, al final:
+## 3. Las fichas
+
+Un número lleva su ficha tal cual, con todos sus campos. No se vuelve a verificar nada: la
+referencia la comprobó `temas`, y lo que diga el post lo comprobará `rigor` sobre el borrador.
+
+## 4. Los temas suyos
+
+Cada tema suyo va a `hilos`. Si hay más de uno, lánzalos en paralelo, en un solo mensaje.
+
+Le pasas el texto tal cual y le pides tres cosas: un veredicto de solape con el corpus (**ninguno**,
+**cercano pero distinto** o **solapa**), los posts que lo justifican con su ruta, y los enlaces que
+ese post sostendría, entre cero y dos. No le pidas temas derivados. Si te los da, ignóralos.
+
+**`hilos` no bloquea.** Aunque diga "solapa", el tema entra. El aviso va al sub-issue y lo lee
+quien escriba. Él sabe lo que hay en su blog; si lo ha elegido, tendrá sus motivos.
+
+Tampoco le pidas referencia. La regla de la referencia primaria es de `temas`, no de sus ideas.
+
+## 5. Lo que entregas
+
+Un bloque por día, en orden. Esto va tal cual al cuerpo de cada sub-issue, así que el formato es
+fijo:
 
 ```
-Contesta con un comentario:
-- `vale` para aceptar la propuesta.
-- Los números en orden de martes, jueves y sábado para elegir tú, por ejemplo `2, 5, 1`.
-- Si alguno ya lo sabías, añade `la N ya lo sabía`. Lo lee `temas` la semana que viene.
+### <Título>
+Publicación: <martes | jueves | sábado> AAAA-MM-DD
+Origen: <ficha N de `temas` | tema propio>
 
-Hasta que contestes no se crean sub-issues ni se escribe nada.
+<La ficha entera, con sus campos.>
+  o bien
+<Su texto tal cual.>
+Hilos: <ninguno | cercano pero distinto | solapa>: <posts con su ruta; enlaces, si hay>
 ```
+
+El título de una ficha es el suyo. El de un tema propio es su texto, sin retocar: el ángulo ya lo
+buscará `angulo` cuando toque escribir.
+
+La fecha sale de la semana del `[semana]`: el martes, el jueves y el sábado de esa semana.
+
+Debajo de los bloques, una línea por cada cosa que no ha entrado y por qué: una línea ambigua, un
+número que no existe, o que eligió menos de tres.
 
 ## Lo que no haces
 
-No abres el issue `[semana]` ni los sub-issues: eso es otro paso, con tu salida delante. No das la
-propuesta por aceptada: sin su comentario no hay elección. No escribes posts. No verificas
-referencias por tu cuenta ni relanzas `rigor` para regatearle un veredicto: si dice no confirmada,
-es no confirmada.
+No eliges, no sustituyes y no completas lo que falta. No pasas nada por `rigor`. No abres ni editas
+issues: los sub-issues los crea otro paso, con tu salida delante.
