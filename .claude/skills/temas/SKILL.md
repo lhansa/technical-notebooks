@@ -1,6 +1,6 @@
 ---
 name: temas
-description: Propone cinco temas para posts del blog, cada uno con una referencia primaria real, su ejemplo concreto y una línea de por qué es probable que él no lo sepa. Úsala el lunes, antes del filtro de rigor y hilos. No elige ni escribe posts.
+description: Propone cinco temas para posts del blog, cada uno con una referencia primaria real, su ejemplo concreto y una línea de por qué es probable que él no lo sepa. Úsala el lunes: las fichas van tal cual al issue semanal y él elige tres. No elige ni escribe posts.
 allowed-tools: Read, Grep, Glob, Bash, WebSearch, WebFetch, mcp__github__list_issues, mcp__github__issue_read, mcp__github__search_issues
 ---
 
@@ -50,9 +50,9 @@ American Statistician*, *Biometrika*, *JASA*, *Statistical Science*, *Technometr
 *PNAS*, documentación técnica de numpy o de IEEE 754, libros de referencia. Las "paradojas" con
 nombre propio y las notas cortas de dos o tres páginas suelen ser buen terreno.
 
-Reparte. Cinco temas de inferencia bayesiana son una semana tirada. El filtro exige después que los
-tres elegidos no sean del mismo campo, así que dale material: **al menos tres campos distintos
-entre las cinco fichas.**
+Reparte. Cinco temas de inferencia bayesiana son una semana tirada. Él elige tres, y con cinco del
+mismo campo no tiene dónde elegir. Dale material: **al menos tres campos distintos entre las cinco
+fichas.**
 
 ## 3. La vara de novedad
 
@@ -79,31 +79,31 @@ editoriales suele estar bloqueado; si falla, tira de búsquedas contra el títul
 
 Y confirma también que **la referencia dice lo que la ficha afirma**. Este es el fallo que se cuela:
 la cita existe, pero el paper dice otra cosa, o una cosa parecida con una condición que la ficha se
-ha comido. Si no puedes confirmar algún dato, márcalo como "no confirmado" en la ficha. `rigor` lo
-va a buscar igual, y es mejor que llegue avisado.
+ha comido. Si no puedes confirmar algún dato, márcalo como "no confirmado" en la ficha. Nadie más
+va a comprobar la cita antes de que él elija, así que tiene que verlo al leer la ficha.
 
 Si una ficha se queda sin referencia confirmada, tírala y busca otra. No entregues cuatro buenas y
 una coja.
 
 ## 5. Las fichas
 
-Cinco, numeradas. Cada una con estos campos, en este orden, porque el filtro y el issue semanal los
-leen así:
+Cinco, numeradas. Cada una con estos campos, en este orden, porque el issue semanal y los sub-issues
+los leen así:
 
 - **Título.** En la forma del blog: afirmación o pregunta concreta. "La fórmula de la varianza del
   libro no aguanta la coma flotante", no "Algoritmos numéricos para la varianza".
 - **Campo.** Uno: estadística, machine learning, programación o matemáticas.
 - **La idea.** Dos frases. Lo que el post contaría.
 - **Referencia.** La cita completa, con DOI o URL.
-- **Qué afirma la referencia.** Una o dos frases con lo que el paper dice y la ficha usa. Esto es
-  lo que `rigor` contrasta.
+- **Qué afirma la referencia.** Una o dos frases con lo que el paper dice y la ficha usa. Si el tema
+  sale elegido, el post se apoya en esto.
 - **Por qué es probable que no lo sepa.** Una línea, concreta.
 - **El ejemplo concreto.** Obligatorio. Un caso con números o con una escena, no una descripción
   del tipo "un ejemplo con datos simulados". Sin ejemplo no hay tema: hay temario.
 - **Formato y categoría.** Ensayo o cuaderno, y una de las tres categorías de `CLAUDE.md`. Cuaderno
   solo si la simulación demuestra algo que la prosa no puede.
-- **Solape.** Los posts o issues más cercanos, con su ruta o número, o "ninguno cercano". `hilos`
-  lo comprobará en serio; tú dile dónde mirar.
+- **Solape.** Los posts o issues más cercanos, con su ruta o número, o "ninguno cercano". Es lo que
+  él ve antes de elegir, así que compruébalo leyendo los posts, no solo los títulos.
 
 ## La vara, con ejemplos
 
@@ -145,7 +145,7 @@ Fíjate en que varias ya rozan el corpus: Freedman con
 Las cinco fichas, y debajo dos líneas: qué zonas descartaste por el mapa (corpus, ideas, "ya lo
 sabía") y cuántos campos distintos cubren las cinco.
 
-Si te piden más porque el filtro dejó pasar menos de tres, repites el proceso con el mapa ampliado:
+Si él pide más porque ninguna le convence, repites el proceso con el mapa ampliado:
 las cinco de antes cuentan como ya propuestas.
 
 ## Lo que no haces
