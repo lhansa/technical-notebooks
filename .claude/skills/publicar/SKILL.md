@@ -135,7 +135,9 @@ En modo desatendido mergeas tú si se cumplen las dos cosas:
 - **`rigor` no dejó nada falso sin arreglar.** Lo imprecisa no para el merge. Lo no confirmado
   tampoco, si el post no se apoya en ello.
 
-Si las dos se cumplen, mira con `pull_request_read` y `get` que el PR es mergeable, y mergea con
+Si las dos se cumplen, mira con `pull_request_read` y `get` que el PR es mergeable. Un
+`mergeable_state` de `unstable` solo dice que hay checks sin terminar, como la revisión de voz, y
+no para el merge; `dirty` es un conflicto y sí. Mergea con
 `merge_pull_request`, método `merge`, como el resto del historial. Luego comprueba con `issue_read`
 que el sub-issue se ha cerrado; si no, ciérralo tú con `state_reason: completed`. Y usa la skill
 `semana` solo para su punto 5, el cierre: si era el último post de la semana, cierra el semanal.
