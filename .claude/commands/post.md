@@ -166,7 +166,8 @@ lo que no hay que hacer, pegados a la frase concreta.
 
 1. Con `list_pull_requests`, los PR cerrados de `main`, del más reciente hacia atrás.
 2. Quédate con los tres últimos **mergeados que añaden un post**: los que tocan
-   `posts/*/index.qmd`. Míralo con `pull_request_read` y `get_files`.
+   `posts/*/index.qmd`. Míralo con `pull_request_read` y `get_files`. Mergeado es que tiene
+   `merged_at`; el campo `merged` de la lista sale `false` aunque lo esté, no te fíes de él.
 3. De cada uno, `pull_request_read` con `get_review_comments`. Cuentan los del dueño del repo que
    **no** terminan con el pie de Claude Code. Los que lo llevan son del pipeline, no suyos.
 4. Por cada comentario, lee la frase a la que apunta y lo que dice él.
