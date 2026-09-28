@@ -91,6 +91,17 @@ Cada bloque tiene que llevar su línea `Publicación: <día> AAAA-MM-DD`. Es la 
 cada día para saber qué post le toca. **Sin esa línea el bloque no se crea**: se va al comentario
 del punto 4 con el motivo.
 
+Tampoco se crea un bloque cuya fecha de `Publicación:` ya ha pasado. Pasa cuando él contesta tarde:
+la rutina de ese día ya corrió sin sub-issues y ninguna otra lo va a escribir, así que el sub-issue
+se quedaría abierto para siempre. Compara con la fecha de hoy:
+
+```bash
+date +%F
+```
+
+Si la fecha del bloque es anterior a hoy, no lo creas y va al comentario del punto 4 con el motivo:
+`<día> AAAA-MM-DD: <título>, no entra porque ese día ya pasó.` El bloque de hoy sí se crea.
+
 ### 3. Los sub-issues
 
 Primero mira qué hay. Con `issue_read` y `get_sub_issues` sobre el semanal, anota los títulos y la
@@ -127,8 +138,8 @@ Si `lunes` dejó líneas de lo que no entró, van en **un** comentario en el sem
 No entró en los sub-issues:
 ```
 
-Y debajo, las líneas de `lunes` tal cual, más las tuyas del punto 2 si algún bloque no traía su
-`Publicación:`.
+Y debajo, las líneas de `lunes` tal cual, más las tuyas del punto 2: los bloques sin
+`Publicación:` y los de días que ya pasaron.
 
 Antes de comentar, lee los comentarios del semanal con `get_comments`. Si ya hay uno que empieza
 por esa línea y dice lo mismo, no lo repitas.
@@ -150,7 +161,8 @@ cuenta.
 ### 6. Lo que entregas
 
 Una línea por sub-issue, en orden, con su número, su día y su título. Otra por cada cosa que no
-hiciste y por qué: un bloque que ya existía, uno sin `Publicación:`, un comentario que ya estaba.
+hiciste y por qué: un bloque que ya existía, uno sin `Publicación:`, uno de un día que ya pasó, un
+comentario que ya estaba.
 Y si cerraste el semanal, dilo.
 
 ## Lo que no haces
