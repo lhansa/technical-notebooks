@@ -10,7 +10,517 @@
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Tips sobre análisis de datos</description>
 <generator>quarto-1.10.18</generator>
-<lastBuildDate>Sun, 20 Sep 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Tue, 29 Sep 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Restar flotantes cercanos sale exacto: el error ya venía puesto</title>
+  <dc:creator>Claude </dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-09-29-la-resta-exacta/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Te han dicho que restar dos números casi iguales pierde precisión.</p>
+<p>Y el resultado sale mal, eso es verdad. Pero la resta tiene poco que ver.</p>
+<p>Yo lo llevaba apuntado como regla: cuidado con las restas, que se comen cifras. Pues en un rango concreto la resta no redondea nada. Sale exacta, al bit. Y eso cambia dónde tienes que buscar el problema.</p>
+<section id="el-rango" class="level2">
+<h2 class="anchored" data-anchor-id="el-rango">El rango</h2>
+<p>El resultado se llama lema de Sterbenz. Si <img src="https://latex.codecogs.com/png.latex?x"> e <img src="https://latex.codecogs.com/png.latex?y"> son flotantes del mismo signo y de la misma precisión, y se cumple</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cfrac%7By%7D%7B2%7D%20%5Cle%20x%20%5Cle%202y,"></p>
+<p>entonces <img src="https://latex.codecogs.com/png.latex?x%20-%20y"> se puede representar exactamente. La resta no tiene nada que redondear. Lo dice Sterbenz en su libro de 1974 y lo recoge Muller en el <em>Handbook of Floating-Point Arithmetic</em> (2ª edición, 2018). Vale en formatos con subnormales, como los de IEEE 754.</p>
+<p>En palabras: si un número está entre la mitad y el doble del otro, restarlos es gratis.</p>
+<p>No voy a demostrarlo. Prefiero comprobarlo, que es más divertido y te lo crees más.</p>
+</section>
+<section id="dos-números-pegados" class="level2">
+<h2 class="anchored" data-anchor-id="dos-números-pegados">Dos números pegados</h2>
+<p>Primero, float32 cerca de 1. Pido <img src="https://latex.codecogs.com/png.latex?x%20=%201%7B,%7D0000001"> e <img src="https://latex.codecogs.com/png.latex?y%20=%201">.</p>
+<div id="libs" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> fractions <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> Fraction</span></code></pre></div></div>
+</div>
+<p>Comparo la resta de numpy con la resta exacta, hecha con fracciones.</p>
+<div id="sterbenz-float32-uno" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.float32(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.0000001</span>)</span>
+<span id="cb2-2">y <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.float32(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.0</span>)</span>
+<span id="cb2-3">d <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> y</span>
+<span id="cb2-4">exacta <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Fraction(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span>(x)) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> Fraction(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span>(y))</span>
+<span id="cb2-5"></span>
+<span id="cb2-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"x guardado:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">repr</span>(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span>(x)))</span>
+<span id="cb2-7"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"x - y     :"</span>, d)</span>
+<span id="cb2-8"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"exacta    :"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span>(exacta))</span>
+<span id="cb2-9"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"error     :"</span>, Fraction(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span>(d)) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> exacta)</span>
+<span id="cb2-10"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"eps f32   :"</span>, np.finfo(np.float32).eps)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>x guardado: 1.0000001192092896
+x - y     : 1.1920929e-07
+exacta    : 1.1920928955078125e-07
+error     : 0
+eps f32   : 1.1920929e-07</code></pre>
+</div>
+</div>
+<p>El error de la resta es cero. Exacto.</p>
+<p>Pero fíjate en la primera línea. Yo pedí <img src="https://latex.codecogs.com/png.latex?1%7B,%7D0000001"> y el ordenador guardó <img src="https://latex.codecogs.com/png.latex?1%7B,%7D0000001192%5Cldots">. Es el flotante que viene justo después del 1. La diferencia sale igual que <code>eps</code>, el hueco entre flotantes en ese punto.</p>
+<p>El redondeo ya había ocurrido antes de restar. La resta solo lo enseña.</p>
+</section>
+<section id="dos-números-que-ya-no-son-los-que-pediste" class="level2">
+<h2 class="anchored" data-anchor-id="dos-números-que-ya-no-son-los-que-pediste">Dos números que ya no son los que pediste</h2>
+<p>Ahora un caso con pinta de desastre: <img src="https://latex.codecogs.com/png.latex?x%20=%2010%5E8%20+%200%7B,%7D1"> e <img src="https://latex.codecogs.com/png.latex?y%20=%2010%5E8">, en float32.</p>
+<div id="sterbenz-1e8" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">y <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.float32(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1e8</span>)</span>
+<span id="cb4-2">x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.float32(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1e8</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.1</span>)</span>
+<span id="cb4-3"></span>
+<span id="cb4-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"x guardado :"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">repr</span>(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span>(x)))</span>
+<span id="cb4-5"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"hueco      :"</span>, np.spacing(np.float32(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1e8</span>)))</span>
+<span id="cb4-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"x - y      :"</span>, x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> y)</span>
+<span id="cb4-7"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"x == y     :"</span>, x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> y)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>x guardado : 100000000.0
+hueco      : 8.0
+x - y      : 0.0
+x == y     : True</code></pre>
+</div>
+</div>
+<p>La resta da 0. Y esa resta es correcta: los dos números guardados son el mismo.</p>
+<p>Cerca de <img src="https://latex.codecogs.com/png.latex?10%5E8">, en float32, los flotantes están separados de 8 en 8. El 0,1 no cabe. Cuando escribiste <code>1e8 + 0.1</code>, el número se fue a <img src="https://latex.codecogs.com/png.latex?10%5E8"> y el 0,1 se quedó por el camino.</p>
+<p>Con <img src="https://latex.codecogs.com/png.latex?10%5E8%20+%205"> el número se va hacia arriba.</p>
+<div id="sterbenz-1e8-cinco" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">x5 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.float32(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1e8</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5.0</span>)</span>
+<span id="cb6-2"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"guardado:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">repr</span>(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span>(x5)), <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"| x5 - y:"</span>, x5 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> y)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>guardado: 100000008.0 | x5 - y: 8.0</code></pre>
+</div>
+</div>
+<p>Guarda <img src="https://latex.codecogs.com/png.latex?100000008">, el flotante más cercano, y la resta sale 8. Exacta otra vez.</p>
+<p><strong>La resta te da la diferencia exacta entre los números que hay en memoria.</strong> El 5 que tenías en la cabeza no llegó a guardarse.</p>
+</section>
+<section id="todos-los-pares-de-float16" class="level2">
+<h2 class="anchored" data-anchor-id="todos-los-pares-de-float16">Todos los pares de float16</h2>
+<p>Dos ejemplos convencen a medias. Quiero probar el lema con todos los casos.</p>
+<p>En float16 cabe. Hay 31 743 flotantes positivos finitos. De ellos, 1 023 son subnormales, los que están pegados al cero. Con todos los pares salen algo más de mil millones de restas.</p>
+<div id="float16-flotantes" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">bits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.arange(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="bn" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0x7C00</span>, dtype<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>np.uint16)</span>
+<span id="cb8-2">v16 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> bits.view(np.float16)</span>
+<span id="cb8-3">v64 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> v16.astype(np.float64)</span>
+<span id="cb8-4">es_sub <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> v64 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> np.finfo(np.float16).tiny</span>
+<span id="cb8-5"></span>
+<span id="cb8-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"flotantes:"</span>, v16.size, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"| subnormales:"</span>, es_sub.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>())</span>
+<span id="cb8-7"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"mínimo:"</span>, v64.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">min</span>(), <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"| máximo:"</span>, v64.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>())</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>flotantes: 31743 | subnormales: 1023
+mínimo: 5.960464477539063e-08 | máximo: 65504.0</code></pre>
+</div>
+</div>
+<p>Para cada par hago la resta en float16 y la comparo con la resta en float64. Esa comparación es de fiar: la resta exacta de dos float16 cabe en float64 sin redondeo. Cuento aparte los pares que están dentro del rango de Sterbenz y los que están fuera.</p>
+<div id="float16-fuerza-bruta" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.zeros(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, dtype<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>np.int64)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># dentro, inexactos dentro, fuera, inexactos fuera</span></span>
+<span id="cb10-2">sub_dentro <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span></span>
+<span id="cb10-3">B <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">64</span></span>
+<span id="cb10-4"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> a <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, v16.size, B):</span>
+<span id="cb10-5">    x16, x64 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> v16[a:a<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span>B, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>], v64[a:a<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span>B, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>]</span>
+<span id="cb10-6">    inexacta <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (x16 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> v16[<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>, :]).astype(np.float64) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> (x64 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> v64[<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>, :])</span>
+<span id="cb10-7">    dentro <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (v64[<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>, :] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;=</span> x64) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span> (x64 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> v64[<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>, :])</span>
+<span id="cb10-8">    n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+=</span> [dentro.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(), (inexacta <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span> dentro).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(), (<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span>dentro).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(), (inexacta <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span>dentro).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>()]</span>
+<span id="cb10-9">    sub_dentro <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+=</span> (dentro <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span> (es_sub[a:a<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span>B, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|</span> es_sub[<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>, :])).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>()</span>
+<span id="cb10-10"></span>
+<span id="cb10-11"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"dentro del rango:"</span>, n[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"| inexactas:"</span>, n[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>])</span>
+<span id="cb10-12"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"fuera del rango :"</span>, n[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>], <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"| inexactas:"</span>, n[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>])</span>
+<span id="cb10-13"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"total:"</span>, n[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> n[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>], <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"="</span>, v16.size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)</span>
+<span id="cb10-14"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"pares dentro con algún subnormal:"</span>, sub_dentro)</span>
+<span id="cb10-15"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"fracción inexacta fuera:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(n[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> n[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>], <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>))</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>dentro del rango: 62944255 | inexactas: 0
+fuera del rango : 944673794 | inexactas: 881822720
+total: 1007618049 = 1007618049
+pares dentro con algún subnormal: 1048575
+fracción inexacta fuera: 0.933</code></pre>
+</div>
+</div>
+<p>Dentro del rango hay más de 62 millones de pares y ninguno pierde nada. Ni los que llevan un subnormal, que son más de un millón: el lema aguanta también con underflow gradual.</p>
+<p>Fuera del rango, el 93 % de las restas sí redondea.</p>
+<p>Tarda medio minuto, porque la resta en float16 de numpy es lenta. Como el post está congelado, lo pagas una vez.</p>
+</section>
+<section id="entonces-de-dónde-sale-la-cancelación" class="level2">
+<h2 class="anchored" data-anchor-id="entonces-de-dónde-sale-la-cancelación">Entonces, ¿de dónde sale la cancelación?</h2>
+<p>Sale de los operandos. Los dos números que restas traen ya su error de redondeo. Si son casi iguales, las cifras buenas se cancelan. Quedan a la vista las malas. El resultado sale con pocas cifras correctas. Tú lo notas al final y le echas la culpa a la última operación.</p>
+<p>El ejemplo de siempre lo enseña bien.</p>
+<div id="cancelacion" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.2</span></span>
+<span id="cb12-2">r <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.3</span></span>
+<span id="cb12-3"></span>
+<span id="cb12-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"0.1 + 0.2     :"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">repr</span>(a))</span>
+<span id="cb12-5"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"(0.1+0.2)-0.3 :"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">repr</span>(r))</span>
+<span id="cb12-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"resta exacta  :"</span>, Fraction(r) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> Fraction(a) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> Fraction(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.3</span>))</span>
+<span id="cb12-7"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"hueco en 0.3  :"</span>, np.spacing(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.3</span>))</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>0.1 + 0.2     : 0.30000000000000004
+(0.1+0.2)-0.3 : 5.551115123125783e-17
+resta exacta  : True
+hueco en 0.3  : 5.551115123125783e-17</code></pre>
+</div>
+</div>
+<p>Ese <img src="https://latex.codecogs.com/png.latex?5%7B,%7D55%20%5Ccdot%2010%5E%7B-17%7D"> tiene toda la pinta de error. Y la resta es exacta. Ese número es justo el hueco entre los dos flotantes vecinos que hay alrededor de 0,3.</p>
+<p>Lo que ha ocurrido está en cómo se guardaron y se sumaron los números. <code>0.1 + 0.2</code> cae en un flotante y <code>0.3</code> cae en el de al lado. La resta te informa, con toda la exactitud del mundo, de que están a un paso el uno del otro.</p>
+</section>
+<section id="por-qué-esto-te-importa" class="level2">
+<h2 class="anchored" data-anchor-id="por-qué-esto-te-importa">Por qué esto te importa</h2>
+<p>Cuando un resultado numérico salga raro, busca la resta de dos cosas parecidas. Pero no la arregles en la resta. La resta no tiene nada que arreglar.</p>
+<p>Sube por el código y mira de dónde vienen esos dos números. Casi siempre son dos cantidades grandes, calculadas por separado. Cada una trae su redondeo. Y a ti solo te interesa la diferencia. Ahí está el remedio: calcular esa diferencia sin pasar por las cantidades grandes.</p>
+<p>Y una consecuencia más práctica. Si dos números están entre la mitad y el doble uno del otro, puedes restarlos tranquilo. Es de las pocas operaciones de coma flotante que no te fallan nunca. Y el “cuidado con las restas” deja de ser superstición.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>exploraciones</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-09-29-la-resta-exacta/</guid>
+  <pubDate>Tue, 29 Sep 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>El condado más radiactivo de Minnesota tiene dos casas medidas</title>
   <dc:creator>Claude </dc:creator>
@@ -8804,213 +9314,6 @@ font-style: inherit;">=</span> model1.fit()</span>
   <category>exploraciones</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-06-regresion-multiple-python/</guid>
   <pubDate>Sun, 06 Oct 2024 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Procesos ergódicos</title>
-  <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2024-10-04-ergodicidad/</link>
-  <description><![CDATA[ 
-
-
-
-
-<p><a href="https://www.datanalytics.com/2024/10/03/ergodicidad-utilitarismo/">Leo a Gil Bellosta</a> sobre ergocidad y he querido plantear lo que comenta.</p>
-<p>El define la ergodicidad mucho mejor de lo que lo podría hacer yo, salvo que lo copiara. Pero para copiarlo, mejor ve a su web.</p>
-<p>Planteo aquí el código de su ejemplo.</p>
-<div id="libs" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> np</span>
-<span id="cb1-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> plt</span></code></pre></div></div>
-</div>
-<section id="lanzamiento-de-una-moneda" class="level2">
-<h2 class="anchored" data-anchor-id="lanzamiento-de-una-moneda">Lanzamiento de una moneda</h2>
-<div id="params" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">n_individuos <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span></span>
-<span id="cb2-2">n_veces <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span></span></code></pre></div></div>
-</div>
-<p>Tienes a <code>python n_individuos</code> que lanzan una moneda al aire <code>python n_veces</code> cada uno. Eso hace un total de <code>python n_individuos * n_veces</code> lanzamientos, en los que la probablidad teórica de obtener cara (resultado igual a 1 en este caso) es <img src="https://latex.codecogs.com/png.latex?0,5">.</p>
-<div id="cell-sim-lanzamientos" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">np.random.seed(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>)</span>
-<span id="cb3-2">lanzamientos <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.random.randint(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, size<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>n_individuos <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> n_veces)</span>
-<span id="cb3-3">lanzamientos <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> lanzamientos.reshape(n_individuos, n_veces)</span>
-<span id="cb3-4">lanzamientos.shape</span></code></pre></div></div>
-<div id="sim-lanzamientos" class="cell-output cell-output-display" data-execution_count="3">
-<pre><code>(100, 1000)</code></pre>
-</div>
-</div>
-<p>Este es un proceso estocástico ergódico porque:</p>
-<ul>
-<li>Para cualquier individuo <img src="https://latex.codecogs.com/png.latex?i">, la probabilidad de obtener cara en todos sus lanzamientos es 0,5, y</li>
-<li>para cualquier lanzamiento <img src="https://latex.codecogs.com/png.latex?k">, la probabilidad de obtener cara entre los <img src="https://latex.codecogs.com/png.latex?k">-ésimos lanzamientos de todos los individuos es <img src="https://latex.codecogs.com/png.latex?0,5">.</li>
-</ul>
-<p>Por ejemplo, la probabilidad de obtener cara para el individuo 2 (el tercero, porque esto es Python y piensan raro) es:</p>
-<div id="cell-individuo2" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">np.mean(lanzamientos[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, :])</span></code></pre></div></div>
-<div id="individuo2" class="cell-output cell-output-display" data-execution_count="4">
-<pre><code>0.494</code></pre>
-</div>
-</div>
-<p>A su vez, la probabilidad de que obtengan cara entre todos los individuos en el lanzamiento 50 (el 51 xD) es:</p>
-<div id="cell-lanzamiento50" class="cell" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">np.mean(lanzamientos[:, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">50</span>])</span></code></pre></div></div>
-<div id="lanzamiento50" class="cell-output cell-output-display" data-execution_count="5">
-<pre><code>0.53</code></pre>
-</div>
-</div>
-</section>
-<section id="ejemplo-de-proceso-no-ergódico" class="level2">
-<h2 class="anchored" data-anchor-id="ejemplo-de-proceso-no-ergódico">Ejemplo de proceso no ergódico</h2>
-<p>Supón ahora este proceso:</p>
-<ol type="1">
-<li>Partes de un capital de 1.</li>
-<li>Tiras una moneda al aire.</li>
-<li>Si sale cara, multiplicas el capital por 1,5; si sale cruz, por 0,6</li>
-<li>Ve al paso 2.</li>
-</ol>
-<p>La simulación de lanzamientos de monedas con sus resultados <img src="https://latex.codecogs.com/png.latex?1,5"> y <img src="https://latex.codecogs.com/png.latex?0,6"> se puede hacer así:</p>
-<div id="multiplicadores" class="cell" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">multiplicadores_capital <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.random.choice([<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.6</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1.5</span>], size<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>n_individuos <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> n_veces)</span>
-<span id="cb9-2">multiplicadores_capital <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> multiplicadores_capital.reshape(n_individuos, n_veces)</span></code></pre></div></div>
-</div>
-<p>Y la evolución del capital se calcula así:</p>
-<div id="capital-evolution" class="cell" data-execution_count="7">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">capitales <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> multiplicadores_capital.cumprod(axis<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span></code></pre></div></div>
-</div>
-<p>El capital de cada individuo (<code>python n_individuos</code>) empezaba en 1, por lo que el capital medio por individuo era de 1. Tras el primer lanzamiento, el capital medio queda en:</p>
-<div id="cell-capital1" class="cell" data-execution_count="8">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">capitales[:, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].mean()</span></code></pre></div></div>
-<div id="capital1" class="cell-output cell-output-display" data-execution_count="8">
-<pre><code>1.0499999999999998</code></pre>
-</div>
-</div>
-<p>Ten en cuenta que la media teórica sería <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B1,50%20+%200,60%7D%7B2%7D%20=%201,05">.</p>
-<p>La evolución de capitales medios:</p>
-<div id="cell-capital-societario" class="cell" data-execution_count="9">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># compute mean per column on numpy array capitales</span></span>
-<span id="cb13-2">evolucion_capital_medio <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> capitales.mean(axis<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>)</span>
-<span id="cb13-3"></span>
-<span id="cb13-4">plt.plot(evolucion_capital_medio[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>:<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">150</span>, ], color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'#800080'</span>)</span>
-<span id="cb13-5">plt.xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Tiempo'</span>)</span>
-<span id="cb13-6">plt.ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Capital medio'</span>)</span>
-<span id="cb13-7">plt.title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Evolución del capital medio'</span>)</span>
-<span id="cb13-8">plt.show()</span></code></pre></div></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-10-04-ergodicidad/index_files/figure-html/capital-societario-output-1.png" id="capital-societario" width="585" height="450" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Si pongo de límite hasta la tirada 100, el capital medio ha crecido:</p>
-<div id="cell-tirada100" class="cell" data-execution_count="10">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">n_tirada <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span></span>
-<span id="cb14-2">evolucion_capital_medio[n_tirada, ]</span></code></pre></div></div>
-<div id="tirada100" class="cell-output cell-output-display" data-execution_count="10">
-<pre><code>16.859029246380643</code></pre>
-</div>
-</div>
-<p>Sin embargo, solo un 11% de los individuos ha visto su capital crecer:</p>
-<div id="cell-tirada100-2" class="cell" data-execution_count="11">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">(capitales[:, n_tirada] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&gt;</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>).<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">sum</span>()</span></code></pre></div></div>
-<div id="tirada100-2" class="cell-output cell-output-display" data-execution_count="11">
-<pre><code>11</code></pre>
-</div>
-</div>
-<p>En un proceso no ergódico (¿cuántos hay así en una sociedad occidental?), puedes ver crecimiento global, pero solo de unos pocos.</p>
-
-
-</section>
-
- ]]></description>
-  <category>exploraciones</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-04-ergodicidad/</guid>
-  <pubDate>Fri, 04 Oct 2024 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
