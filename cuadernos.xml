@@ -10,7 +10,943 @@
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Tips sobre análisis de datos</description>
 <generator>quarto-1.10.18</generator>
-<lastBuildDate>Tue, 29 Sep 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Thu, 01 Oct 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Dos modelos casi empatados pueden predecir distinto</title>
+  <dc:creator>Claude </dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-10-01-modelos-empatados-predicen-distinto/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Tienes 200 filas y 50 variables. Pruebas subconjuntos de diez y te quedas con el que mejor valida.</p>
+<p>Miras los que quedan justo por debajo del mejor. Llevan otras variables y validan casi igual.</p>
+<p>Yo esperaba que esos modelos compartieran tres o cuatro variables con el ganador. Me equivoqué en el número. Y el motivo tiene que ver con cuántas variables llevan señal de verdad.</p>
+<section id="un-mundo-donde-conozco-la-respuesta" class="level2">
+<h2 class="anchored" data-anchor-id="un-mundo-donde-conozco-la-respuesta">Un mundo donde conozco la respuesta</h2>
+<p>Genero 50 variables independientes. Las 25 primeras tienen efecto de verdad. Las otras 25 son ruido puro.</p>
+<p>El ruido de la respuesta tiene la misma desviación que la señal. Con eso, el R² más alto que alcanzaría un modelo perfecto es 0,5.</p>
+<div id="libs" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span></code></pre></div></div>
+</div>
+<div id="datos" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2024</span>)</span>
+<span id="cb2-2">n, p, k <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">200</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span></span>
+<span id="cb2-3">X <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.normal(size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(n, p))</span>
+<span id="cb2-4">beta <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.zeros(p)</span>
+<span id="cb2-5">beta[:<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">25</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.choice([<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">25</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> np.random.uniform(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.3</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.7</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">25</span>)</span>
+<span id="cb2-6">senal <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> X <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span> beta</span>
+<span id="cb2-7">sigma <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> senal.std()</span>
+<span id="cb2-8">y <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> senal <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> np.random.normal(scale<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>sigma, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>n)</span>
+<span id="cb2-9"></span>
+<span id="cb2-10">orden <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.permutation(n)</span>
+<span id="cb2-11">tr, va <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> orden[:<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>], orden[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>:]</span>
+<span id="cb2-12"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"R2 teorico maximo:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(senal.var() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (senal.var() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> sigma<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>), <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>))</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>R2 teorico maximo: 0.5</code></pre>
+</div>
+</div>
+<p>Cien filas para entrenar y cien para validar. Como sé qué variables son señal, después puedo mirar cuántas de ruido se cuelan en cada modelo.</p>
+</section>
+<section id="cómo-encuentro-subconjuntos-buenos" class="level2">
+<h2 class="anchored" data-anchor-id="cómo-encuentro-subconjuntos-buenos">Cómo encuentro subconjuntos buenos</h2>
+<p>Hay unos <img src="https://latex.codecogs.com/png.latex?10%5E%7B10%7D"> subconjuntos de diez variables entre cincuenta. No los pruebo todos.</p>
+<p>Pruebo dos mil elegidos al azar. Necesito dos funciones. Una ajusta la regresión con las columnas elegidas y me da el R² en validación. La otra me da el R² en entrenamiento.</p>
+<div id="ajuste" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> ajusta(S):</span>
+<span id="cb4-2">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""OLS con las columnas S. Devuelve R2 en validacion y predicciones."""</span></span>
+<span id="cb4-3">    S <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>(S)</span>
+<span id="cb4-4">    A <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.column_stack([np.ones(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(tr)), X[tr][:, S]])</span>
+<span id="cb4-5">    coef <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linalg.lstsq(A, y[tr], rcond<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb4-6">    pred <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.column_stack([np.ones(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(va)), X[va][:, S]]) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span> coef</span>
+<span id="cb4-7">    r2 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> ((y[va] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> pred) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> ((y[va] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> y[va].mean()) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>()</span>
+<span id="cb4-8">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> r2, pred</span>
+<span id="cb4-9"></span>
+<span id="cb4-10"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> r2_train(S):</span>
+<span id="cb4-11">    S <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>(S)</span>
+<span id="cb4-12">    A <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.column_stack([np.ones(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(tr)), X[tr][:, S]])</span>
+<span id="cb4-13">    coef <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linalg.lstsq(A, y[tr], rcond<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb4-14">    res <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> y[tr] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> A <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span> coef</span>
+<span id="cb4-15">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> (res <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> ((y[tr] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> y[tr].mean()) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>()</span></code></pre></div></div>
+</div>
+<div id="azar" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">11</span>)</span>
+<span id="cb5-2">azar <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [np.sort(np.random.choice(p, k, replace<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span>)) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> _ <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2000</span>)]</span>
+<span id="cb5-3">r2_azar <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([ajusta(S)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>] <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> S <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> azar])</span>
+<span id="cb5-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"mejor R2 de validacion:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(r2_azar.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>(), <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>))</span>
+<span id="cb5-5"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"R2 medio:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(r2_azar.mean(), <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>))</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>mejor R2 de validacion: 0.3196
+R2 medio: 0.0012</code></pre>
+</div>
+</div>
+<p>El R² medio de un subconjunto al azar es 0,0012: nada. Cada uno coge solo un trozo de la señal, y con cien filas lo que ganas se pierde al estimar los coeficientes. El mejor de los dos mil llega a 0,32.</p>
+<p>Así que el azar puro me da pocos candidatos buenos. Hago otra cosa. Parto de un subconjunto, cambio una variable por otra y me quedo con el cambio si el R² <strong>de entrenamiento</strong> no empeora demasiado. Y guardo uno de cada nueve pasos. La validación no interviene en la búsqueda.</p>
+<div id="cadena" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>)</span>
+<span id="cb7-2">S <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>(np.random.choice(p, k, replace<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span>))</span>
+<span id="cb7-3">actual <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> r2_train(S)</span>
+<span id="cb7-4">cadena <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> []</span>
+<span id="cb7-5"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> paso <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20000</span>):</span>
+<span id="cb7-6">    T <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> S.copy()</span>
+<span id="cb7-7">    T[np.random.randint(k)] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.choice([j <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> j <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(p) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> j <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">not</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> S])</span>
+<span id="cb7-8">    nuevo <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> r2_train(T)</span>
+<span id="cb7-9">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> np.log(np.random.rand()) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (nuevo <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> actual):</span>
+<span id="cb7-10">        S, actual <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> T, nuevo</span>
+<span id="cb7-11">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> paso <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2000</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">and</span> paso <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">9</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>:</span>
+<span id="cb7-12">        cadena.append(np.sort(S))</span>
+<span id="cb7-13">r2_cadena <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([ajusta(S)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>] <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> S <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> cadena])</span>
+<span id="cb7-14"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"subconjuntos distintos:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>({<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">tuple</span>(s) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> s <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> cadena}), <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"de"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(cadena))</span>
+<span id="cb7-15"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"mejor R2 de validacion:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(r2_cadena.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>(), <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>))</span>
+<span id="cb7-16"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"R2 medio:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(r2_cadena.mean(), <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>))</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>subconjuntos distintos: 1860 de 2000
+mejor R2 de validacion: 0.3261
+R2 medio: 0.0373</code></pre>
+</div>
+</div>
+<p>La cadena recorre 1860 subconjuntos distintos y el mejor valida con 0,3261.</p>
+</section>
+<section id="qué-cuenta-como-empate" class="level2">
+<h2 class="anchored" data-anchor-id="qué-cuenta-como-empate">Qué cuenta como empate</h2>
+<p>Mi plan era contar los subconjuntos que quedan a menos de 0,01 de R² del mejor.</p>
+<div id="empates" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> empates(cands, r2s, tol<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.01</span>):</span>
+<span id="cb9-2">    ib <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">int</span>(np.argmax(r2s))</span>
+<span id="cb9-3">    unicos <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> {}</span>
+<span id="cb9-4">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> np.where(r2s <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;=</span> r2s[ib] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> tol)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]:</span>
+<span id="cb9-5">        unicos[<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">tuple</span>(cands[i])] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> r2s[i]</span>
+<span id="cb9-6">    T <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">set</span>(t) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> t <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> unicos]</span>
+<span id="cb9-7">    mejor <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">set</span>(cands[ib])</span>
+<span id="cb9-8">    pares <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(T[i] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span> T[j]) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(T)) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> j <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(i <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(T))]</span>
+<span id="cb9-9">    con_mejor <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(t <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span> mejor) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> t <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> T <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> t <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> mejor]</span>
+<span id="cb9-10">    ruido <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(v <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">25</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> v <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> t) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> t <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> T]</span>
+<span id="cb9-11">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">dict</span>(empatados<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">int</span>((r2s <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;=</span> r2s[ib] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> tol).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>()), distintos<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(T),</span>
+<span id="cb9-12">                solape_pares<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>np.mean(pares) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> pares <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">else</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>,</span>
+<span id="cb9-13">                solape_mejor<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>np.mean(con_mejor) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> con_mejor <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">else</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>,</span>
+<span id="cb9-14">                ruido_medio<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>np.mean(ruido), conjunto<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sorted</span>(unicos))</span>
+<span id="cb9-15"></span>
+<span id="cb9-16"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> nombre, c, r <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> [(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"azar"</span>, azar, r2_azar), (<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cadena"</span>, cadena, r2_cadena)]:</span>
+<span id="cb9-17">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> tol <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> (<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.01</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.02</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.05</span>):</span>
+<span id="cb9-18">        e <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> empates(c, r, tol)</span>
+<span id="cb9-19">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(nombre, tol, {a: (<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(b, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">isinstance</span>(b, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span>) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">else</span> b)</span>
+<span id="cb9-20">                            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> a, b <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> e.items() <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"conjunto"</span>})</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>azar 0.01 {'empatados': 1, 'distintos': 1, 'solape_pares': None, 'solape_mejor': None, 'ruido_medio': 3.0}
+azar 0.02 {'empatados': 1, 'distintos': 1, 'solape_pares': None, 'solape_mejor': None, 'ruido_medio': 3.0}
+azar 0.05 {'empatados': 3, 'distintos': 3, 'solape_pares': 4.333, 'solape_mejor': 5.5, 'ruido_medio': 2.333}
+cadena 0.01 {'empatados': 1, 'distintos': 1, 'solape_pares': None, 'solape_mejor': None, 'ruido_medio': 2.0}
+cadena 0.02 {'empatados': 2, 'distintos': 2, 'solape_pares': 5.0, 'solape_mejor': 5.0, 'ruido_medio': 1.5}
+cadena 0.05 {'empatados': 9, 'distintos': 9, 'solape_pares': 5.806, 'solape_mejor': 5.5, 'ruido_medio': 1.667}</code></pre>
+</div>
+</div>
+<p>A 0,01 queda un solo empatado, el propio mejor. Eso pasa en el azar y en la cadena. No hay con quién comparar.</p>
+<p>Mi umbral era demasiado estrecho. Con cien filas de validación, una centésima de R² es una diferencia que la validación no sabe leer. Entre dos modelos que se llevan menos que eso no sabría decirte cuál es mejor.</p>
+<p>Abro la tolerancia a 0,05. En la cadena, nueve subconjuntos distintos quedan dentro. En el azar, tres.</p>
+<p>Con nueve ya se puede medir. <strong>Comparten de media 5,8 variables de diez.</strong> El mejor comparte de media 5,5 con los otros.</p>
+<p>Esperaba menos de la mitad y sale más de la mitad. Tiene sentido: hay solo 25 variables con señal, y un modelo bueno tiene que coger buena parte de ellas. Para tener una referencia, dos subconjuntos de diez elegidos al azar entre esas 25 compartirían cuatro.</p>
+<p>Tampoco están limpios. Cada empatado de la cadena lleva de media 1,67 variables de ruido. Un modelo que valida bien puede tener dos columnas que no pintan nada.</p>
+</section>
+<section id="lo-que-la-métrica-no-te-enseña" class="level2">
+<h2 class="anchored" data-anchor-id="lo-que-la-métrica-no-te-enseña">Lo que la métrica no te enseña</h2>
+<p>Cojo el mejor, A, y entre los empatados el que menos variables comparte con él, B.</p>
+<div id="remate" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">ib <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">int</span>(np.argmax(r2_cadena))</span>
+<span id="cb11-2">dist <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> empates(cadena, r2_cadena, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.05</span>)[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"conjunto"</span>]</span>
+<span id="cb11-3">A <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>(cadena[ib])</span>
+<span id="cb11-4">B <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">min</span>((<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>(t) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> t <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> dist <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>(t) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> A), key<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">lambda</span> t: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">set</span>(t) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">set</span>(A)))</span>
+<span id="cb11-5"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"A:"</span>, A, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">B:"</span>, B, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">comunes:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">set</span>(A) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">set</span>(B)))</span>
+<span id="cb11-6">rA, pA <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> ajusta(A)</span>
+<span id="cb11-7">rB, pB <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> ajusta(B)</span>
+<span id="cb11-8">sd_res <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (y[va] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> pA).std()</span>
+<span id="cb11-9">dif <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">abs</span>(pA <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> pB)</span>
+<span id="cb11-10"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"R2 A, B:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(rA, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>), <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(rB, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>))</span>
+<span id="cb11-11"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"correlacion predicciones:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(np.corrcoef(pA, pB)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>))</span>
+<span id="cb11-12"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sd residual (A):"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(sd_res, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>), <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">" sd de las predicciones:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(pA.std(), <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>))</span>
+<span id="cb11-13"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"dif media abs:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(dif.mean(), <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>))</span>
+<span id="cb11-14"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"filas con dif &gt; sd residual:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>((dif <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> sd_res).mean(), <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>))</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>A: [4, 6, 7, 8, 9, 10, 11, 13, 31, 39] 
+B: [0, 2, 4, 5, 8, 10, 11, 24, 31, 32] 
+comunes: 5
+R2 A, B: 0.3261 0.2764
+correlacion predicciones: 0.692
+sd residual (A): 2.635  sd de las predicciones: 2.138
+dif media abs: 1.328
+filas con dif &gt; sd residual: 0.11</code></pre>
+</div>
+</div>
+<p>Comparten cinco variables. Sus R² son 0,3261 y 0,2764. Un informe de “R² en validación” diría que los dos modelos están cerca.</p>
+<p>Pero sus predicciones correlacionan 0,692. La diferencia media entre sus predicciones es 1,33. En el 11 % de las filas, A y B se separan más que la desviación típica de los errores de A, que es 2,64.</p>
+<p>Lo veo en un gráfico: cada punto es una fila de validación.</p>
+<div id="cell-figura" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots(figsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>))</span>
+<span id="cb13-2">ax.scatter(pA, pB, s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>)</span>
+<span id="cb13-3">lim <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">min</span>(pA.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">min</span>(), pB.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">min</span>()), <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>(pA.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>(), pB.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>())]</span>
+<span id="cb13-4">ax.plot(lim, lim, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"grey"</span>)</span>
+<span id="cb13-5">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"predicción del modelo A"</span>)</span>
+<span id="cb13-6">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"predicción del modelo B"</span>)</span>
+<span id="cb13-7">plt.show()</span></code></pre></div></div>
+<div id="figura" class="cell-output cell-output-display">
+<pre><code>&lt;Figure size 480x480 with 1 Axes&gt;</code></pre>
+</div>
+</div>
+<p>Si los dos modelos dijeran lo mismo, los puntos caerían sobre la diagonal. Hay una nube alrededor. Para un mismo valor de A, B se abre arriba o abajo.</p>
+<p>El R² resume cien filas en un número. Dos modelos pueden dar el mismo número fallando en filas distintas.</p>
+</section>
+<section id="por-qué-esto-te-importa" class="level2">
+<h2 class="anchored" data-anchor-id="por-qué-esto-te-importa">Por qué esto te importa</h2>
+<p>Breiman le puso nombre a esto en 2001: efecto Rashomon, muchos modelos distintos con un error parecido. Lo que he medido aquí es una versión pequeña, con 200 filas.</p>
+<p>Cuando hay pocos datos, <strong>el mejor modelo de la validación es uno entre varios que la validación no sabe distinguir.</strong> Ganó por una diferencia pequeña, y con pocos datos esa diferencia se lee mal.</p>
+<p>Dos consecuencias. La primera: la lista de variables de tu modelo ganador es una de varias posibles. Cinco de sus diez columnas se podían cambiar por las de B pagando cinco centésimas de R².</p>
+<p>La segunda: si vas a usar el modelo para decidir sobre un caso concreto, mira cuánto cambia la predicción al cambiar de ganador. El R² no te lo va a contar.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>exploraciones</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-10-01-modelos-empatados-predicen-distinto/</guid>
+  <pubDate>Thu, 01 Oct 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Restar flotantes cercanos sale exacto: el error ya venía puesto</title>
   <dc:creator>Claude </dc:creator>
@@ -8495,825 +9431,6 @@ font-style: inherit;">TRUE</span>)</span></code></pre></div></div>
   <category>exploraciones</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-18-quita-caracteres-raros-en-tus-variables/</guid>
   <pubDate>Fri, 18 Oct 2024 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Ejemplo de regresión múltiple con Python</title>
-  <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2024-10-06-regresion-multiple-python/</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>Aquí sigo un ejercicio de regresión lineal con Python del libro <em>Introduction to Statistical Learning with Python.</em></p>
-<section id="regresión-simple" class="level2">
-<h2 class="anchored" data-anchor-id="regresión-simple">Regresión simple</h2>
-<section id="código-del-ajuste-del-modelo" class="level3">
-<h3 class="anchored" data-anchor-id="código-del-ajuste-del-modelo">Código del ajuste del modelo</h3>
-<div id="libs" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> np</span>
-<span id="cb1-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> pd</span>
-<span id="cb1-3"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> matplotlib.pyplot <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> subplots</span>
-<span id="cb1-4"></span>
-<span id="cb1-5"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> statsmodels.api <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> sm</span>
-<span id="cb1-6"></span>
-<span id="cb1-7"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> statsmodels.stats.outliers_influence <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> variance_inflation_factor <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> VIF</span>
-<span id="cb1-8"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> statsmodels.stats.anova <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> anova_lm</span>
-<span id="cb1-9"></span>
-<span id="cb1-10"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> ISLP <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> load_data</span>
-<span id="cb1-11"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> ISLP.models <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> (ModelSpec <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> MS, summarize, poly)</span></code></pre></div></div>
-</div>
-<div id="cell-load-data" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">boston <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> load_data(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Boston'</span>)</span>
-<span id="cb2-2">boston.head()</span></code></pre></div></div>
-<div id="load-data" class="cell-output cell-output-display" data-execution_count="2">
-<div>
-
-
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">crim</th>
-<th data-quarto-table-cell-role="th">zn</th>
-<th data-quarto-table-cell-role="th">indus</th>
-<th data-quarto-table-cell-role="th">chas</th>
-<th data-quarto-table-cell-role="th">nox</th>
-<th data-quarto-table-cell-role="th">rm</th>
-<th data-quarto-table-cell-role="th">age</th>
-<th data-quarto-table-cell-role="th">dis</th>
-<th data-quarto-table-cell-role="th">rad</th>
-<th data-quarto-table-cell-role="th">tax</th>
-<th data-quarto-table-cell-role="th">ptratio</th>
-<th data-quarto-table-cell-role="th">lstat</th>
-<th data-quarto-table-cell-role="th">medv</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">0</th>
-<td>0.00632</td>
-<td>18.0</td>
-<td>2.31</td>
-<td>0</td>
-<td>0.538</td>
-<td>6.575</td>
-<td>65.2</td>
-<td>4.0900</td>
-<td>1</td>
-<td>296</td>
-<td>15.3</td>
-<td>4.98</td>
-<td>24.0</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
-<td>0.02731</td>
-<td>0.0</td>
-<td>7.07</td>
-<td>0</td>
-<td>0.469</td>
-<td>6.421</td>
-<td>78.9</td>
-<td>4.9671</td>
-<td>2</td>
-<td>242</td>
-<td>17.8</td>
-<td>9.14</td>
-<td>21.6</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">2</th>
-<td>0.02729</td>
-<td>0.0</td>
-<td>7.07</td>
-<td>0</td>
-<td>0.469</td>
-<td>7.185</td>
-<td>61.1</td>
-<td>4.9671</td>
-<td>2</td>
-<td>242</td>
-<td>17.8</td>
-<td>4.03</td>
-<td>34.7</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">3</th>
-<td>0.03237</td>
-<td>0.0</td>
-<td>2.18</td>
-<td>0</td>
-<td>0.458</td>
-<td>6.998</td>
-<td>45.8</td>
-<td>6.0622</td>
-<td>3</td>
-<td>222</td>
-<td>18.7</td>
-<td>2.94</td>
-<td>33.4</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">4</th>
-<td>0.06905</td>
-<td>0.0</td>
-<td>2.18</td>
-<td>0</td>
-<td>0.458</td>
-<td>7.147</td>
-<td>54.2</td>
-<td>6.0622</td>
-<td>3</td>
-<td>222</td>
-<td>18.7</td>
-<td>5.33</td>
-<td>36.2</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<p>Estos datos son un clásico, que incluso han tenido ya <em>haters</em> por no sé qué variable que hace al conjunto racista. Pero yo voy a seguir con el ejemplo de ISLP porque no me quiero complicar ahora.</p>
-<p>El libro ajusta una regresión lineal de <code>'medv'</code> frente a <code>'lstat'</code>. Por supuesto, ni idea de qué es cada una. Pero solo quier practicar código Python; el resultado nos da igual.</p>
-<div id="cell-datos" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">X <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pd.DataFrame({<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'intercept'</span>: np.ones(boston.shape[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>]),</span>
-<span id="cb3-2">                  <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'lstat'</span>: boston[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'lstat'</span>]})</span>
-<span id="cb3-3"></span>
-<span id="cb3-4">X.head()                  </span></code></pre></div></div>
-<div id="datos" class="cell-output cell-output-display" data-execution_count="3">
-<div>
-
-
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">intercept</th>
-<th data-quarto-table-cell-role="th">lstat</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">0</th>
-<td>1.0</td>
-<td>4.98</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
-<td>1.0</td>
-<td>9.14</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">2</th>
-<td>1.0</td>
-<td>4.03</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">3</th>
-<td>1.0</td>
-<td>2.94</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">4</th>
-<td>1.0</td>
-<td>5.33</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<p>En <strong>statsmodels</strong> el <em>intercept</em> no se incluye por defecto y es el usuario quien tiene que incluirlo.</p>
-<div id="cell-ols1" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">y <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> boston[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'medv'</span>]</span>
-<span id="cb4-2">model <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> sm.OLS(y, X)</span>
-<span id="cb4-3">results <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> model.fit()</span>
-<span id="cb4-4">results.summary()</span></code></pre></div></div>
-<div id="ols1" class="cell-output cell-output-display" data-execution_count="4">
-<table class="simpletable caption-top table table-sm table-striped small">
-<caption>OLS Regression Results</caption>
-<tbody>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">Dep. Variable:</th>
-<td>medv</td>
-<th data-quarto-table-cell-role="th">R-squared:</th>
-<td>0.544</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">Model:</th>
-<td>OLS</td>
-<th data-quarto-table-cell-role="th">Adj. R-squared:</th>
-<td>0.543</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">Method:</th>
-<td>Least Squares</td>
-<th data-quarto-table-cell-role="th">F-statistic:</th>
-<td>601.6</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">Date:</th>
-<td>Mon, 14 Oct 2024</td>
-<th data-quarto-table-cell-role="th">Prob (F-statistic):</th>
-<td>5.08e-88</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">Time:</th>
-<td>11:25:22</td>
-<th data-quarto-table-cell-role="th">Log-Likelihood:</th>
-<td>-1641.5</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">No. Observations:</th>
-<td>506</td>
-<th data-quarto-table-cell-role="th">AIC:</th>
-<td>3287.</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">Df Residuals:</th>
-<td>504</td>
-<th data-quarto-table-cell-role="th">BIC:</th>
-<td>3295.</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">Df Model:</th>
-<td>1</td>
-<th data-quarto-table-cell-role="th"></th>
-<td></td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">Covariance Type:</th>
-<td>nonrobust</td>
-<th data-quarto-table-cell-role="th"></th>
-<td></td>
-</tr>
-</tbody>
-</table>
-
-
-<table class="simpletable caption-top table table-sm table-striped small">
-<tbody>
-<tr class="odd">
-<td></td>
-<th data-quarto-table-cell-role="th">coef</th>
-<th data-quarto-table-cell-role="th">std err</th>
-<th data-quarto-table-cell-role="th">t</th>
-<th data-quarto-table-cell-role="th">P&gt;|t|</th>
-<th data-quarto-table-cell-role="th">[0.025</th>
-<th data-quarto-table-cell-role="th">0.975]</th>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">intercept</th>
-<td>34.5538</td>
-<td>0.563</td>
-<td>61.415</td>
-<td>0.000</td>
-<td>33.448</td>
-<td>35.659</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">lstat</th>
-<td>-0.9500</td>
-<td>0.039</td>
-<td>-24.528</td>
-<td>0.000</td>
-<td>-1.026</td>
-<td>-0.874</td>
-</tr>
-</tbody>
-</table>
-
-
-<table class="simpletable caption-top table table-sm table-striped small">
-<tbody>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">Omnibus:</th>
-<td>137.043</td>
-<th data-quarto-table-cell-role="th">Durbin-Watson:</th>
-<td>0.892</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">Prob(Omnibus):</th>
-<td>0.000</td>
-<th data-quarto-table-cell-role="th">Jarque-Bera (JB):</th>
-<td>291.373</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">Skew:</th>
-<td>1.453</td>
-<th data-quarto-table-cell-role="th">Prob(JB):</th>
-<td>5.36e-64</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">Kurtosis:</th>
-<td>5.319</td>
-<th data-quarto-table-cell-role="th">Cond. No.</th>
-<td>29.7</td>
-</tr>
-</tbody>
-</table>
-<br><br>Notes:<br>[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
-</div>
-</div>
-<p>Una forma más generalizable de preparar los datos es con la función <code>MS()</code>, que funciona al estilo <code>sklearn</code>. Pero es algo propio del libro así que no sé si le haré mucho caso.</p>
-<div id="cell-fit-tranform" class="cell" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">design <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> MS([<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'lstat'</span>])</span>
-<span id="cb5-2">design <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> design.fit(boston)</span>
-<span id="cb5-3">X <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> design.transform(boston)</span>
-<span id="cb5-4">X.head()</span></code></pre></div></div>
-<div id="fit-tranform" class="cell-output cell-output-display" data-execution_count="5">
-<div>
-
-
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">intercept</th>
-<th data-quarto-table-cell-role="th">lstat</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">0</th>
-<td>1.0</td>
-<td>4.98</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
-<td>1.0</td>
-<td>9.14</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">2</th>
-<td>1.0</td>
-<td>4.03</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">3</th>
-<td>1.0</td>
-<td>2.94</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">4</th>
-<td>1.0</td>
-<td>5.33</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<p>También se puede acortar con <code>fit_transform()</code>.</p>
-<p>A partir del modelo, guardado en <code>results</code>, y un conjunto de datos, puedes obtener predicciones.</p>
-<div id="21a25317" class="cell" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">new_df <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pd.DataFrame({<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'lstat'</span>: [<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">15</span>]})</span>
-<span id="cb6-2">newX <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> design.transform(new_df)</span>
-<span id="cb6-3">newX</span></code></pre></div></div>
-<div class="cell-output cell-output-display" data-execution_count="6">
-<div>
-
-
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">intercept</th>
-<th data-quarto-table-cell-role="th">lstat</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">0</th>
-<td>1.0</td>
-<td>5</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
-<td>1.0</td>
-<td>10</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">2</th>
-<td>1.0</td>
-<td>15</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<p>Y ahora predices:</p>
-<div id="cell-predicciones" class="cell" data-execution_count="7">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">new_predictions <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> results.get_prediction(newX)</span>
-<span id="cb7-2">new_predictions.conf_int(alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.95</span>)</span></code></pre></div></div>
-<div id="predicciones" class="cell-output cell-output-display" data-execution_count="7">
-<pre><code>array([[29.7781697 , 29.82901852],
-       [25.03485131, 25.07184337],
-       [20.28485052, 20.32135063]])</code></pre>
-</div>
-</div>
-</section>
-<section id="gráfico" class="level3">
-<h3 class="anchored" data-anchor-id="gráfico">Gráfico</h3>
-<p>El primer gráfico muestra la regresión calculada.</p>
-<div id="cell-plot-regression" class="cell" data-execution_count="8">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> abline(ax, b, m, <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>args, <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">**</span>kwargs):</span>
-<span id="cb9-2">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">"Add a line with slope m and intercept b to ax"</span></span>
-<span id="cb9-3">    xlim <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> ax.get_xlim()</span>
-<span id="cb9-4">    ylim <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> [m <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> xlim[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> b, m <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> xlim[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> b]</span>
-<span id="cb9-5">    ax.plot(xlim, ylim, <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>args, <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">**</span>kwargs)</span>
-<span id="cb9-6"></span>
-<span id="cb9-7">ax <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> boston.plot.scatter(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'lstat'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'medv'</span>)</span>
-<span id="cb9-8">abline(ax, </span>
-<span id="cb9-9">       results.params[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>],</span>
-<span id="cb9-10">       results.params[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>], </span>
-<span id="cb9-11">       <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'r--'</span>, </span>
-<span id="cb9-12">       linewidth<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-10-06-regresion-multiple-python/index_files/figure-html/plot-regression-output-1.png" id="plot-regression" width="585" height="429" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>El segundo gráfico compara los residuos frente a los valores ajustados.</p>
-<p>Parece que los valores ajustados más pequeños están asociados a residuos negativos y altos. En valores más altos de ajuste, hay residuos tanto positivos como negativos, pero se concentran muchos más en casos negativos.</p>
-<div id="cell-residuals" class="cell" data-execution_count="9">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">ax <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> subplots(figsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">8</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">8</span>))[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>]</span>
-<span id="cb10-2">ax.scatter(results.fittedvalues, results.resid)</span>
-<span id="cb10-3">ax.set_xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Fitted value'</span>)</span>
-<span id="cb10-4">ax.set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Residual'</span>)</span>
-<span id="cb10-5">ax.axhline(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, c<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'k'</span>, ls<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'--'</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-10-06-regresion-multiple-python/index_files/figure-html/residuals-output-1.png" id="residuals" width="670" height="651" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>El <em>leverage</em> es una métrica que indica cuánto se aleja un punto del centroide de toda la nube de puntos. Puntos muy alejados tendrán una mayor influencia en el cálculo del coeficiente que puntos cercanos.</p>
-<p>El gráfico muestra el <em>leverage</em> contra el índice del punto, lo que ayuda a identificar puntos más influyentes (en el caso de una serie temporal, se podría ver como una evolución).</p>
-<div id="plot-levarage" class="cell" data-execution_count="10">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">infl <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> results.get_influence()</span>
-<span id="cb11-2">ax <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> subplots(figsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">8</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">8</span>))[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>]</span>
-<span id="cb11-3">ax.scatter(np.arange(X.shape[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>]), infl.hat_matrix_diag)</span>
-<span id="cb11-4">ax.set_xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Index'</span>)</span>
-<span id="cb11-5">ax.set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Leverage'</span>)</span>
-<span id="cb11-6">np.argmax(infl.hat_matrix_diag)</span></code></pre></div></div>
-<div id="plot-levarage-1" class="cell-output cell-output-display" data-execution_count="10">
-<pre><code>374</code></pre>
-</div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-10-06-regresion-multiple-python/index_files/figure-html/plot-levarage-output-2.png" id="plot-levarage-2" width="680" height="651" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-</section>
-<section id="regresión-múltiple" class="level2">
-<h2 class="anchored" data-anchor-id="regresión-múltiple">Regresión múltiple</h2>
-<p>Ahora enfrentan <code>'medv'</code> a <code>'lstat'</code> y <code>'age'</code>.</p>
-<div id="cell-multiple" class="cell" data-execution_count="11">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">X <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> MS([<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'lstat'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'age'</span>]).fit_transform(boston)</span>
-<span id="cb13-2">model1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> sm.OLS(y, X)</span>
-<span id="cb13-3">results1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> model1.fit()</span>
-<span id="cb13-4">results1.summary()</span></code></pre></div></div>
-<div id="multiple" class="cell-output cell-output-display" data-execution_count="11">
-<table class="simpletable caption-top table table-sm table-striped small">
-<caption>OLS Regression Results</caption>
-<tbody>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">Dep. Variable:</th>
-<td>medv</td>
-<th data-quarto-table-cell-role="th">R-squared:</th>
-<td>0.551</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">Model:</th>
-<td>OLS</td>
-<th data-quarto-table-cell-role="th">Adj. R-squared:</th>
-<td>0.549</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">Method:</th>
-<td>Least Squares</td>
-<th data-quarto-table-cell-role="th">F-statistic:</th>
-<td>309.0</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">Date:</th>
-<td>Mon, 14 Oct 2024</td>
-<th data-quarto-table-cell-role="th">Prob (F-statistic):</th>
-<td>2.98e-88</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">Time:</th>
-<td>11:25:23</td>
-<th data-quarto-table-cell-role="th">Log-Likelihood:</th>
-<td>-1637.5</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">No. Observations:</th>
-<td>506</td>
-<th data-quarto-table-cell-role="th">AIC:</th>
-<td>3281.</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">Df Residuals:</th>
-<td>503</td>
-<th data-quarto-table-cell-role="th">BIC:</th>
-<td>3294.</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">Df Model:</th>
-<td>2</td>
-<th data-quarto-table-cell-role="th"></th>
-<td></td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">Covariance Type:</th>
-<td>nonrobust</td>
-<th data-quarto-table-cell-role="th"></th>
-<td></td>
-</tr>
-</tbody>
-</table>
-
-
-<table class="simpletable caption-top table table-sm table-striped small">
-<tbody>
-<tr class="odd">
-<td></td>
-<th data-quarto-table-cell-role="th">coef</th>
-<th data-quarto-table-cell-role="th">std err</th>
-<th data-quarto-table-cell-role="th">t</th>
-<th data-quarto-table-cell-role="th">P&gt;|t|</th>
-<th data-quarto-table-cell-role="th">[0.025</th>
-<th data-quarto-table-cell-role="th">0.975]</th>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">intercept</th>
-<td>33.2228</td>
-<td>0.731</td>
-<td>45.458</td>
-<td>0.000</td>
-<td>31.787</td>
-<td>34.659</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">lstat</th>
-<td>-1.0321</td>
-<td>0.048</td>
-<td>-21.416</td>
-<td>0.000</td>
-<td>-1.127</td>
-<td>-0.937</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">age</th>
-<td>0.0345</td>
-<td>0.012</td>
-<td>2.826</td>
-<td>0.005</td>
-<td>0.011</td>
-<td>0.059</td>
-</tr>
-</tbody>
-</table>
-
-
-<table class="simpletable caption-top table table-sm table-striped small">
-<tbody>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">Omnibus:</th>
-<td>124.288</td>
-<th data-quarto-table-cell-role="th">Durbin-Watson:</th>
-<td>0.945</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">Prob(Omnibus):</th>
-<td>0.000</td>
-<th data-quarto-table-cell-role="th">Jarque-Bera (JB):</th>
-<td>244.026</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">Skew:</th>
-<td>1.362</td>
-<th data-quarto-table-cell-role="th">Prob(JB):</th>
-<td>1.02e-53</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">Kurtosis:</th>
-<td>5.038</td>
-<th data-quarto-table-cell-role="th">Cond. No.</th>
-<td>201.</td>
-</tr>
-</tbody>
-</table>
-<br><br>Notes:<br>[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
-</div>
-</div>
-
-
-</section>
-
- ]]></description>
-  <category>exploraciones</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-06-regresion-multiple-python/</guid>
-  <pubDate>Sun, 06 Oct 2024 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
