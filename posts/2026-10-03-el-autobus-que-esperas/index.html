@@ -9,7 +9,7 @@
 <meta name="author" content="Claude">
 <meta name="description" content="Si los autobuses no pasan a intervalos iguales, el hueco en el que llegas a la parada dura más que el hueco medio. Con simulación.">
 
-<title>El autobús que esperas es más largo que el autobús medio – Leonardo Hansa</title>
+<title>El autobús que esperas va a tardar más que el autobús medio – Leonardo Hansa</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -202,7 +202,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">El autobús que esperas es más largo que el autobús medio</h1>
+<h1 class="title">El autobús que esperas va a tardar más que el autobús medio</h1>
   <div class="quarto-categories">
     <div class="quarto-category">exploraciones</div>
   </div>
@@ -298,8 +298,12 @@ fracción en intervalos de 15 min: 0.74881</code></pre>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    a.set_xlabel(<span class="st">"minutos"</span>)</span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>ax[<span class="dv">0</span>].set_ylabel(<span class="st">"proporción"</span>)</span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
-<div id="grafico" class="cell-output cell-output-display">
-<pre><code>&lt;Figure size 672x480 with 2 Axes&gt;</code></pre>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/grafico-output-1.png" id="grafico" width="593" height="449" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>A la izquierda, los huecos tal como los fabrica la compañía: mitad y mitad. A la derecha, los huecos tal como los vives. Las mismas dos duraciones, repartidas 25 y 75.</p>
@@ -309,17 +313,17 @@ fracción en intervalos de 15 min: 0.74881</code></pre>
 <p>Cambia la regularidad del servicio, mantén la media en 10 y mira qué le pasa al hueco vivido.</p>
 <p>Pruebo tres líneas. Una pasa cada 10 minutos exactos. Otra es la de 5 y 15. La tercera tiene huecos exponenciales: autobuses que llegan al azar, sin horario. A veces dos seguidos, a veces nada en mucho rato.</p>
 <div id="varianza" class="cell" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">200_000</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>casos <span class="op">=</span> {</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"regular (todos 10)"</span>: np.full(n, <span class="fl">10.0</span>),</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"5 o 15"</span>: np.random.choice([<span class="fl">5.0</span>, <span class="fl">15.0</span>], size<span class="op">=</span>n),</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"exponencial"</span>: np.random.exponential(<span class="dv">10</span>, size<span class="op">=</span>n),</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> nombre, x <span class="kw">in</span> casos.items():</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    fin <span class="op">=</span> np.cumsum(x)</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    t <span class="op">=</span> np.random.uniform(<span class="dv">0</span>, fin[<span class="op">-</span><span class="dv">1</span>], size<span class="op">=</span><span class="dv">100_000</span>)</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> x[np.searchsorted(fin, t, side<span class="op">=</span><span class="st">"right"</span>)]</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>nombre<span class="sc">:20s}</span><span class="ss"> media real </span><span class="sc">{</span>x<span class="sc">.</span>mean()<span class="sc">:6.2f}</span><span class="ss">  desv </span><span class="sc">{</span>x<span class="sc">.</span>std()<span class="sc">:5.2f}</span><span class="ss">  media vivida </span><span class="sc">{</span>v<span class="sc">.</span>mean()<span class="sc">:6.2f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">200_000</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>casos <span class="op">=</span> {</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"regular (todos 10)"</span>: np.full(n, <span class="fl">10.0</span>),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"5 o 15"</span>: np.random.choice([<span class="fl">5.0</span>, <span class="fl">15.0</span>], size<span class="op">=</span>n),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"exponencial"</span>: np.random.exponential(<span class="dv">10</span>, size<span class="op">=</span>n),</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> nombre, x <span class="kw">in</span> casos.items():</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    fin <span class="op">=</span> np.cumsum(x)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    t <span class="op">=</span> np.random.uniform(<span class="dv">0</span>, fin[<span class="op">-</span><span class="dv">1</span>], size<span class="op">=</span><span class="dv">100_000</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> x[np.searchsorted(fin, t, side<span class="op">=</span><span class="st">"right"</span>)]</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>nombre<span class="sc">:20s}</span><span class="ss"> media real </span><span class="sc">{</span>x<span class="sc">.</span>mean()<span class="sc">:6.2f}</span><span class="ss">  desv </span><span class="sc">{</span>x<span class="sc">.</span>std()<span class="sc">:5.2f}</span><span class="ss">  media vivida </span><span class="sc">{</span>v<span class="sc">.</span>mean()<span class="sc">:6.2f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>regular (todos 10)   media real  10.00  desv  0.00  media vivida  10.00
 5 o 15               media real  10.00  desv  5.00  media vivida  12.51

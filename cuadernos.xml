@@ -12,7 +12,7 @@
 <generator>quarto-1.10.18</generator>
 <lastBuildDate>Sat, 03 Oct 2026 00:00:00 GMT</lastBuildDate>
 <item>
-  <title>El autobús que esperas es más largo que el autobús medio</title>
+  <title>El autobús que esperas va a tardar más que el autobús medio</title>
   <dc:creator>Claude </dc:creator>
   <link>https://lhansa.github.io/technical-notebooks/posts/2026-10-03-el-autobus-que-esperas/</link>
   <description><![CDATA[ 
@@ -209,8 +209,12 @@ font-style: inherit;">0</span>].set_ylabel(<span class="st" style="color: #20794
 background-color: null;
 font-style: inherit;">"proporción"</span>)</span>
 <span id="cb6-9">plt.show()</span></code></pre></div></div>
-<div id="grafico" class="cell-output cell-output-display">
-<pre><code>&lt;Figure size 672x480 with 2 Axes&gt;</code></pre>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-10-03-el-autobus-que-esperas/index_files/figure-html/grafico-output-1.png" id="grafico" width="593" height="449" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>A la izquierda, los huecos tal como los fabrica la compañía: mitad y mitad. A la derecha, los huecos tal como los vives. Las mismas dos duraciones, repartidas 25 y 75.</p>
@@ -220,20 +224,20 @@ font-style: inherit;">"proporción"</span>)</span>
 <p>Cambia la regularidad del servicio, mantén la media en 10 y mira qué le pasa al hueco vivido.</p>
 <p>Pruebo tres líneas. Una pasa cada 10 minutos exactos. Otra es la de 5 y 15. La tercera tiene huecos exponenciales: autobuses que llegan al azar, sin horario. A veces dos seguidos, a veces nada en mucho rato.</p>
 <div id="varianza" class="cell" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">n <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">n <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">200_000</span></span>
-<span id="cb8-2">casos <span class="op" style="color: #5E5E5E;
+<span id="cb7-2">casos <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> {</span>
-<span id="cb8-3">    <span class="st" style="color: #20794D;
+<span id="cb7-3">    <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"regular (todos 10)"</span>: np.full(n, <span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">10.0</span>),</span>
-<span id="cb8-4">    <span class="st" style="color: #20794D;
+<span id="cb7-4">    <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"5 o 15"</span>: np.random.choice([<span class="fl" style="color: #AD0000;
 background-color: null;
@@ -242,25 +246,25 @@ background-color: null;
 font-style: inherit;">15.0</span>], size<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>n),</span>
-<span id="cb8-5">    <span class="st" style="color: #20794D;
+<span id="cb7-5">    <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"exponencial"</span>: np.random.exponential(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">10</span>, size<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>n),</span>
-<span id="cb8-6">}</span>
-<span id="cb8-7"><span class="cf" style="color: #003B4F;
+<span id="cb7-6">}</span>
+<span id="cb7-7"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">for</span> nombre, x <span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">in</span> casos.items():</span>
-<span id="cb8-8">    fin <span class="op" style="color: #5E5E5E;
+<span id="cb7-8">    fin <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> np.cumsum(x)</span>
-<span id="cb8-9">    t <span class="op" style="color: #5E5E5E;
+<span id="cb7-9">    t <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> np.random.uniform(<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -273,14 +277,14 @@ background-color: null;
 font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">100_000</span>)</span>
-<span id="cb8-10">    v <span class="op" style="color: #5E5E5E;
+<span id="cb7-10">    v <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> x[np.searchsorted(fin, t, side<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"right"</span>)]</span>
-<span id="cb8-11">    <span class="bu" style="color: null;
+<span id="cb7-11">    <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
 background-color: null;
@@ -1259,8 +1263,12 @@ font-style: inherit;">"predicción del modelo A"</span>)</span>
 background-color: null;
 font-style: inherit;">"predicción del modelo B"</span>)</span>
 <span id="cb13-7">plt.show()</span></code></pre></div></div>
-<div id="figura" class="cell-output cell-output-display">
-<pre><code>&lt;Figure size 480x480 with 1 Axes&gt;</code></pre>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-10-01-modelos-empatados-predicen-distinto/index_files/figure-html/figura-output-1.png" id="figura" width="439" height="430" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Si los dos modelos dijeran lo mismo, los puntos caerían sobre la diagonal. Hay una nube alrededor. Para un mismo valor de A, B se abre arriba o abajo.</p>
