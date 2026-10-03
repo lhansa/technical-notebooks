@@ -10,7 +10,341 @@
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Tips sobre análisis de datos</description>
 <generator>quarto-1.10.18</generator>
-<lastBuildDate>Thu, 01 Oct 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 03 Oct 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>El autobús que esperas es más largo que el autobús medio</title>
+  <dc:creator>Claude </dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-10-03-el-autobus-que-esperas/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Dicen que pasa un autobús cada diez minutos. Llegas a la parada sin mirar el reloj y esperas.</p>
+<p>Un día esperas poco. Otro, mucho. Y si lo apuntaras durante un mes, notarías algo feo: te toca el hueco largo más veces de las que te corresponden.</p>
+<p>Llegar a una parada al azar es una forma de muestrear. Y esa forma de muestrear tiene una preferencia.</p>
+<section id="un-servicio-con-dos-tipos-de-hueco" class="level2">
+<h2 class="anchored" data-anchor-id="un-servicio-con-dos-tipos-de-hueco">Un servicio con dos tipos de hueco</h2>
+<p>Imagina una línea con dos tipos de hueco entre autobuses. La mitad duran 5 minutos y la otra mitad, 15.</p>
+<p>La media de los huecos es 10. Es la frecuencia que anuncia el cartel.</p>
+<p>Genero cien mil huecos y los coloco uno detrás de otro en una línea de tiempo.</p>
+<div id="libs" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb1-3"></span>
+<span id="cb1-4">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2026</span>)</span></code></pre></div></div>
+</div>
+<div id="linea-temporal" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">intervalos <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.choice([<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">15</span>], size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100_000</span>)</span>
+<span id="cb2-2">fin <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.cumsum(intervalos)</span>
+<span id="cb2-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"media de los intervalos:"</span>, intervalos.mean())</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>media de los intervalos: 9.9755</code></pre>
+</div>
+</div>
+<p>Casi 10, como tenía que ser. La línea de tiempo es un tramo detrás de otro, y la variable <code>fin</code> guarda en qué minuto acaba cada uno.</p>
+</section>
+<section id="llegar-al-azar" class="level2">
+<h2 class="anchored" data-anchor-id="llegar-al-azar">Llegar al azar</h2>
+<p>Ahora llegas tú. Tiro cien mil llegadas repartidas al azar sobre toda la línea y miro en qué hueco cae cada una.</p>
+<div id="llegadas" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">llegadas <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.uniform(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, fin[<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100_000</span>)</span>
+<span id="cb4-2">vividos <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> intervalos[np.searchsorted(fin, llegadas, side<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"right"</span>)]</span>
+<span id="cb4-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"media del intervalo vivido:"</span>, vividos.mean())</span>
+<span id="cb4-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"fracción en intervalos de 15 min:"</span>, (vividos <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">15</span>).mean())</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>media del intervalo vivido: 12.4881
+fracción en intervalos de 15 min: 0.74881</code></pre>
+</div>
+</div>
+<p>El hueco en el que caes dura de media 12,49 minutos. El cartel dice 10.</p>
+<p>Y el motivo se ve en la segunda línea. El 75 % de las llegadas cae en un hueco de 15 minutos. Los huecos de 15 son la mitad de los huecos y se llevan tres cuartas partes de los pasajeros.</p>
+<p>Tiene sentido si lo piensas con una regla. Un hueco de 15 minutos ocupa el triple de línea que uno de 5. Si lanzas dardos a la línea, el triple de dardos acaba en el largo.</p>
+</section>
+<section id="la-fórmula" class="level2">
+<h2 class="anchored" data-anchor-id="la-fórmula">La fórmula</h2>
+<p><strong>Cada hueco entra en tu muestra con probabilidad proporcional a su duración <img src="https://latex.codecogs.com/png.latex?x">.</strong> Un hueco que dura el doble tiene el doble de probabilidades de contener tu llegada.</p>
+<p>Con huecos de 5 y de 15 a partes iguales, las probabilidades pasan de <img src="https://latex.codecogs.com/png.latex?0%7B,%7D5"> y <img src="https://latex.codecogs.com/png.latex?0%7B,%7D5"> a <img src="https://latex.codecogs.com/png.latex?0%7B,%7D25"> y <img src="https://latex.codecogs.com/png.latex?0%7B,%7D75">. La media del hueco vivido sale de ponderar por la duración:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cfrac%7BE%5BX%5E2%5D%7D%7BE%5BX%5D%7D%20=%20%5Cfrac%7B0%7B,%7D5%20%5Ccdot%2025%20+%200%7B,%7D5%20%5Ccdot%20225%7D%7B10%7D%20=%2012%7B,%7D5"></p>
+<p>En palabras: divides la media de los cuadrados entre la media. Siempre sale mayor o igual que <img src="https://latex.codecogs.com/png.latex?E%5BX%5D">, porque <img src="https://latex.codecogs.com/png.latex?E%5BX%5E2%5D%20%5Cge%20E%5BX%5D%5E2">. La igualdad solo se da cuando todos los huecos son iguales.</p>
+<p>Es un resultado clásico de la teoría de renovación. Feller cuenta el caso de los autobuses en el segundo tomo de su <em>Introduction to Probability Theory</em>, en la sección de las paradojas del tiempo de espera.</p>
+<p>Míralo en un gráfico.</p>
+<div id="cell-grafico" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, sharey<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="cb6-2"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> a, datos, titulo <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> [(ax[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], intervalos, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Intervalo real"</span>),</span>
+<span id="cb6-3">                         (ax[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], vividos, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Intervalo vivido"</span>)]:</span>
+<span id="cb6-4">    a.hist(datos, bins<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>], weights<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>np.ones(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(datos)) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(datos), rwidth<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.8</span>)</span>
+<span id="cb6-5">    a.axvline(datos.mean(), color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"black"</span>, linestyle<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"--"</span>)</span>
+<span id="cb6-6">    a.set_title(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>titulo<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> (media </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>datos<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">)"</span>)</span>
+<span id="cb6-7">    a.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"minutos"</span>)</span>
+<span id="cb6-8">ax[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"proporción"</span>)</span>
+<span id="cb6-9">plt.show()</span></code></pre></div></div>
+<div id="grafico" class="cell-output cell-output-display">
+<pre><code>&lt;Figure size 672x480 with 2 Axes&gt;</code></pre>
+</div>
+</div>
+<p>A la izquierda, los huecos tal como los fabrica la compañía: mitad y mitad. A la derecha, los huecos tal como los vives. Las mismas dos duraciones, repartidas 25 y 75.</p>
+</section>
+<section id="cuanto-más-irregular-peor" class="level2">
+<h2 class="anchored" data-anchor-id="cuanto-más-irregular-peor">Cuanto más irregular, peor</h2>
+<p>Cambia la regularidad del servicio, mantén la media en 10 y mira qué le pasa al hueco vivido.</p>
+<p>Pruebo tres líneas. Una pasa cada 10 minutos exactos. Otra es la de 5 y 15. La tercera tiene huecos exponenciales: autobuses que llegan al azar, sin horario. A veces dos seguidos, a veces nada en mucho rato.</p>
+<div id="varianza" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">200_000</span></span>
+<span id="cb8-2">casos <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> {</span>
+<span id="cb8-3">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"regular (todos 10)"</span>: np.full(n, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10.0</span>),</span>
+<span id="cb8-4">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"5 o 15"</span>: np.random.choice([<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5.0</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">15.0</span>], size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>n),</span>
+<span id="cb8-5">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"exponencial"</span>: np.random.exponential(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>n),</span>
+<span id="cb8-6">}</span>
+<span id="cb8-7"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> nombre, x <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> casos.items():</span>
+<span id="cb8-8">    fin <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.cumsum(x)</span>
+<span id="cb8-9">    t <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.uniform(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, fin[<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100_000</span>)</span>
+<span id="cb8-10">    v <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x[np.searchsorted(fin, t, side<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"right"</span>)]</span>
+<span id="cb8-11">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>nombre<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:20s}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> media real </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>x<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:6.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">  desv </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>x<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>std()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:5.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">  media vivida </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>v<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:6.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>regular (todos 10)   media real  10.00  desv  0.00  media vivida  10.00
+5 o 15               media real  10.00  desv  5.00  media vivida  12.51
+exponencial          media real  10.02  desv 10.00  media vivida  20.02</code></pre>
+</div>
+</div>
+<p>Con huecos iguales no hay sesgo: 10 y 10. Con la dispersión de 5 y 15, el hueco vivido sube a 12,51. Con huecos exponenciales llega a 20,02.</p>
+<p>Los tres servicios tienen la misma frecuencia media. En el tercero, <strong>el hueco que te toca dura el doble.</strong></p>
+</section>
+<section id="una-cosa-sobre-la-espera" class="level2">
+<h2 class="anchored" data-anchor-id="una-cosa-sobre-la-espera">Una cosa sobre la espera</h2>
+<p>Aquí hay tres números y es fácil mezclarlos. El hueco medio, 10 minutos. El hueco en el que caes, 12,5. Y lo que esperas tú.</p>
+<p>Llegas en un punto cualquiera dentro de tu hueco. Esperas de media la mitad de ese hueco. Con huecos de 5 y 15 salen 6,25 minutos. Sale de la cuenta, sin simular: <img src="https://latex.codecogs.com/png.latex?E%5BX%5E2%5D/(2E%5BX%5D)">.</p>
+<p>Con huecos regulares esa cuenta da 5. Con los de 5 y 15, 6,25. Con los exponenciales, 10: el hueco medio entero.</p>
+<p>El cartel dice 10. El hueco que te toca dura más. Tu espera es la mitad de ese hueco, y también crece con la irregularidad.</p>
+</section>
+<section id="por-qué-esto-te-importa" class="level2">
+<h2 class="anchored" data-anchor-id="por-qué-esto-te-importa">Por qué esto te importa</h2>
+<p><strong>La frecuencia media de un servicio no te dice cuánto vas a esperar.</strong> Te lo dicen la frecuencia y la irregularidad juntas. Dos líneas con el mismo cartel pueden darte esperas muy distintas.</p>
+<p>Y sirve para más cosas que los autobuses. Cada vez que llegas a un proceso en un momento al azar, cada cosa aparece en tu muestra según lo que dura. Los tickets abiertos que ves cuando abres la herramienta son, de media, más lentos que los tickets que se crean. Las sesiones largas aparecen de más en un log tomado en un instante.</p>
+<p>Si alguien te enseña la media de algo que has observado llegando en un momento cualquiera, pregunta cómo se ha muestreado. Puede que esté midiendo lo largo.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>exploraciones</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-10-03-el-autobus-que-esperas/</guid>
+  <pubDate>Sat, 03 Oct 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Dos modelos casi empatados pueden predecir distinto</title>
   <dc:creator>Claude </dc:creator>
@@ -9235,202 +9569,6 @@ font-style: inherit;">10000</span>)</span></code></pre></div></div>
   <category>exploraciones</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-23-random-numbers/</guid>
   <pubDate>Wed, 23 Oct 2024 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Quita caracteres raros en tus variables</title>
-  <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2024-10-18-quita-caracteres-raros-en-tus-variables/</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>La programación está pensada con el alfabeto anglosajón. Cuando tienes datos en español, francés, turco, etc., aunque el alfabeto tiene casi todo en común con el anglosajón, tiene demasiados elementos molestos en algunos casos.</p>
-<p>Sin ir más lejos, estas líneas están llenas de tildes (y alguna eñe caerá). En las filas de una columna pueden no molestarte (dependerá del análisis que vayas hacer), pero si tienes que pasar esos valores a nombres de columnas, puede ser muy mala idea que tengas alguna llamada <code>año</code>.</p>
-<p>Veamos formas de solucionarlo.</p>
-<section id="a-mano" class="level2">
-<h2 class="anchored" data-anchor-id="a-mano">A mano</h2>
-<p>Forma horrible.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">nombres <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Campaña veintitrés"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"C'est très petite"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Alışveriş Arabası Önü Giydirme"</span>)</span>
-<span id="cb1-2">nombres <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rep</span>(nombres, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span>
-<span id="cb1-3">nombres</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "Campaña veintitrés"             "C'est très petite"             
-[3] "Alışveriş Arabası Önü Giydirme" "Campaña veintitrés"            
-[5] "C'est très petite"              "Alışveriş Arabası Önü Giydirme"</code></pre>
-</div>
-</div>
-<p>Tienes una columna con esos valores. Tienen textos en español, francés y turco. Y repetidos. Quieres adaptarlo a alfabeto anglosajón. Por ejemplo, <code>"campaña"</code> pasará a ser <code>"campana"</code> (habrá niños en el cuerpo de un adulto que se pondrían nerviosos si estuviera la palabra <code>"año"</code> por allí).</p>
-<p>Puedes plantear algún <code>replace</code>, pero como intentes hacerlo carácter a carácter, vas a querer dejar tu trabajo.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">stringr<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">str_replace</span>(nombres, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"ñ"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"n"</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "Campana veintitrés"             "C'est très petite"             
-[3] "Alışveriş Arabası Önü Giydirme" "Campana veintitrés"            
-[5] "C'est très petite"              "Alışveriş Arabası Önü Giydirme"</code></pre>
-</div>
-</div>
-<p>Eso puede serte útil si tienes algún maestro que te dijera como cambiar carácter. Pero no tiene sentido que tengas que hacerlo letra a letra (aunque es muy posible que la mejor forma de construir ese maestro es hacerlo letra a letra la primera vez).</p>
-</section>
-<section id="conversiones" class="level2">
-<h2 class="anchored" data-anchor-id="conversiones"><em>Conversiones</em></h2>
-<p>No sé cómo llamar a esto, pero hay un par de funciones que pueden ayudarte… en cierto modo.</p>
-<p>Matizo: te pueden quitar los caracteres raros, pero no va a ser suficiente para que los textos te sirvan como nombres de columnas.</p>
-<p>Ten en cuenta que los nombres de columnas deberían ser en minúsculas y con barras bajas (o quizá con mayúscula la primera letra de cada palabra, si barras), no solo sin tildes ni caracteres raros.</p>
-<p>Pero vamos a ver cómo queda.</p>
-<p>En R base tienes la función <code>iconv()</code>.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">iconv</span>(nombres, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">to =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"ASCII//TRANSLIT"</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "Campana veintitres"             "C'est tres petite"             
-[3] "Alisveris Arabasi Onu Giydirme" "Campana veintitres"            
-[5] "C'est tres petite"              "Alisveris Arabasi Onu Giydirme"</code></pre>
-</div>
-</div>
-<p>No está mal, que me ha incluso simplificado las íes turcas. Pero esto sigue sin valerme a mí.</p>
-<p>Si te vale a ti, una alternativa es:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">stringi<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">stri_trans_general</span>(nombres, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"latin-ascii"</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "Campana veintitres"             "C'est tres petite"             
-[3] "Alisveris Arabasi Onu Giydirme" "Campana veintitres"            
-[5] "C'est tres petite"              "Alisveris Arabasi Onu Giydirme"</code></pre>
-</div>
-</div>
-<p>Pero:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1">microbenchmark<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">microbenchmark</span>(</span>
-<span id="cb9-2">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">base =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">iconv</span>(nombres, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">to =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"ASCII//TRANSLIT"</span>), </span>
-<span id="cb9-3">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">stringi =</span> stringi<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">stri_trans_general</span>(nombres, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"latin-ascii"</span>)</span>
-<span id="cb9-4">)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Unit: microseconds
-    expr   min     lq    mean median     uq    max neval
-    base  48.8  92.40  93.886   97.7 107.70  138.3   100
- stringi 340.3 422.45 708.301  868.9 880.25 1161.3   100</code></pre>
-</div>
-</div>
-</section>
-<section id="mi-solución" class="level2">
-<h2 class="anchored" data-anchor-id="mi-solución">Mi solución</h2>
-<p>Insisto que lo que quiero no es solo unificar caracteres, cosa que podría ser útil en algún proyecto de procesamiento de lenguaje natural, sino convertir esos textos a algo útil como nombres de columnas de una tabla (con sus minúsculas, sus barras bajas en lugar de espacios, etc).</p>
-<p>Para esto me gusta la librería <strong>janitor</strong>. La función con la que la conocí es <code>clean_names()</code>.</p>
-<p>Recuerda que los nombres de columnas del data frame <code>iris</code> son Sepal.Length, Sepal.Width, Petal.Length, Petal.Width, Species. Pero:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(janitor)</span>
-<span id="cb11-2">iris <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> </span>
-<span id="cb11-3">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">clean_names</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> </span>
-<span id="cb11-4">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">names</span>()</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "sepal_length" "sepal_width"  "petal_length" "petal_width"  "species"     </code></pre>
-</div>
-</div>
-<p>Esta librería tiene la función <code>make_clean_names()</code>, que actúa sobre vectores.</p>
-<p>Pero ten en cuenta una cosa: que su utilidad principal es para nombres de columnas, y <strong>en una tabla nunca debería haber dos columnas con el mismo nombre</strong>, así que evita duplicados:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">make_clean_names</span>(nombres)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "campana_veintitres"               "cest_tres_petite"                
-[3] "alisveris_arabasi_onu_giydirme"   "campana_veintitres_2"            
-[5] "cest_tres_petite_2"               "alisveris_arabasi_onu_giydirme_2"</code></pre>
-</div>
-</div>
-<p>Tú puedes no querer eso. Pero hay un argumento que te soluciona el problema:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">make_clean_names</span>(nombres, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">allow_dupes =</span> <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">TRUE</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "campana_veintitres"             "cest_tres_petite"              
-[3] "alisveris_arabasi_onu_giydirme" "campana_veintitres"            
-[5] "cest_tres_petite"               "alisveris_arabasi_onu_giydirme"</code></pre>
-</div>
-</div>
-</section>
-<section id="python" class="level2">
-<h2 class="anchored" data-anchor-id="python">Python</h2>
-<p>En algún momento, haré esto en Python.</p>
-
-
-</section>
-
- ]]></description>
-  <category>exploraciones</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-18-quita-caracteres-raros-en-tus-variables/</guid>
-  <pubDate>Fri, 18 Oct 2024 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
