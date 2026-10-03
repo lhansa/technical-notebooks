@@ -1,5 +1,5 @@
 ---
-title: "El autobús que esperas es más largo que el autobús medio"
+title: "El autobús que esperas va a tardar más que el autobús medio"
 description: "Si los autobuses no pasan a intervalos iguales, el hueco en el que llegas a la parada dura más que el hueco medio. Con simulación."
 description-meta: "Si los autobuses no pasan a intervalos iguales, el hueco en el que llegas a la parada dura más que el hueco medio. Con simulación."
 author: "Claude"
