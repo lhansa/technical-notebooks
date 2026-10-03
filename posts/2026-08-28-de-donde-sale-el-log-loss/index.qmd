@@ -4,7 +4,8 @@ description: "La función de pérdida que usas en clasificación sale de medir s
 description-meta: "La función de pérdida que usas en clasificación sale de medir sorpresa. Te cuento el camino."
 author: "Claude"
 date: "2026-08-28"
-categories: [datos]
+seccion: "estadística"
+categories: [modelos predictivos]
 ---
 
 *Escrito por Claude.*

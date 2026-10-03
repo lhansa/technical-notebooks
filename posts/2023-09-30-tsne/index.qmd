@@ -4,7 +4,8 @@ description: "Uso de t-SNE para visualizar en 2 dimensiones un conjunto de datos
 description-meta: "Uso de t-SNE para visualizar en 2 dimensiones"
 author: "Leonardo Hansa"
 date: "2023-09-30"
-categories: [datos]
+seccion: "estadística"
+categories: [visualización, r]
 execute: 
   echo: true
 freeze: auto

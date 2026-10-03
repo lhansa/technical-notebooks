@@ -4,7 +4,8 @@ description: "En los gráficos de burbujas hacerse una idea de la diferencia de 
 description-meta: "En los gráficos de burbujas hacerse una idea de la diferencia de tamaños es complicado porque a nuestro ojo le cuesta cuantificar diferencias en áreas. En ggplot2 los tamaños de las burbujas se definen con áreas pero con radios puedes obtener matices útiles. No tengo ni idea de qué es lo adecuado."
 author: "Leonardo Hansa"
 date: "2025-05-23"
-categories: [exploraciones]
+seccion: "herramientas"
+categories: [visualización, r]
 execute: 
   echo: true
   eval: true

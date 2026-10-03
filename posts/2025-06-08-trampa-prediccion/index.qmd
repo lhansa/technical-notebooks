@@ -4,7 +4,8 @@ description: "Un modelo que capture mejor el proceso real de generación de dato
 description-meta: "Un modelo que capture mejor el proceso real de generación de datos puede predecir peor que uno que use mal las variables. Aquí demuestro cómo."
 author: "Leonardo Hansa"
 date: "2025-06-08"
-categories: [exploraciones]
+seccion: "estadística"
+categories: [modelos predictivos, causalidad, simulación, python]
 execute: 
   echo: true
   eval: true

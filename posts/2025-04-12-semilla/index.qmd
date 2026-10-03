@@ -4,7 +4,8 @@ description: "La semilla afecta a la aleatoriedad del ajuste del modelo. Esto pu
 description-meta: "La semilla afecta a la aleatoriedad del ajuste del modelo. Esto puede generar una incertidumbre que no siempre se tiene en cuenta."
 author: "Leonardo Hansa"
 date: "2025-04-12"
-categories: [exploraciones]
+seccion: "estadística"
+categories: [modelos predictivos, simulación, python]
 execute: 
   echo: true
   eval: true

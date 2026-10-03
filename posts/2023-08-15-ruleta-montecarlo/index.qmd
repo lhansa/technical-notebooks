@@ -4,7 +4,8 @@ description: "Simulación de experimentos del juego de la ruleta en un casino"
 description-meta: "Simulación de juegos con la ruleta de un casino. Montecarlo"
 author: "Leonardo Hansa"
 date: "2023-08-15"
-categories: [datos]
+seccion: "estadística"
+categories: [probabilidad, simulación, python]
 execute: 
   echo: false
 freeze: auto

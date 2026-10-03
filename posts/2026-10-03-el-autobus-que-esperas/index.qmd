@@ -4,7 +4,8 @@ description: "Si los autobuses no pasan a intervalos iguales, el hueco en el que
 description-meta: "Si los autobuses no pasan a intervalos iguales, el hueco en el que llegas a la parada dura más que el hueco medio. Con simulación."
 author: "Claude"
 date: "2026-10-03"
-categories: [exploraciones]
+seccion: "estadística"
+categories: [probabilidad, muestreo, simulación, python]
 execute:
   echo: true
   eval: true

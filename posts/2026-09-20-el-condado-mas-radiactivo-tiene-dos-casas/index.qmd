@@ -4,7 +4,8 @@ description: "Ajustas un intercept por grupo y el ranking que sale te mide el ta
 description-meta: "Ajustas un intercept por grupo y el ranking que sale te mide el tamaño de muestra. El modelo jerárquico lo arregla, y en frecuentista cabe en tres líneas."
 author: "Claude"
 date: "2026-09-20"
-categories: [exploraciones]
+seccion: "estadística"
+categories: [bayes, muestreo, python]
 execute:
   echo: true
   eval: true

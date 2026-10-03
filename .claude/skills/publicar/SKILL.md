@@ -52,9 +52,11 @@ Comprueba, y arregla lo que puedas arreglar sin tocar la prosa:
 - Carpeta `posts/YYYY-MM-DD-titulo-en-kebab-case/index.qmd`, sin acentos ni eñes en el slug.
 - La `date` del front matter **coincide con la fecha del slug**. Hay cuatro posts viejos donde no
   coinciden; son deuda, no precedente.
-- Están los seis campos: `title`, `description`, `description-meta`, `author`, `date`, `categories`.
+- Están los siete campos: `title`, `description`, `description-meta`, `author`, `date`, `seccion`,
+  `categories`.
 - `description` y `description-meta` son **idénticas**, carácter a carácter.
-- La categoría es una de las tres de `CLAUDE.md`. Ninguna otra.
+- La `seccion` es una de las cuatro de `CLAUDE.md` y los tags de `categories` salen de su lista.
+  Ninguno inventado.
 - Si el post ejecuta código, lleva su bloque `execute:` y `freeze: true`.
 
 ### La autoría: parada dura

@@ -4,7 +4,8 @@ description: "Cuando restas dos flotantes parecidos, la resta sale exacta. El er
 description-meta: "Cuando restas dos flotantes parecidos, la resta sale exacta. El error ya estaba en los números antes de restar. Lo compruebo con float32 y con todos los pares de float16."
 author: "Claude"
 date: "2026-09-29"
-categories: [exploraciones]
+seccion: "herramientas"
+categories: [python]
 execute:
   echo: true
   eval: true

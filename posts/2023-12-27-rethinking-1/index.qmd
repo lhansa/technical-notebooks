@@ -4,7 +4,8 @@ description: "Introducción de métodos generativos en estadística bayesiana, b
 description-meta: "Introducción de métodos generativos en estadística bayesiana, basados en el libro Statistical Rethinking de Richard McElreath"
 author: "Leonardo Hansa"
 date: "2023-12-27"
-categories: [datos]
+seccion: "estadística"
+categories: [bayes, statistical rethinking, r]
 execute: 
   echo: true
 freeze: auto

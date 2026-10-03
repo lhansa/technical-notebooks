@@ -43,9 +43,9 @@ Cada una lleva:
 - **Qué se deja fuera a propósito.** No es un cliffhanger ni un "continuará". Es dónde se corta
   sabiendo que ahí sigue habiendo tela, de forma que quien lo lea note el borde. Di también qué se
   deja fuera porque sobra, que no es lo mismo.
-- **Formato y categoría.** Ensayo o cuaderno, y por qué. Cuaderno solo si la simulación demuestra
-  algo que la prosa no puede; si el código es decorativo, es ensayo. Categoría de las tres de
-  `CLAUDE.md`.
+- **Formato y sección.** Ensayo o cuaderno, y por qué. Cuaderno solo si la simulación demuestra
+  algo que la prosa no puede; si el código es decorativo, es ensayo. Sección de las cuatro de
+  `CLAUDE.md`, con sus tags.
 - **El riesgo.** Por dónde este enfoque concreto puede acabar sonando a manual.
 
 ## La parada
@@ -64,7 +64,7 @@ La parada no desaparece: se mueve al PR, y él contesta ahí si quiere otra.
 ## El cierre
 
 Cuando haya una elegida, escríbela en seis líneas como brief para quien redacte: la pregunta, el
-gancho, el ejemplo, dónde se corta, formato y categoría.
+gancho, el ejemplo, dónde se corta, formato y sección.
 
 **En frases, no en campos.** Si el brief sale en viñetas, el borrador tiende a viñetas, y `CLAUDE.md`
 pide prosa antes que listas.

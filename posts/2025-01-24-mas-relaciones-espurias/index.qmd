@@ -4,7 +4,8 @@ description: "Ejercicio con variables espurias y regresión"
 description-meta: "Ejercicio con variables espurias y regresión"
 author: "Leonardo Hansa"
 date: "2025-01-24"
-categories: [datos]
+seccion: "estadística"
+categories: [causalidad, regresión, r]
 execute: 
   echo: true
   message: false

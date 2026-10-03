@@ -4,7 +4,8 @@ description: "Comparativa de non-stantard evaluation y tidyeval"
 description-meta: "Comparativa de non-stantard evaluation y tidyeval"
 author: "Leonardo Hansa"
 date: "2024-04-24"
-categories: [datos]
+seccion: "herramientas"
+categories: [rlang, r]
 execute: 
   echo: true
 message: false

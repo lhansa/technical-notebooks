@@ -4,7 +4,8 @@ description: "Evolución de compraventa mensual en España"
 description-meta: "Evolución de compraventa mensual en España"
 author: "Leonardo Hansa"
 date: "2024-05-25"
-categories: [datos]
+seccion: "exploraciones"
+categories: [ine, python]
 execute: 
   echo: true
   message: false

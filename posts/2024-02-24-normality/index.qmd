@@ -4,7 +4,8 @@ description: "Exploración de la distribución normal con R"
 description-meta: "Exploración de la distribución normal con R"
 author: "Leonardo Hansa"
 date: "2024-02-24"
-categories: [datos]
+seccion: "estadística"
+categories: [probabilidad, simulación, r]
 execute: 
   echo: true
 freeze: auto

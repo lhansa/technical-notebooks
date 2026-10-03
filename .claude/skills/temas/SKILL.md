@@ -4,7 +4,7 @@ description: Propone cinco temas para posts del blog, cada uno con una referenci
 allowed-tools: Read, Grep, Glob, Bash, WebSearch, WebFetch, mcp__github__list_issues, mcp__github__issue_read, mcp__github__search_issues
 ---
 
-Lee `CLAUDE.md` antes de nada: las categorías, la forma de los títulos y la sección **La voz**.
+Lee `CLAUDE.md` antes de nada: las secciones y los tags, la forma de los títulos y la sección **La voz**.
 
 Tu trabajo es encontrar cinco cosas que él no sepa y que den para un post. Cinco fichas, cada una
 atada a una referencia que existe. No eliges cuáles se escriben ni escribes nada: eso viene después.
@@ -100,8 +100,8 @@ los leen así:
 - **Por qué es probable que no lo sepa.** Una línea, concreta.
 - **El ejemplo concreto.** Obligatorio. Un caso con números o con una escena, no una descripción
   del tipo "un ejemplo con datos simulados". Sin ejemplo no hay tema: hay temario.
-- **Formato y categoría.** Ensayo o cuaderno, y una de las tres categorías de `CLAUDE.md`. Cuaderno
-  solo si la simulación demuestra algo que la prosa no puede.
+- **Formato y sección.** Ensayo o cuaderno, una de las cuatro secciones de `CLAUDE.md` y sus tags.
+  Cuaderno solo si la simulación demuestra algo que la prosa no puede.
 - **Solape.** Los posts o issues más cercanos, con su ruta o número, o "ninguno cercano". Es lo que
   él ve antes de elegir, así que compruébalo leyendo los posts, no solo los títulos.
 

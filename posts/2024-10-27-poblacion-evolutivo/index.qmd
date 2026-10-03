@@ -4,7 +4,8 @@ description: "Exploratorio con Python de los datos públicos de residentes por p
 description-meta: "Exploratorio con Python de los datos públicos de residentes por provincia en España"
 author: "Leonardo Hansa"
 date: "2024-10-27"
-categories: [exploraciones]
+seccion: "exploraciones"
+categories: [ine, python]
 execute: 
   echo: true
   message: false

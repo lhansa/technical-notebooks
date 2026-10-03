@@ -4,7 +4,8 @@ description: "Ejemplo de uso de la distancia de Mahalanobis en un conjunto de da
 description-meta: "Ejemplo de uso de la distancia de Mahalanobis en un conjunto de datos"
 author: "Leonardo Hansa"
 date: "2024-03-31"
-categories: [datos]
+seccion: "estadística"
+categories: [r]
 execute: 
   echo: true
   message: false

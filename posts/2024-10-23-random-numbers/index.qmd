@@ -4,7 +4,8 @@ description: "Práctica de pensamiento probabilístico con ejemplos de generaci�
 description-meta: "Práctica de pensamiento probabilístico con ejemplos de generación de números aleatorios con Python"
 author: "Leonardo Hansa"
 date: "2024-10-23"
-categories: [exploraciones]
+seccion: "estadística"
+categories: [probabilidad, simulación, python]
 execute: 
   echo: true
   message: false

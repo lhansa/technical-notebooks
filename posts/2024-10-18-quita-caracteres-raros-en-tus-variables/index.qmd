@@ -4,7 +4,8 @@ description: "Pequeña práctica para limpiar los textos de las variables de tus
 description-meta: "Pequeña práctica para limpiar los textos de las variables de tus tablas"
 author: "Leonardo Hansa"
 date: "2024-10-18"
-categories: [exploraciones]
+seccion: "herramientas"
+categories: [limpieza, r, python]
 execute: 
   echo: true
   message: false

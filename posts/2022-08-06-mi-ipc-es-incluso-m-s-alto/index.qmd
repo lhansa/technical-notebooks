@@ -4,7 +4,8 @@ description-meta: "Exploración de datos del IPC"
 description: "Exploración de datos del IPC"
 author: "Leonardo Hansa"
 date: "2022-08-06"
-categories: [exploraciones]
+seccion: "exploraciones"
+categories: [ine, python]
 ---
 
 No sé tú pero yo no consumo de todo. Si así fuera, entonces el IPC asociado a mis gastos sí sería el 10% del que hablan. 

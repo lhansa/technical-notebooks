@@ -4,7 +4,8 @@ description: ""
 description-meta: ""
 author: "Leonardo Hansa"
 date: "2023-10-12"
-categories: [datos]
+seccion: "exploraciones"
+categories: [r]
 execute: 
   echo: false
   eval: false

@@ -4,7 +4,8 @@ description: "Buenas diferencias de edades entre parejas en películas"
 description-meta: "Exploración de datos de películas"
 author: "Leonardo Hansa"
 date: "2023-02-19"
-categories: [exploraciones]
+seccion: "exploraciones"
+categories: [r]
 execute: 
   echo: false
 ---

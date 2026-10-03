@@ -4,7 +4,8 @@ description: "Exploración de datos del INE de Pernotaciones por Comunidades Aut
 description-meta: "Exploración de datos del INE de Pernotaciones por Comunidades Autónomas"
 author: "Leonardo Hansa"
 date: "2024-08-04"
-categories: [exploraciones]
+seccion: "exploraciones"
+categories: [ine, r]
 execute: 
   echo: true
   message: false

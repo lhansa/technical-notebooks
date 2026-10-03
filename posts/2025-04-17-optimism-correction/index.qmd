@@ -4,7 +4,8 @@ description: "Bootstrap aplicado a la corrección del optimismo de un modelo est
 description-meta: "Bootstrap aplicado a la corrección del optimismo de un modelo estadístico cuando tienes pocos datos."
 author: "Leonardo Hansa"
 date: "2025-04-17"
-categories: [exploraciones]
+seccion: "estadística"
+categories: [modelos predictivos, python]
 execute: 
   echo: true
   eval: true

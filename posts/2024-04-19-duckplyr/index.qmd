@@ -4,7 +4,8 @@ description: "Tiempos de ejecución de arrow y duckdb"
 description-meta: "Tiempos de ejecución de arrow y duckdb"
 author: "Leonardo Hansa"
 date: "2024-04-19"
-categories: [datos]
+seccion: "herramientas"
+categories: [rendimiento, r]
 execute: 
   echo: true
   message: false

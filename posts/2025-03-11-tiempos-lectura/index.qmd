@@ -4,7 +4,8 @@ description: "Ejercicio de exploración de tiempos de lectura de un fichero Exce
 description-meta: "Ejercicio de exploración de tiempos de lectura de un fichero Excel"
 author: "Leonardo Hansa"
 date: "2025-03-11"
-categories: [exploraciones]
+seccion: "herramientas"
+categories: [rendimiento, r]
 execute: 
   echo: true
   eval: false

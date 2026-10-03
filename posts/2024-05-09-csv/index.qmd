@@ -4,7 +4,8 @@ description: "El formato de los ficheros CSV depende de cómo se separen las col
 description-meta: "Cómo leer ficheros CSV que te dan problemas"
 author: "Leonardo Hansa"
 date: "2024-05-09"
-categories: [datos]
+seccion: "herramientas"
+categories: [limpieza, r, python]
 execute: 
   echo: true
 message: false

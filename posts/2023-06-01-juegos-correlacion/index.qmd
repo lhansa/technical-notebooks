@@ -4,7 +4,8 @@ description: "Las causualidades de la felicidad. Cacharreos con datos de felicid
 description-meta: "Correlación con datos de felicidad"
 author: "Leonardo Hansa"
 date: "2023-06-01"
-categories: [datos]
+seccion: "estadística"
+categories: [causalidad, r]
 execute: 
   echo: false
 freeze: auto

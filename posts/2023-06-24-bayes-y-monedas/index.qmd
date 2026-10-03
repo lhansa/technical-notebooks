@@ -4,7 +4,8 @@ description: "Experimentos estadísticos frecuentistas y bayesianos en lanzamien
 description-meta: "Experimentos estadísticos frecuentistas y bayesianos en lanzamiento de monedas."
 author: "Leonardo Hansa"
 date: "2023-06-24"
-categories: [datos]
+seccion: "estadística"
+categories: [bayes, simulación, r]
 execute: 
   echo: false
 freeze: auto

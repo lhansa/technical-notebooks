@@ -4,7 +4,8 @@ description: "Párrafo de La señal y el ruido, sobre pandemias"
 description-meta: "Párrafo de La señal y el ruido, sobre pandemias"
 author: "Leonardo Hansa"
 date: "2021-08-07"
-categories: [lecturas]
+seccion: "lecturas"
+categories: []
 ---
 
 En Fort Dix en enero de 1976 un soldado murió de una neumonía causada por la gripe porcina, la causante de la pandemia que asoló el mundo en 1918. En los EEUU esta gripe también se manifestó inicialmente en un fuerte y acabó con más de 600000 estadounidenses. El Secretario de Salud de Gerald Ford dio un millón como estimación de muertos si este nuevo brote se manifestaba tan letal como el del 18. Sabían que los equipos de investigación de vacunas necesitaban del orden de 6 meses para enfrentarse a nuevas cepas, pero el gobierno fue adelante con un plan de 200 millones de vacunaciones, el programa más grande desde la polio en el 50. El plan se aprobó con enorme mayoría en el Congreso; costaría 180 millones de dólares.

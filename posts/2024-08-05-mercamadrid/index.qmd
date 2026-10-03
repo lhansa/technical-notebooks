@@ -4,7 +4,8 @@ description: "Exploración de datos públicos de mercamadrid"
 description-meta: "Exploración de datos públicos de mercamadrid"
 author: "Leonardo Hansa"
 date: "2024-08-05"
-categories: [exploraciones]
+seccion: "exploraciones"
+categories: [r]
 execute: 
   echo: true
   message: false

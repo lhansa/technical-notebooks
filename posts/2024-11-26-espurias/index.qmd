@@ -4,7 +4,8 @@ description: "Ejemplos de relaciones espurias con Statistical Rethinking"
 description-meta: "Ejemplos de relaciones espurias con Statistical Rethinking"
 author: "Leonardo Hansa"
 date: "2024-11-26"
-categories: [exploraciones]
+seccion: "estadística"
+categories: [causalidad, statistical rethinking, r]
 execute: 
   echo: true
   message: false
