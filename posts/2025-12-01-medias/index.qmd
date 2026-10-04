@@ -4,7 +4,8 @@ description: "Ya te habrán dicho que la media es sensible a valores extremos. T
 description-meta: "Ya te habrán dicho que la media es sensible a valores extremos. Te cuento cómo ocurre esto y cómo lo puedes arreglar (sin mediana ni tonterías)"
 author: "Leonardo Hansa"
 date: "2025-12-01"
-categories: [exploraciones]
+seccion: "estadística"
+categories: [probabilidad, simulación, python]
 execute: 
   echo: true
   eval: true

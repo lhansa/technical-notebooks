@@ -4,7 +4,8 @@ description: "Selección de aforismos de Taleb, del Lecho de Procusto"
 description-meta: "Selección de aforismos de Taleb, del Lecho de Procusto"
 author: "Leonardo Hansa"
 date: "2022-09-03"
-categories: [lecturas]
+seccion: "lecturas"
+categories: [taleb]
 ---
 
 Selección personal de aforismos de [Nassim Taleb,](https://longitudsinanchura.com/2021/10/01/asalariado-taleb-habla-de-ti/) publicados en _El Lecho de Procusto._

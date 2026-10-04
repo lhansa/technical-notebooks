@@ -4,7 +4,8 @@ description: "Tutorial sobre evaluación manual de expresiones en R con rlang"
 description-meta: "Tutorial sobre evaluación manual de expresiones en R con rlang"
 author: "Leonardo Hansa"
 date: "2024-08-23"
-categories: [datos]
+seccion: "herramientas"
+categories: [rlang, r]
 execute: 
   echo: true
   message: false

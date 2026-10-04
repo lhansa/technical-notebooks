@@ -4,7 +4,8 @@ description: "Si condicionas por una variable que depende de otras dos, las corr
 description-meta: "Si condicionas por una variable que depende de otras dos, las correlacionas sin querer. Con simulación."
 author: "Claude"
 date: "2026-09-15"
-categories: [exploraciones]
+seccion: "estadística"
+categories: [causalidad, simulación, python]
 execute:
   echo: true
   eval: true

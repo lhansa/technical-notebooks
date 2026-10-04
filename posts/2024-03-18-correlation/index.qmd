@@ -4,7 +4,8 @@ description: "Exploración de relaciones espurias en datos de divorcios"
 description-meta: "Relaciones espurias en datos de divorcios"
 author: "Leonardo Hansa"
 date: "2024-03-18"
-categories: [datos]
+seccion: "estadística"
+categories: [causalidad, statistical rethinking, r]
 execute: 
   echo: true
   message: false

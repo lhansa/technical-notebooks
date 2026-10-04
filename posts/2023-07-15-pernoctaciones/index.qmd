@@ -4,7 +4,8 @@ description: "Análisis de la evolución de pernoctaciones por CCAA"
 description-meta: "Análisis de la evolución de pernoctaciones por CCAA"
 author: "Leonardo Hansa"
 date: "2023-07-15"
-categories: [datos]
+seccion: "exploraciones"
+categories: [ine, r]
 execute: 
   echo: false
 freeze: auto

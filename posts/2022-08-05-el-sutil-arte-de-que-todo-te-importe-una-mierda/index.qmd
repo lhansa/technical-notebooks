@@ -4,7 +4,8 @@ description: "Resumen del libro El sutil arte de que casi todo te importe una mi
 description-meta: "Resumen del libro El sutil arte de que casi todo te importe una mierda"
 author: "Leonardo Hansa"
 date: "2022-08-05"
-categories: [lecturas]
+seccion: "lecturas"
+categories: []
 ---
 
 

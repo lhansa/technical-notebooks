@@ -4,7 +4,8 @@ description: "Pequeña práctica y ejemplo con procesos ergódicos en Python"
 description-meta: "Pequeña práctica y ejemplo con procesos ergódicos en Python"
 author: "Leonardo Hansa"
 date: "2024-10-04"
-categories: [exploraciones]
+seccion: "estadística"
+categories: [probabilidad, simulación, python]
 execute: 
   echo: true
   message: false

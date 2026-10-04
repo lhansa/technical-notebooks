@@ -4,7 +4,8 @@ description: "Tutorial en R de cómo usar las prioris conjugadas en estadística
 description-meta: "Tutorial en R de cómo usar las prioris conjugadas en estadística bayesiana, con el ejemplo de lanzar una moneda"
 author: "Leonardo Hansa"
 date: "2023-12-31"
-categories: [datos]
+seccion: "estadística"
+categories: [bayes, r]
 execute: 
   echo: true
 freeze: auto

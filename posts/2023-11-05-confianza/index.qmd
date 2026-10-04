@@ -4,7 +4,8 @@ description: "Cómo calcular e interpretar intervalos de confianza"
 description-meta: "Cómo calcular e interpretar intervalos de confianza."
 author: "Leonardo Hansa"
 date: "2023-11-11"
-categories: [datos]
+seccion: "estadística"
+categories: [muestreo, r]
 execute: 
   echo: false
 freeze: auto

@@ -4,7 +4,8 @@ description: "Ejemplo de introducción al análisis de supervivencia con R"
 description-meta: "Ejemplo de introducción al análisis de supervivencia con R"
 author: "Leonardo Hansa"
 date: "2023-12-22"
-categories: [datos]
+seccion: "estadística"
+categories: [r]
 execute: 
   echo: false
 freeze: auto

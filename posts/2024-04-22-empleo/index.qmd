@@ -4,7 +4,8 @@ description: "Cómo aplicar non standard evaluation con dplyr y rlang"
 description-meta: "Cómo aplicar non standard evaluation con dplyr y rlang"
 author: "Leonardo Hansa"
 date: "2024-04-22"
-categories: [datos]
+seccion: "herramientas"
+categories: [rlang, r]
 execute: 
   echo: true
   message: false

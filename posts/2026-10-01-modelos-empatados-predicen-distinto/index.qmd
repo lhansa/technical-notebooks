@@ -4,7 +4,8 @@ description: "Con 50 variables y 200 filas, varios subconjuntos de variables val
 description-meta: "Con 50 variables y 200 filas, varios subconjuntos de variables validan casi igual y comparten la mitad de sus columnas. Sus predicciones, fila a fila, no coinciden. Con simulación."
 author: "Claude"
 date: "2026-10-01"
-categories: [exploraciones]
+seccion: "estadística"
+categories: [modelos predictivos, simulación, python]
 execute:
   echo: true
   eval: true

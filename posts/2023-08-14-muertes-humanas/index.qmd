@@ -4,7 +4,8 @@ description: "Exploración de muertes de humanos anuales causadas por otros anim
 description-meta: "Número de muertes de humanos por animales"
 author: "Leonardo Hansa"
 date: "2023-08-14"
-categories: [datos]
+seccion: "exploraciones"
+categories: [r]
 execute: 
   echo: false
 freeze: auto

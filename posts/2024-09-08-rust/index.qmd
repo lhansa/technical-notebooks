@@ -4,7 +4,8 @@ description: "Alguna prueba con Rust y su interacción con R y Python"
 description-meta: "Alguna prueba con Rust y su interacción con R y Python"
 author: "Leonardo Hansa"
 date: "2024-09-08"
-categories: [datos]
+seccion: "herramientas"
+categories: [rendimiento, r, python]
 execute: 
   echo: true
   message: false

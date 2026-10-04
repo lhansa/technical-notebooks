@@ -4,7 +4,8 @@ description: "Regresión lineal bayesiana con multicolinealidad"
 description-meta: "Regresión lineal bayesiana con multicolinealidad"
 author: "Leonardo Hansa"
 date: "2025-01-26"
-categories: [datos]
+seccion: "estadística"
+categories: [regresión, bayes, r]
 execute: 
   echo: true
   message: false

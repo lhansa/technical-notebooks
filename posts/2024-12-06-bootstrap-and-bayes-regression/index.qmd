@@ -4,7 +4,8 @@ description: "Comparativa de regresión lineal bootstrap y bayesiana"
 description-meta: "Comparativa de regresión lineal bootstrap y bayesiana"
 author: "Leonardo Hansa"
 date: "2024-12-06"
-categories: [exploraciones]
+seccion: "estadística"
+categories: [regresión, bayes, r]
 execute: 
   echo: true
   message: false

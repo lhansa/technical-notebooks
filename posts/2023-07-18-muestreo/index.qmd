@@ -4,7 +4,8 @@ description: "Un repaso a algunos conceptos introductorios al muestreo estadíst
 description-meta: "Explicación de conceptos sobre muestreo (sampling) estadístico"
 author: "Leonardo Hansa"
 date: "2023-07-18"
-categories: [datos]
+seccion: "estadística"
+categories: [muestreo, r]
 execute: 
   echo: false
 freeze: auto

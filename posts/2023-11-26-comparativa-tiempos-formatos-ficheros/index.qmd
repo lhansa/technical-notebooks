@@ -4,7 +4,8 @@ description: "Experimentos para comparar tiempos de ejecución en lectura y escr
 description-meta: "Experimentos para comparar tiempos de ejecución en lectura y escritura de distintos ficheros de datos con R y Python"
 author: "Leonardo Hansa"
 date: "2023-11-26"
-categories: [datos]
+seccion: "herramientas"
+categories: [rendimiento, r, python]
 execute: 
   echo: false
 freeze: auto

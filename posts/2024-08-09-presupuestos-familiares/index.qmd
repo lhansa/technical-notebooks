@@ -4,7 +4,8 @@ description: "Exploración de datos de la Encuesta de Presupuestos Familiares de
 description-meta: "Exploración de datos de la Encuesta de Presupuestos Familiares del INE"
 author: "Leonardo Hansa"
 date: "2024-08-09"
-categories: [exploraciones]
+seccion: "exploraciones"
+categories: [ine, r]
 execute: 
   echo: true
   message: false

@@ -4,7 +4,8 @@ description: "Resumen con interpretación propia sobre el libro 12 reglas para a
 description-meta: "Resumen sobre el libro 12 reglas para la vida, de Jordan Peterson"
 author: "Leonardo Hansa"
 date: "2023-07-19"
-categories: [lecturas]
+seccion: "lecturas"
+categories: []
 ---
 
 _Comentario mío: el libro no me ha gustado. Creo que está mal planteado, porque tiene conceptos interesantes pero muy mal hilados. Pero eso: tiene conceptos interesantes. De algún capítulo no hay notas o bien porque me parecía una tontería o bien porque no tenía nada a mano para apuntar. Y algunas de las notas son frases literales, otras son reinterpretadas; con algunas estoy a favor, con otras estoy en contra, y otras me han llamado la atención pero no me he posicionado (aún)_

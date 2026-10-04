@@ -4,7 +4,8 @@ description: "Una comparativa entre algunos códigos en R base y tidyverse para 
 description-meta: "Una comparativa entre algunos códigos en R base y tidyverse para tratar un data frame"
 author: "Leonardo Hansa"
 date: "2023-12-07"
-categories: [datos]
+seccion: "herramientas"
+categories: [r]
 execute: 
   echo: false
 freeze: auto

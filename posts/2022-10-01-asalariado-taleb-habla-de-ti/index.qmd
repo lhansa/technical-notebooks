@@ -2,7 +2,8 @@
 title: "Asalariado, Taleb habla de ti"
 author: "Leonardo Hansa"
 date: "2021-10-01"
-categories: [lecturas]
+seccion: "lecturas"
+categories: [taleb]
 ---
 
 _Un perro alardea ante un lobo de todos los lujos y comodidades a su disposición._

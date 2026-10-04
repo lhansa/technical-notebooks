@@ -7,5 +7,5 @@
 ## Comprobaciones
 
 - [ ] `quarto render` sin errores
-- [ ] Front matter completo (title, description, description-meta, date, categories)
+- [ ] Front matter completo (title, description, description-meta, date, seccion, categories)
 - [ ] Enlaces y fórmulas se ven bien

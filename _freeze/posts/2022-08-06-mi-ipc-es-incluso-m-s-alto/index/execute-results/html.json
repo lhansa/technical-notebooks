@@ -1,8 +1,8 @@
 {
-  "hash": "e2277ca88afe2a978216f9bbf69dded9",
+  "hash": "ff27a1022914db8b730cee7594b88882",
   "result": {
     "engine": "jupyter",
-    "markdown": "---\ntitle: \"Mi IPC es (incluso) más alto\"\ndescription-meta: \"Exploración de datos del IPC\"\ndescription: \"Exploración de datos del IPC\"\nauthor: \"Leonardo Hansa\"\ndate: \"2022-08-06\"\ncategories: [exploraciones]\n---\n\n\n\n\nNo sé tú pero yo no consumo de todo. Si así fuera, entonces el IPC asociado a mis gastos sí sería el 10% del que hablan. \n\nPero a mí me afectan más unos grupos de consumo que otros. \n\nAfortunadamente, no gasto en transporte. \n\nPobrecitos los que sí. \n\n::: {#cell-reading .cell execution_count=1}\n\n::: {.cell-output .cell-output-display}\n![](index_files/figure-html/reading-output-1.png){#reading width=1149 height=460}\n:::\n:::\n\n\nP.D. Hacer este gráfico con Python ha sido un suplicio :(\n\n",
+    "markdown": "---\ntitle: \"Mi IPC es (incluso) más alto\"\ndescription-meta: \"Exploración de datos del IPC\"\ndescription: \"Exploración de datos del IPC\"\nauthor: \"Leonardo Hansa\"\ndate: \"2022-08-06\"\nseccion: \"exploraciones\"\ncategories: [ine, python]\n---\n\n\n\n\nNo sé tú pero yo no consumo de todo. Si así fuera, entonces el IPC asociado a mis gastos sí sería el 10% del que hablan. \n\nPero a mí me afectan más unos grupos de consumo que otros. \n\nAfortunadamente, no gasto en transporte. \n\nPobrecitos los que sí. \n\n::: {#cell-reading .cell execution_count=1}\n\n::: {.cell-output .cell-output-display}\n![](index_files/figure-html/reading-output-1.png){#reading width=1149 height=460}\n:::\n:::\n\n\nP.D. Hacer este gráfico con Python ha sido un suplicio :(\n\n",
     "supporting": [
       "index_files\\figure-html"
     ],

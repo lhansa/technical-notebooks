@@ -4,7 +4,8 @@ description: "Evolución anual de matrimonios, nacimientos y defunciones en Espa
 description-meta: "Análisis de la evolución de matrimonios y nacimientos y muertes"
 author: "Leonardo Hansa"
 date: "2023-07-16"
-categories: [datos]
+seccion: "exploraciones"
+categories: [ine, r]
 execute: 
   echo: false
 freeze: auto

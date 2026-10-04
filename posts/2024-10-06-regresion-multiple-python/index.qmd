@@ -4,7 +4,8 @@ description: "Pequeña práctica de regresión múltiple con Python, siguiendo I
 description-meta: "Pequeña práctica de regresión múltiple con Python, siguiendo ISLP"
 author: "Leonardo Hansa"
 date: "2024-10-06"
-categories: [exploraciones]
+seccion: "estadística"
+categories: [regresión, python]
 execute: 
   echo: true
   message: false

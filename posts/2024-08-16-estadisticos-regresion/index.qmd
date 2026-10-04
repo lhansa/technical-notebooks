@@ -4,7 +4,8 @@ description: "Revisión paso a paso de cómo calcular el p-valor de una variable
 description-meta: "Guía paso a paso de cómo calcular el p-valor de una variable en una regresión lineal"
 author: "Leonardo Hansa"
 date: "2024-08-16"
-categories: [datos]
+seccion: "estadística"
+categories: [regresión, python]
 execute: 
   echo: true
   message: false

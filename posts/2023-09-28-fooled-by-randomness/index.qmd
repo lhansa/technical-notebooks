@@ -4,7 +4,8 @@ description: "Notas sobre el libro Existe la suerte de Nassim Taleb"
 description-meta: "Notas sobre Existe la suerte o Fooled by randomness de Nassim Taleb"
 author: "Leonardo Hansa"
 date: "2023-09-28"
-categories: [lecturas]
+seccion: "lecturas"
+categories: [taleb]
 ---
 
 

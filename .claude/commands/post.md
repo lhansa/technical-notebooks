@@ -102,7 +102,7 @@ El tema es el cuerpo del sub-issue. Lo ha dejado `lunes` con formato fijo: `### 
 `Publicación:`, `Origen:` y debajo una de dos cosas.
 
 - **`Origen: ficha N de temas`.** Trae título, idea, referencia, qué afirma la referencia, ejemplo
-  concreto, formato y categoría, y solape. La ficha ya viene con la decisión de fondo tomada: el
+  concreto, formato y sección, y solape. La ficha ya viene con la decisión de fondo tomada: el
   título, la referencia, el ejemplo y el formato son los de la ficha. El post se apoya en lo que
   dice "Qué afirma la referencia", y en nada que la referencia no diga.
 - **`Origen: tema propio`.** Trae solo su texto y la línea `Hilos:`. Sin referencia, y no la

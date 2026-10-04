@@ -4,7 +4,8 @@ description: "Contraste de medias y de distribución con estadística bayesiana"
 description-meta: "Contraste de medias y de distribución con estadística bayesiana"
 author: "Leonardo Hansa"
 date: "2024-12-11"
-categories: [exploraciones]
+seccion: "estadística"
+categories: [bayes, r]
 execute: 
   echo: true
   message: false

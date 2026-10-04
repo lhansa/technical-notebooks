@@ -4,7 +4,8 @@ description: "La regresión a la media aplicada a alturas de padres e hijos."
 description-meta: "Ejemplo de regresión a la media con datos de Pearson de padres e hijos."
 author: "Leonardo Hansa"
 date: "2023-06-12"
-categories: [datos]
+seccion: "estadística"
+categories: [regresión, r]
 execute: 
   echo: false
 freeze: auto

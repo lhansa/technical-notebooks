@@ -4,7 +4,8 @@ description: "Evolución de la población española por edades desde 1971, con R
 description-meta: "Evolución de la población española por edades desde 1971, con R y ggplot2."
 author: "Leonardo Hansa"
 date: "2023-10-20"
-categories: [datos]
+seccion: "exploraciones"
+categories: [ine, visualización, r]
 execute: 
   echo: false
   eval: true

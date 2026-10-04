@@ -82,7 +82,8 @@ description: "La función de pérdida que usas en clasificación sale de medir s
 description-meta: "La función de pérdida que usas en clasificación sale de medir sorpresa. Te cuento el camino."
 author: "Leonardo Hansa"
 date: "2026-08-28"
-categories: [datos]
+seccion: "estadística"
+categories: [modelos predictivos]
 ---
 ```
 
@@ -102,7 +103,8 @@ description: "..."
 description-meta: "..."
 author: "Leonardo Hansa"
 date: "2025-04-12"
-categories: [exploraciones]
+seccion: "estadística"
+categories: [modelos predictivos, simulación, python]
 execute:
   echo: true
   eval: true
@@ -118,13 +120,34 @@ después. Un cuaderno no es una sucesión de celdas con un comentario encima.
 ## Front matter y convenciones
 
 - Campos obligatorios: `title`, `description`, `description-meta`, `author: "Leonardo Hansa"`,
-  `date`, `categories`.
+  `date`, `seccion`, `categories`.
 - `description-meta` es **idéntica** a `description`. Una o dos frases, en la voz del blog, que
   digan qué te llevas del post.
-- Categorías permitidas, no inventar otras:
-  - `[datos]` — estadística y machine learning explicados.
-  - `[exploraciones]` — experimentos y simulaciones con código.
-  - `[lecturas]` — notas de libros.
+
+## Sección y tags
+
+Cada post lleva una sección y varios tags. Son cosas distintas y ninguna depende del formato: un
+post de estadística es de estadística tenga código o no.
+
+**Sección** (`seccion:`, una y solo una). Es lo que agrupa las tablas de `cuadernos.qmd`:
+
+- `"estadística"` — una idea de estadística o de modelado explicada, con o sin simulación.
+- `"exploraciones"` — un conjunto de datos real que se explora.
+- `"herramientas"` — programación, R/Python, rendimiento, formatos, limpieza, gráficos como oficio.
+- `"lecturas"` — notas de libros.
+
+**Tags** (`categories:`, el campo que Quarto usa para filtrar). De esta lista, no inventar otros:
+
+- Tema: `bayes`, `regresión`, `causalidad`, `muestreo`, `probabilidad`, `modelos predictivos`,
+  `visualización`, `statistical rethinking`, `taleb`.
+- Método u oficio: `simulación`, `rendimiento`, `limpieza`, `rlang`, `ine`.
+- Lenguaje: `r` o `python`, en todo post que ejecute código.
+
+Entre uno y cuatro tags por post. No repitas la sección como tag. Un tag nuevo solo entra en la
+lista si ya hay tres posts que lo llevarían; si se añade, se añade aquí.
+
+## Otras convenciones
+
 - Slug de la carpeta: `posts/YYYY-MM-DD-titulo-en-kebab-case/`, sin acentos ni eñes. La `date` del
   front matter coincide con la fecha del slug, en formato `"YYYY-MM-DD"`.
 - Los títulos son afirmaciones o preguntas concretas ("Cómo un modelo erróneo predice mejor que uno
@@ -177,7 +200,7 @@ El push a `main` dispara `.github/workflows/publish.yml`, que renderiza y public
 - [ ] `quarto render posts/<slug>/index.qmd` termina sin errores.
 - [ ] `description` y `description-meta` rellenas e iguales.
 - [ ] Si lo ha escrito Claude, autoría marcada (`author: "Claude"` o nota `*Escrito por Claude.*`).
-- [ ] Categoría de la lista permitida.
+- [ ] Una `seccion` de las cuatro y tags de la lista.
 - [ ] Fecha del front matter igual a la del slug.
 - [ ] Si ejecuta código, `_freeze/` actualizado y añadido al commit.
 - [ ] Léelo en voz alta: si suena a manual, reescríbelo.

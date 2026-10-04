@@ -4,7 +4,8 @@ description: "Exploración de datos de personas centenarias, con datos del tidyt
 description-meta: "Tidytueday - Centenarians"
 author: "Leonardo Hansa"
 date: "2023-07-21"
-categories: [datos]
+seccion: "exploraciones"
+categories: [r]
 execute: 
   echo: false
 freeze: auto

@@ -4,7 +4,8 @@ description: "Resumen del libro Rompe la barrera del no"
 description-meta: "Resumen del libro Rompe la barrera del no"
 author: "Leonardo Hansa"
 date: "2022-09-11"
-categories: [lecturas]
+seccion: "lecturas"
+categories: []
 ---
 
 

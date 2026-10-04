@@ -4,7 +4,8 @@ description: "Ejercicio 2 de Advent of code 2023"
 description-meta: "Ejercicio 2 de Advent of code 2023"
 author: "Leonardo Hansa"
 date: "2023-12-02"
-categories: [datos]
+seccion: "herramientas"
+categories: [r]
 execute: 
   echo: true
 freeze: auto

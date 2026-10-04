@@ -4,7 +4,8 @@ description: "Experimentos con multicolinealidad para ver si siempre es tan mala
 description-meta: "Experimentos con multicolinealidad para ver si siempre es tan mala como se dice en la regresión lineal"
 author: "Leonardo Hansa"
 date: "2025-01-16"
-categories: [datos]
+seccion: "estadística"
+categories: [regresión, simulación, python]
 execute: 
   echo: true
   message: false

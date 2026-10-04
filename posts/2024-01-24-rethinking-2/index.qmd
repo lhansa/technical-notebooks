@@ -4,7 +4,8 @@ description: "Por qué es importante la distribución normal"
 description-meta: "Por qué es importante la distribución normal"
 author: "Leonardo Hansa"
 date: "2024-01-24"
-categories: [datos]
+seccion: "estadística"
+categories: [bayes, statistical rethinking, r]
 execute: 
   echo: true
 freeze: auto

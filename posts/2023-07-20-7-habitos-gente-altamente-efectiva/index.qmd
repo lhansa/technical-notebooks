@@ -4,7 +4,8 @@ description: "Resumen con interpretación propia sobre el libro 7 hábitos de la
 description-meta: "Resumen del libro 7 hábitos de la gente altamente efectiva, de Stephen Covey"
 author: "Leonardo Hansa"
 date: "2023-07-20"
-categories: [lecturas]
+seccion: "lecturas"
+categories: []
 ---
 
 ## Ideas introductorias
