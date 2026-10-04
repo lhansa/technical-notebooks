@@ -85,6 +85,18 @@ de aviso con la cola del error.
 Si el post ejecuta código, mira que `_freeze/posts/<slug>/` se haya actualizado: eso es lo que evita
 que el workflow de publicación tenga que recalcularlo todo.
 
+Y mira que los gráficos han salido como imagen:
+
+```bash
+grep -l "<Figure size" _freeze/posts/<slug>/index/execute-results/html.json
+```
+
+Si sale algo, matplotlib ha devuelto el texto de la figura en vez del PNG, y el post se publicaría
+sin gráficos. Pasa cuando el IPython del entorno es la versión 9 o posterior, que ya no tiene la función
+con la que Quarto 1.5 activa los PNG. Es un fallo del entorno, no del post: no lo arregles quitando
+el gráfico. Para, y en modo desatendido abre el issue de aviso diciendo que el setup script tiene
+que fijar `ipython==8.10.0`.
+
 ## 4. Rama, commit y PR
 
 ```bash
