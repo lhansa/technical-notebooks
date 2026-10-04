@@ -345,7 +345,10 @@ exponencial          media real  10.02  desv 10.00  media vivida  20.02</code></
 </section>
 
  ]]></description>
-  <category>exploraciones</category>
+  <category>probabilidad</category>
+  <category>muestreo</category>
+  <category>simulación</category>
+  <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2026-10-03-el-autobus-que-esperas/</guid>
   <pubDate>Sat, 03 Oct 2026 00:00:00 GMT</pubDate>
 </item>
@@ -1285,7 +1288,9 @@ font-style: inherit;">"predicción del modelo B"</span>)</span>
 </section>
 
  ]]></description>
-  <category>exploraciones</category>
+  <category>modelos predictivos</category>
+  <category>simulación</category>
+  <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2026-10-01-modelos-empatados-predicen-distinto/</guid>
   <pubDate>Thu, 01 Oct 2026 00:00:00 GMT</pubDate>
 </item>
@@ -1795,7 +1800,7 @@ hueco en 0.3  : 5.551115123125783e-17</code></pre>
 </section>
 
  ]]></description>
-  <category>exploraciones</category>
+  <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2026-09-29-la-resta-exacta/</guid>
   <pubDate>Tue, 29 Sep 2026 00:00:00 GMT</pubDate>
 </item>
@@ -2286,7 +2291,9 @@ font-style: inherit;">"Intercept estimado (log radón en sótano)"</span>)</span
 </section>
 
  ]]></description>
-  <category>exploraciones</category>
+  <category>bayes</category>
+  <category>muestreo</category>
+  <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2026-09-20-el-condado-mas-radiactivo-tiene-dos-casas/</guid>
   <pubDate>Sun, 20 Sep 2026 00:00:00 GMT</pubDate>
 </item>
@@ -2604,7 +2611,9 @@ font-style: inherit;">"</span>)</span></code></pre></div></div>
 </section>
 
  ]]></description>
-  <category>exploraciones</category>
+  <category>causalidad</category>
+  <category>simulación</category>
+  <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2026-09-15-collider/</guid>
   <pubDate>Tue, 15 Sep 2026 00:00:00 GMT</pubDate>
 </item>
@@ -2679,7 +2688,7 @@ font-style: inherit;">"</span>)</span></code></pre></div></div>
 </section>
 
  ]]></description>
-  <category>datos</category>
+  <category>modelos predictivos</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2026-08-28-de-donde-sale-el-log-loss/</guid>
   <pubDate>Fri, 28 Aug 2026 00:00:00 GMT</pubDate>
 </item>
@@ -5375,7 +5384,9 @@ font-style: inherit;">'y'</span>)</span>
 </section>
 
  ]]></description>
-  <category>exploraciones</category>
+  <category>probabilidad</category>
+  <category>simulación</category>
+  <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2025-12-01-medias/</guid>
   <pubDate>Mon, 01 Dec 2025 00:00:00 GMT</pubDate>
 </item>
@@ -5565,7 +5576,10 @@ MSE modelo con todo: 6114951.786343323</code></pre>
 </section>
 
  ]]></description>
-  <category>exploraciones</category>
+  <category>modelos predictivos</category>
+  <category>causalidad</category>
+  <category>simulación</category>
+  <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2025-06-08-trampa-prediccion/</guid>
   <pubDate>Sun, 08 Jun 2025 00:00:00 GMT</pubDate>
 </item>
@@ -5771,7 +5785,8 @@ font-style: inherit;">20</span>))</span></code></pre></div></div>
 
 
  ]]></description>
-  <category>exploraciones</category>
+  <category>visualización</category>
+  <category>r</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2025-05-23-radius-vs-area/</guid>
   <pubDate>Fri, 23 May 2025 00:00:00 GMT</pubDate>
 </item>
@@ -6095,7 +6110,8 @@ R² corregido: 0.7229</code></pre>
 </section>
 
  ]]></description>
-  <category>exploraciones</category>
+  <category>modelos predictivos</category>
+  <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2025-04-17-optimism-correction/</guid>
   <pubDate>Thu, 17 Apr 2025 00:00:00 GMT</pubDate>
 </item>
@@ -6405,7 +6421,9 @@ font-style: inherit;">5</span>)</span>
 </section>
 
  ]]></description>
-  <category>exploraciones</category>
+  <category>modelos predictivos</category>
+  <category>simulación</category>
+  <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2025-04-12-semilla/</guid>
   <pubDate>Sat, 12 Apr 2025 00:00:00 GMT</pubDate>
 </item>
@@ -6830,7 +6848,8 @@ font-style: inherit;">10</span></span>
 </section>
 
  ]]></description>
-  <category>exploraciones</category>
+  <category>rendimiento</category>
+  <category>r</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2025-03-11-tiempos-lectura/</guid>
   <pubDate>Tue, 11 Mar 2025 00:00:00 GMT</pubDate>
 </item>
@@ -7184,7 +7203,9 @@ sigma 1.2435069 0.08730279  1.10398016 1.3830336</code></pre>
 </section>
 
  ]]></description>
-  <category>datos</category>
+  <category>causalidad</category>
+  <category>regresión</category>
+  <category>r</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2025-01-24-mas-relaciones-espurias/</guid>
   <pubDate>Fri, 24 Jan 2025 00:00:00 GMT</pubDate>
 </item>
@@ -7681,7 +7702,9 @@ font-style: inherit;">'Coeficiente de x2'</span>)</span>
 </section>
 
  ]]></description>
-  <category>datos</category>
+  <category>regresión</category>
+  <category>simulación</category>
+  <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2025-01-16-autocolinealidad/</guid>
   <pubDate>Thu, 16 Jan 2025 00:00:00 GMT</pubDate>
 </item>
@@ -7864,7 +7887,8 @@ sigma  5.067067 0.03581597  5.009826  5.124308</code></pre>
 
 
  ]]></description>
-  <category>exploraciones</category>
+  <category>bayes</category>
+  <category>r</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2024-12-11-contraste-bayesiano/</guid>
   <pubDate>Wed, 11 Dec 2024 00:00:00 GMT</pubDate>
 </item>
@@ -8293,7 +8317,9 @@ font-style: inherit;">"#800080"</span></span>
 </section>
 
  ]]></description>
-  <category>exploraciones</category>
+  <category>regresión</category>
+  <category>bayes</category>
+  <category>r</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2024-12-06-bootstrap-and-bayes-regression/</guid>
   <pubDate>Fri, 06 Dec 2024 00:00:00 GMT</pubDate>
 </item>
@@ -8896,7 +8922,9 @@ font-style: inherit;"># lines(rep(df_divorce$D[i], 2), D_sim[, i], col = "blue")
 
 
  ]]></description>
-  <category>exploraciones</category>
+  <category>causalidad</category>
+  <category>statistical rethinking</category>
+  <category>r</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2024-11-26-espurias/</guid>
   <pubDate>Tue, 26 Nov 2024 00:00:00 GMT</pubDate>
 </item>
@@ -9030,7 +9058,8 @@ dtype: object</code></pre>
 </section>
 
  ]]></description>
-  <category>exploraciones</category>
+  <category>limpieza</category>
+  <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-31-pyjanitor/</guid>
   <pubDate>Thu, 31 Oct 2024 00:00:00 GMT</pubDate>
 </item>
@@ -9386,7 +9415,8 @@ font-style: inherit;">''</span>)</span>
 
 
  ]]></description>
-  <category>exploraciones</category>
+  <category>ine</category>
+  <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-27-poblacion-evolutivo/</guid>
   <pubDate>Sun, 27 Oct 2024 00:00:00 GMT</pubDate>
 </item>
@@ -9574,7 +9604,9 @@ font-style: inherit;">10000</span>)</span></code></pre></div></div>
 </section>
 
  ]]></description>
-  <category>exploraciones</category>
+  <category>probabilidad</category>
+  <category>simulación</category>
+  <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-23-random-numbers/</guid>
   <pubDate>Wed, 23 Oct 2024 00:00:00 GMT</pubDate>
 </item>
