@@ -66,8 +66,8 @@ empezar.
 
 ## De dónde sale la diferencia
 
-El p-valor suma la probabilidad de lo que pasó y de lo que podría haber pasado siendo más extremo.
-Nueve caras, y también diez, once y doce. Es lo mismo que el área a la derecha del histograma en
+El p-valor suma la probabilidad de lo que pasó. Y también la de todo lo que habría sido más extremo.
+Nueve caras, diez, once y doce. Es lo mismo que el área a la derecha del histograma en
 [la moneda de las cien tiradas](../2023-06-24-bayes-y-monedas/index.qmd).
 
 Y lo que podría haber pasado depende del plan.
@@ -172,8 +172,7 @@ El número que imprime el bloque es el que duele. De los 740 experimentos que al
 significativo, 647 acaban por encima de 0,05 con las mil observaciones. Casi todos los "ganadores"
 eran un mal día del azar que tú elegiste congelar.
 
-Además se paran pronto. Y cuantas más veces miras, peor. En el bloque siguiente reparto $k$ miradas entre
-la observación 10 y la 1000, las dos incluidas:
+Cuantas más veces miras, peor. Pruebo con $k$ miradas repartidas entre la observación 10 y la 1000:
 
 ```{python}
 #| label: cuando-cruzan
@@ -184,9 +183,12 @@ primera = (p_tray < 0.05).argmax(axis=1)[cruza]
 print("mediana de n al parar:", np.median(miradas[primera]))
 ```
 
-Con dos miradas, una con diez observaciones y otra al final, ya estás en el 8,8%. Con cinco, en el 16,6%. Con diez, en el 22,8%. Y los que
-acaban "ganando" lo hacen con una mediana de 90 observaciones por grupo, de las mil que tenías
-previstas.
+Con dos miradas, una a las diez observaciones y otra al final, ya estás en el 8,8%.
+
+Con cinco, en el 16,6%. Con diez, en el 22,8%.
+
+Y los que acaban "ganando" lo hacen con una mediana de 90 observaciones por grupo. Tenías previstas
+mil.
 
 El 0,05 que imprime el software supone que miraste una vez. Si no fue así, ese número no significa lo
 que crees.
@@ -210,9 +212,11 @@ Y con una priori mala, la posteriori te lleva donde quiera la priori, mires las 
 
 ## Por qué esto te importa
 
-Cuando paras un test porque el p-valor ha bajado, el experimento que has hecho es "recojo datos hasta
-que me guste el resultado o me canse". Tiene su propia distribución bajo la hipótesis nula, y se
-parece poco a la del test que crees haber hecho.
+Cuando paras un test porque el p-valor ha bajado, haces otro experimento: recoges datos hasta que te
+guste el resultado o te canses.
+
+Ese experimento tiene su propia distribución bajo la hipótesis nula. Con efecto cero, te dio un
+ganador el 37% de las veces.
 
 **La regla de parada forma parte del análisis.** Puede mover el p-valor tanto como un cambio en los datos.
 
