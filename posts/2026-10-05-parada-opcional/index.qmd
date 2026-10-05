@@ -144,9 +144,8 @@ Ningún experimento tiene efecto. Y más de un tercio te da un ganador.
 
 ## El p-valor pasea
 
-En el gráfico se ve el mecanismo. Son trayectorias del p-valor según van llegando observaciones. He
-elegido a propósito tres que cruzan 0,05 y luego vuelven a subir, y les he añadido cuatro
-cualesquiera.
+En el gráfico se ve el mecanismo. Son trayectorias del p-valor según van llegando observaciones. Tres
+las he elegido a propósito: cruzan 0,05 y luego vuelven a subir. Las otras cuatro son cualesquiera.
 
 ```{python}
 #| label: trayectorias
@@ -162,8 +161,8 @@ ax.set_ylabel("p-valor")
 plt.show()
 ```
 
-Con efecto nulo, el p-valor no se queda quieto. Pasea entre 0 y 1, y al principio pasea mucho, porque
-con pocas observaciones cualquier racha mueve la media.
+Con efecto nulo, el p-valor no se queda quieto. Pasea entre 0 y 1. Al principio pasea mucho: con
+pocas observaciones, cualquier racha mueve la media.
 
 Si lo miras una vez, lo pillas en un punto al azar. Si lo miras cien veces y paras en cuanto baja, te
 basta con que baje una vez. Y si miras lo bastante, acaba bajando.
