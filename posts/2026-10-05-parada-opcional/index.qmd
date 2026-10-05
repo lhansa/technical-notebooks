@@ -208,9 +208,6 @@ engaña depende de cuántas veces mires. El factor de Bayes mirado cada mañana 
 
 Y con una priori mala, la posteriori te lleva donde quiera la priori, mires las veces que mires.
 
-Lo que saco de aquí es más incómodo. El p-valor responde a la pregunta "qué pasaría si repitiera
-este experimento muchas veces". Y el experimento incluye la regla con la que decidiste parar.
-
 ## Por qué esto te importa
 
 Cuando paras un test porque el p-valor ha bajado, el experimento que has hecho es "recojo datos hasta
@@ -223,11 +220,10 @@ Y casi nadie la declara. En el informe del test A/B pone el tamaño de muestra f
 No pone cuántas veces se miró ni por qué se paró ese día y no otro. Sin eso, el p-valor de ese
 informe no se puede interpretar. Ni siquiera quien lo firmó sabe lo que vale.
 
-Tienes dos salidas. La primera: escribes antes de empezar cuándo vas a mirar y ajustas los umbrales
-para que el 5% siga siendo un 5%. La segunda: usas un test secuencial, como el de Wald, pensado para
-mirar cuando quieras.
+Tienes tres salidas decentes. Escribes antes de empezar cuándo vas a mirar y ajustas los umbrales
+para que el 5% siga siendo un 5%. Usas un test secuencial, como el de Wald, pensado para mirar cuando
+quieras. O te vas al lado bayesiano: la posteriori te da igual cuándo pares, pero la regla con la que
+decides necesita el mismo cuidado.
 
-Si vas por el lado bayesiano, la posteriori te da igual cuándo pares. La regla con la que decides, no.
-
-Hay una tercera salida, la que usa casi todo el mundo: mirar cada mañana y fiarte del 0,05. Esa no
+Y hay una cuarta, la que usa casi todo el mundo: mirar cada mañana y fiarte del 0,05. Esa no
 te la puedes permitir.
