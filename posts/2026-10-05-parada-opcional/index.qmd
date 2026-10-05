@@ -150,6 +150,7 @@ las he elegido a propósito: cruzan 0,05 y luego vuelven a subir. Las otras cuat
 ```{python}
 #| label: trayectorias
 cruzan = np.where(cruza & (p_tray[:, -1] > 0.05))[0]
+print(cruza.sum(), "dan significativo alguna vez")
 print(len(cruzan), "cruzan 0,05 y acaban por encima")
 elegidas = list(cruzan[:3]) + [i for i in range(n_exp) if i not in cruzan[:3]][:4]
 fig, ax = plt.subplots()
@@ -167,7 +168,7 @@ pocas observaciones, cualquier racha mueve la media.
 Si lo miras una vez, lo pillas en un punto al azar. Si lo miras cien veces y paras en cuanto baja, te
 basta con que baje una vez. Y si miras lo bastante, acaba bajando.
 
-El número que imprime el bloque es el que duele. De los 740 experimentos que alguna vez dieron
+Los números que imprime el bloque son los que duelen. De los 740 experimentos que alguna vez dieron
 significativo, 647 acaban por encima de 0,05 con las mil observaciones. Casi todos los "ganadores"
 eran un mal día del azar que tú elegiste congelar.
 
