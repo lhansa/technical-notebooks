@@ -175,20 +175,25 @@ eran un mal día del azar que tú elegiste congelar.
 Cuantas más veces miras, peor. Pruebo con $k$ miradas repartidas entre la observación 10 y la 1000:
 
 ```{python}
-#| label: cuando-cruzan
+#| label: cuantas-miradas
 for k in (1, 2, 5, 10, 20, 100):
     idx = np.linspace(len(miradas) - 1, 0, k).round().astype(int)
     print(k, np.mean((p_tray[:, idx] < 0.05).any(axis=1)))
-primera = (p_tray < 0.05).argmax(axis=1)[cruza]
-print("mediana de n al parar:", np.median(miradas[primera]))
 ```
 
 Con dos miradas, una a las diez observaciones y otra al final, ya estás en el 8,8%.
 
 Con cinco, en el 16,6%. Con diez, en el 22,8%.
 
-Y los que acaban "ganando" lo hacen con una mediana de 90 observaciones por grupo. Tenías previstas
-mil.
+Y los que ganan se paran pronto. Miro en qué observación cruzan 0,05 por primera vez:
+
+```{python}
+#| label: cuando-paran
+primera = (p_tray < 0.05).argmax(axis=1)[cruza]
+print("mediana de n al parar:", np.median(miradas[primera]))
+```
+
+Una mediana de 90 observaciones por grupo. Tenías previstas mil.
 
 El 0,05 que imprime el software supone que miraste una vez. Si no fue así, ese número no significa lo
 que crees.
