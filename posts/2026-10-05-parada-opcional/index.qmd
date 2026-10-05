@@ -97,8 +97,8 @@ ver_negbin = comb(11, 2) * theta**9 * (1 - theta)**3
 print(np.round(ver_binom / ver_negbin, 6))
 ```
 
-El cociente es 4 en todos. Una constante que no depende de $\theta$, y que por tanto no te dice nada
-sobre $\theta$.
+El cociente es 4 en todos. Es una constante: no depende de $\theta$, así que no te dice nada sobre
+$\theta$.
 
 ## Lo mismo, con un test A/B
 
@@ -148,10 +148,14 @@ En el gráfico se ve el mecanismo. Son trayectorias del p-valor según van llega
 las he elegido a propósito: cruzan 0,05 y luego vuelven a subir. Las otras cuatro son cualesquiera.
 
 ```{python}
-#| label: trayectorias
+#| label: trayectorias-eleccion
 cruzan = np.where(cruza & (p_tray[:, -1] > 0.05))[0]
 print(cruza.sum(), "dan significativo alguna vez")
 print(len(cruzan), "cruzan 0,05 y acaban por encima")
+```
+
+```{python}
+#| label: trayectorias-grafico
 elegidas = list(cruzan[:3]) + [i for i in range(n_exp) if i not in cruzan[:3]][:4]
 fig, ax = plt.subplots()
 for i in elegidas:
@@ -230,9 +234,9 @@ No pone cuántas veces se miró ni por qué se paró ese día y no otro. Sin eso
 informe no se puede interpretar. Ni siquiera quien lo firmó sabe lo que vale.
 
 Tienes tres salidas decentes. Escribes antes de empezar cuándo vas a mirar y ajustas los umbrales
-para que el 5% siga siendo un 5%. Usas un test secuencial, como el de Wald, pensado para mirar cuando
-quieras. O te vas al lado bayesiano: la posteriori te da igual cuándo pares, pero la regla con la que
-decides necesita el mismo cuidado.
+para que el 5% siga siendo un 5%. Usas un test secuencial, como el de Wald, hecho para mirar cuando
+quieras. O te vas al lado bayesiano. La posteriori no depende de cuándo pares. La regla con la que
+decides, sí.
 
 Y hay una cuarta, la que usa casi todo el mundo: mirar cada mañana y fiarte del 0,05. Esa no
 te la puedes permitir.
