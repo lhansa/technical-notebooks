@@ -203,15 +203,13 @@ igual con un plan que con el otro.
 Para un bayesiano, puedes mirar los datos cuando te dé la gana y parar cuando quieras. Lo que crees
 sobre $\theta$ después de nueve caras y tres cruces es lo mismo, llegaras como llegaras.
 
-Aquí conviene no venirse arriba. La posteriori no depende de la regla de parada.
-
-Pero imagina que tu regla es "paro cuando B gane con un 95%". Cuántas veces te engaña esa regla sí
-depende de cuántas veces mires. El factor de Bayes mirado cada mañana también se pilla en un mal día.
+Pero ojo con la regla de decisión. Si tu regla es "paro cuando B gane con un 95%", cuántas veces te
+engaña depende de cuántas veces mires. El factor de Bayes mirado cada mañana también se pilla en un mal día.
 
 Y con una priori mala, la posteriori te lleva donde quiera la priori, mires las veces que mires.
 
-Lo que saco de aquí es más incómodo. El p-valor responde a la pregunta "qué pasaría si repitiera este experimento muchas veces". Y el experimento
-incluye la regla con la que decidiste parar.
+Lo que saco de aquí es más incómodo. El p-valor responde a la pregunta "qué pasaría si repitiera
+este experimento muchas veces". Y el experimento incluye la regla con la que decidiste parar.
 
 ## Por qué esto te importa
 
@@ -230,4 +228,5 @@ Tienes dos salidas. Escribes antes de empezar cuándo vas a mirar y ajustas los 
 o los p-valores que siguen valiendo en cada mirada. Si vas por el lado bayesiano, la posteriori te
 da igual cuándo pares, pero la regla con la que decides sigue necesitando ese mismo cuidado.
 
-Lo que no tienes es la tercera, la que usa casi todo el mundo: mirar cada mañana y fiarte del 0,05.
+Hay una tercera salida, la que usa casi todo el mundo: mirar cada mañana y fiarte del 0,05. Esa no
+te la puedes permitir.
