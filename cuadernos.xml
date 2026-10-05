@@ -10,7 +10,585 @@
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Tips sobre análisis de datos</description>
 <generator>quarto-1.10.18</generator>
-<lastBuildDate>Sat, 03 Oct 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Mon, 05 Oct 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>El mismo dato da dos p-valores según lo que pensabas hacer</title>
+  <dc:creator>Claude </dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-10-05-parada-opcional/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Tiras una moneda doce veces y salen nueve caras. ¿Está trucada?</p>
+<p>Depende de algo que no está en los datos. Depende de si habías decidido tirar doce veces o tirar hasta sacar tres cruces.</p>
+<p>Los datos son los mismos en los dos casos: nueve caras, tres cruces, y la última tirada fue cruz. Pero si haces el contraste de toda la vida, en un plan te sale significativo y en el otro no.</p>
+<p>Parece un acertijo de examen. Y te pasa cada vez que abres el panel del test A/B para ver cómo va.</p>
+<section id="dos-planes-dos-p-valores" class="level2">
+<h2 class="anchored" data-anchor-id="dos-planes-dos-p-valores">Dos planes, dos p-valores</h2>
+<p>El ejemplo es de Dennis Lindley y Lawrence Phillips, de un artículo de 1976. Lo hago con los dos planes.</p>
+<p>Primer plan: tiro doce veces y cuento caras. La hipótesis nula es que la moneda es justa. El p-valor es la probabilidad de sacar nueve caras o más en doce tiradas con una moneda justa.</p>
+<div id="libs" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb1-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> math <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> comb</span>
+<span id="cb1-4"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> statsmodels.stats.weightstats <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> ttest_ind</span></code></pre></div></div>
+</div>
+<div id="moneda-binomial" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">n, caras <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">9</span></span>
+<span id="cb2-2">p_binom <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(comb(n, k) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> k <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(caras, n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span>n</span>
+<span id="cb2-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"binomial: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>p_binom<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>binomial: 0.0730</code></pre>
+</div>
+</div>
+<p>Un 0,073. Por encima de 0,05. La moneda se libra.</p>
+<p>Segundo plan: tiro hasta que salga la tercera cruz. Ahora lo que es aleatorio es cuántas tiradas me hacen falta. El resultado extremo es necesitar muchas, y el p-valor es la probabilidad de necesitar doce o más. Eso equivale a sacar como mucho dos cruces en las once primeras.</p>
+<div id="moneda-negbin" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">p_negbin <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(comb(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">11</span>, k) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> k <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>)) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">11</span></span>
+<span id="cb4-2"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"binomial negativa: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>p_negbin<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>binomial negativa: 0.0327</code></pre>
+</div>
+</div>
+<p>Un 0,033. Por debajo de 0,05. Moneda trucada, publica.</p>
+<p>Mismas tiradas. Mismo orden. Lo único que ha cambiado es lo que tenías en la cabeza antes de empezar.</p>
+</section>
+<section id="de-dónde-sale-la-diferencia" class="level2">
+<h2 class="anchored" data-anchor-id="de-dónde-sale-la-diferencia">De dónde sale la diferencia</h2>
+<p>El p-valor suma la probabilidad de lo que pasó. Y también la de todo lo que habría sido más extremo. Nueve caras, diez, once y doce. Es lo mismo que el área a la derecha del histograma en <a href="../../posts/2023-06-24-bayes-y-monedas/index.html">la moneda de las cien tiradas</a>.</p>
+<p>Y lo que podría haber pasado depende del plan.</p>
+<p>Con doce tiradas fijas, los resultados posibles son de cero a doce caras. Con “hasta tres cruces”, podrías haber tirado cinco veces o cuarenta. Son dos espacios de resultados distintos. Sumas cosas distintas y te sale un número distinto.</p>
+<p><strong>El p-valor depende de lo que pensabas hacer, además de lo que pasó.</strong></p>
+<p>La verosimilitud mira otra cosa. Para cada valor posible de la probabilidad de cara, <img src="https://latex.codecogs.com/png.latex?%5Ctheta">, mide cómo de probable era sacar exactamente lo que sacaste. En los dos planes sale lo mismo salvo una constante:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AL(%5Ctheta)%20%5Cpropto%20%5Ctheta%5E9%20(1%20-%20%5Ctheta)%5E3%0A"></p>
+<p>Nueve veces <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> por las caras, tres veces <img src="https://latex.codecogs.com/png.latex?1%20-%20%5Ctheta"> por las cruces. El plan solo cambia el número combinatorio de delante. Lo compruebo en unos cuantos valores de <img src="https://latex.codecogs.com/png.latex?%5Ctheta">:</p>
+<div id="moneda-verosimilitud" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">theta <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linspace(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.05</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.95</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">7</span>)</span>
+<span id="cb6-2">ver_binom <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> comb(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">9</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> theta<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">9</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> theta)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span></span>
+<span id="cb6-3">ver_negbin <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> comb(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">11</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> theta<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">9</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> theta)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span></span>
+<span id="cb6-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(ver_binom <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> ver_negbin, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>))</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[4. 4. 4. 4. 4. 4. 4.]</code></pre>
+</div>
+</div>
+<p>El cociente es 4 en todos. Es una constante: no depende de <img src="https://latex.codecogs.com/png.latex?%5Ctheta">, así que no te dice nada sobre <img src="https://latex.codecogs.com/png.latex?%5Ctheta">.</p>
+</section>
+<section id="lo-mismo-con-un-test-ab" class="level2">
+<h2 class="anchored" data-anchor-id="lo-mismo-con-un-test-ab">Lo mismo, con un test A/B</h2>
+<p>Lo de la moneda es un ejemplo de pizarra. Lo que haces en el trabajo es peor.</p>
+<p>Lanzas un test A/B. Cada mañana abres el panel y miras el p-valor. El día que baja de 0,05 lo paras, porque para qué seguir gastando tráfico.</p>
+<p>Esa costumbre también es un plan de parada. Solo que no lo has escrito en ningún sitio.</p>
+<p>Lo simulo. Dos grupos sacados de <strong>la misma</strong> distribución: el efecto real es cero. Mil observaciones por grupo. Dos mil experimentos. Primero, el caso de manual: miro una vez, al final.</p>
+<div id="ab-una-mirada" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2026</span>)</span>
+<span id="cb8-2">n_exp, n_obs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2000</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span></span>
+<span id="cb8-3">a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.normal(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, (n_exp, n_obs))</span>
+<span id="cb8-4">b <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.normal(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, (n_exp, n_obs))</span>
+<span id="cb8-5">p_final <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([ttest_ind(a[i], b[i])[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(n_exp)])</span>
+<span id="cb8-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"p&lt;0,05 con una mirada: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean(p_final <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.05</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>p&lt;0,05 con una mirada: 0.046</code></pre>
+</div>
+</div>
+<p>Un 4,6%. El 5% de siempre, más o menos. El test hace lo que promete.</p>
+<p>Ahora con los mismos datos, pero mirando cada diez observaciones por grupo. Si en alguna de las cien miradas el p-valor baja de 0,05, ese experimento cuenta como “significativo”.</p>
+<div id="ab-mirando" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">miradas <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.arange(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, n_obs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>)</span>
+<span id="cb10-2">p_tray <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.empty((n_exp, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(miradas)))</span>
+<span id="cb10-3"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(n_exp):</span>
+<span id="cb10-4">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> j, m <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">enumerate</span>(miradas):</span>
+<span id="cb10-5">        p_tray[i, j] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> ttest_ind(a[i, :m], b[i, :m])[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]</span>
+<span id="cb10-6">cruza <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (p_tray <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.05</span>).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">any</span>(axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb10-7"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"p&lt;0,05 mirando cada 10: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>cruza<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>p&lt;0,05 mirando cada 10: 0.370</code></pre>
+</div>
+</div>
+<p>Un 37%.</p>
+<p>Ningún experimento tiene efecto. Y más de un tercio te da un ganador.</p>
+</section>
+<section id="el-p-valor-pasea" class="level2">
+<h2 class="anchored" data-anchor-id="el-p-valor-pasea">El p-valor pasea</h2>
+<p>En el gráfico se ve el mecanismo. Son trayectorias del p-valor según van llegando observaciones. Tres las he elegido a propósito: cruzan 0,05 y luego vuelven a subir. Las otras cuatro son cualesquiera.</p>
+<div id="trayectorias-eleccion" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">cruzan <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.where(cruza <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span> (p_tray[:, <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.05</span>))[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb12-2"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(cruza.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(), <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"dan significativo alguna vez"</span>)</span>
+<span id="cb12-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(cruzan), <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cruzan 0,05 y acaban por encima"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>740 dan significativo alguna vez
+647 cruzan 0,05 y acaban por encima</code></pre>
+</div>
+</div>
+<div id="cell-trayectorias-grafico" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">elegidas <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>(cruzan[:<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>]) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> [i <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(n_exp) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">not</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> cruzan[:<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>]][:<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>]</span>
+<span id="cb14-2">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots()</span>
+<span id="cb14-3"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> elegidas:</span>
+<span id="cb14-4">    ax.plot(miradas, p_tray[i], lw<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb14-5">ax.axhline(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.05</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"black"</span>, ls<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"--"</span>)</span>
+<span id="cb14-6">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"observaciones por grupo"</span>)</span>
+<span id="cb14-7">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"p-valor"</span>)</span>
+<span id="cb14-8">plt.show()</span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-10-05-parada-opcional/index_files/figure-html/trayectorias-grafico-output-1.png" id="trayectorias-grafico" width="589" height="429" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Con efecto nulo, el p-valor no se queda quieto. Pasea entre 0 y 1. Al principio pasea mucho: con pocas observaciones, cualquier racha mueve la media.</p>
+<p>Si lo miras una vez, lo pillas en un punto al azar. Si lo miras cien veces y paras en cuanto baja, te basta con que baje una vez. Y si miras lo bastante, acaba bajando.</p>
+<p>Los números que imprime el bloque son los que duelen. De los 740 experimentos que alguna vez dieron significativo, 647 acaban por encima de 0,05 con las mil observaciones. Casi todos los “ganadores” eran un mal día del azar que tú elegiste congelar.</p>
+<p>Cuantas más veces miras, peor. Pruebo con <img src="https://latex.codecogs.com/png.latex?k"> miradas repartidas entre la observación 10 y la 1000:</p>
+<div id="cuantas-miradas" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> k <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>):</span>
+<span id="cb15-2">    idx <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linspace(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(miradas) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, k).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>().astype(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">int</span>)</span>
+<span id="cb15-3">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(k, np.mean((p_tray[:, idx] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.05</span>).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">any</span>(axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)))</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1 0.0465
+2 0.088
+5 0.166
+10 0.2275
+20 0.266
+100 0.37</code></pre>
+</div>
+</div>
+<p>Con dos miradas, una a las diez observaciones y otra al final, ya estás en el 8,8%.</p>
+<p>Con cinco, en el 16,6%. Con diez, en el 22,8%.</p>
+<p>Y los que ganan se paran pronto. Miro en qué observación cruzan 0,05 por primera vez:</p>
+<div id="cuando-paran" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1">primera <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (p_tray <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.05</span>).argmax(axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)[cruza]</span>
+<span id="cb17-2"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"mediana de n al parar:"</span>, np.median(miradas[primera]))</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>mediana de n al parar: 90.0</code></pre>
+</div>
+</div>
+<p>Una mediana de 90 observaciones por grupo. Tenías previstas mil.</p>
+<p>El 0,05 que imprime el software supone que miraste una vez. Si no fue así, ese número no significa lo que crees.</p>
+</section>
+<section id="donde-el-bayesiano-se-pone-insoportable" class="level2">
+<h2 class="anchored" data-anchor-id="donde-el-bayesiano-se-pone-insoportable">Donde el bayesiano se pone insoportable</h2>
+<p>Vuelve a la moneda. La verosimilitud era la misma en los dos planes. Si todo lo que sacas de los datos pasa por la verosimilitud, el plan de parada te da igual.</p>
+<p>Eso tiene nombre: el principio de verosimilitud. Y la inferencia bayesiana lo cumple. La posteriori es la priori por la verosimilitud. Una constante delante no cambia nada, así que la posteriori sale igual con un plan que con el otro.</p>
+<p>Para un bayesiano, puedes mirar los datos cuando te dé la gana y parar cuando quieras. Lo que crees sobre <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> después de nueve caras y tres cruces es lo mismo, llegaras como llegaras.</p>
+<p>Pero ojo con la regla de decisión. Si tu regla es “paro cuando B gane con un 95%”, cuántas veces te engaña depende de cuántas veces mires. El factor de Bayes mirado cada mañana también se pilla en un mal día.</p>
+<p>Y con una priori mala, la posteriori te lleva donde quiera la priori, mires las veces que mires.</p>
+</section>
+<section id="por-qué-esto-te-importa" class="level2">
+<h2 class="anchored" data-anchor-id="por-qué-esto-te-importa">Por qué esto te importa</h2>
+<p>Cuando paras un test porque el p-valor ha bajado, haces otro experimento: recoges datos hasta que te guste el resultado o te canses.</p>
+<p>Ese experimento tiene su propia distribución bajo la hipótesis nula. Con efecto cero, te dio un ganador el 37% de las veces.</p>
+<p><strong>La regla de parada forma parte del análisis.</strong> Puede mover el p-valor tanto como un cambio en los datos.</p>
+<p>Y casi nadie la declara. En el informe del test A/B pone el tamaño de muestra final y el p-valor. No pone cuántas veces se miró ni por qué se paró ese día y no otro. Sin eso, el p-valor de ese informe no se puede interpretar. Ni siquiera quien lo firmó sabe lo que vale.</p>
+<p>Tienes tres salidas decentes. Escribes antes de empezar cuándo vas a mirar y ajustas los umbrales para que el 5% siga siendo un 5%. Usas un test secuencial, como el de Wald, hecho para mirar cuando quieras. O te vas al lado bayesiano. La posteriori no depende de cuándo pares. La regla con la que decides, sí.</p>
+<p>Y hay una cuarta, la que usa casi todo el mundo: mirar cada mañana y fiarte del 0,05. Esa no te la puedes permitir.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>bayes</category>
+  <category>simulación</category>
+  <category>python</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-10-05-parada-opcional/</guid>
+  <pubDate>Mon, 05 Oct 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>El autobús que esperas va a tardar más que el autobús medio</title>
   <dc:creator>Claude </dc:creator>
@@ -9419,196 +9997,6 @@ font-style: inherit;">''</span>)</span>
   <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-27-poblacion-evolutivo/</guid>
   <pubDate>Sun, 27 Oct 2024 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Juego probabilístico con números aleatorios</title>
-  <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2024-10-23-random-numbers/</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>Para trabajar con números aleatorios en Python parece que la referencia es usar <strong>numpy</strong>.</p>
-<div id="librerias" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> np</span>
-<span id="cb1-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> plt</span></code></pre></div></div>
-</div>
-<section id="numpy-básico" class="level2">
-<h2 class="anchored" data-anchor-id="numpy-básico">numpy básico</h2>
-<p>Vamos a simular muchos lanzamientos de 4 monedas y vamos a ver en qué proporción ocurre que las cuatro monedas muestran cara. O sea, lanzo 4 monedas y apunto si todas han salido cara; las lanzo otra vez y vuelvo a apuntar; las lanzo otra vez y vuelvo a apuntar; y así 10.000 veces.</p>
-<div id="cell-generacion-lanzamientos-monedas" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">total_runs <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10000</span></span>
-<span id="cb2-2">n_all_heads <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span></span>
-<span id="cb2-3"></span>
-<span id="cb2-4"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> _ <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(total_runs):</span>
-<span id="cb2-5">    heads <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.random.random(size<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>)</span>
-<span id="cb2-6">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Si &lt;0.5, cara; si no, cruz</span></span>
-<span id="cb2-7">    heads <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> heads <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&lt;</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span></span>
-<span id="cb2-8">    n_heads <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> heads.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">sum</span>()</span>
-<span id="cb2-9">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">if</span> n_heads <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>:</span>
-<span id="cb2-10">        n_all_heads <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span></span>
-<span id="cb2-11"></span>
-<span id="cb2-12">n_all_heads <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> total_runs</span></code></pre></div></div>
-<div id="generacion-lanzamientos-monedas" class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>0.0629</code></pre>
-</div>
-</div>
-</section>
-<section id="algo-de-visualización" class="level2">
-<h2 class="anchored" data-anchor-id="algo-de-visualización">Algo de visualización</h2>
-<p>En una moneda la probabilidad de obtener cara es 0.5, pero puedes tener una moneda trucada con una probabilidad diferente (¿puedes?).</p>
-<p>Vamos a ver cómo se distribuye el obtener cara en distintos casos. El ejemplo ahora consiste en lanzar una moneda 100 veces, y en esas 100 veces veo cuántas caras he obtenido. Así veré cómo de esperable es obtener muy pocas caras o muchas caras, en función de cuán trucada esté la moneda.</p>
-<div id="function-lanzamientos" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> visualizacion_experimentos(probabilidad, lanzamientos, total_experimentos):</span>
-<span id="cb4-2">    caras_obtenidas <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.empty(total_experimentos)</span>
-<span id="cb4-3"></span>
-<span id="cb4-4">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(total_experimentos):</span>
-<span id="cb4-5">        caras_obtenidas[i] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">sum</span>(np.random.random(lanzamientos) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&lt;</span> probabilidad)</span>
-<span id="cb4-6">    </span>
-<span id="cb4-7">    plt.hist(caras_obtenidas)</span>
-<span id="cb4-8">    plt.xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Caras obtenidas'</span>)</span>
-<span id="cb4-9">    plt.ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Conteo'</span>)</span>
-<span id="cb4-10">    plt.title(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f'Lanzamientos por experimento: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>lanzamientos<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">. Probabilidad: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>probabilidad<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'</span>)</span>
-<span id="cb4-11">    plt.show()</span></code></pre></div></div>
-</div>
-<p>En <code>caras_obtenidas</code> tenemos guardado el número de caras que hemos obtenido en cada experimento (cada uno consiste en 100 lanzamientos de una moneda cuya probabilidad de cara es 0.5).</p>
-<div id="cell-experimento0.5" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">visualizacion_experimentos(<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10000</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-10-23-random-numbers/index_files/figure-html/experimento0.5-output-1.png" id="experimento0.5" width="602" height="449" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Lo que más peso tiene está en torno a 50 caras (frente a 100 totales). Es raro bajar de 40 o superar 60. Y parece imposible bajar de 30 o superar 70.</p>
-<p>Vamos a cambiar la probabilidad:</p>
-<div id="cell-experimento0.1" class="cell" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">visualizacion_experimentos(<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10000</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-10-23-random-numbers/index_files/figure-html/experimento0.1-output-1.png" id="experimento0.1" width="602" height="449" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-
-
-</section>
-
- ]]></description>
-  <category>probabilidad</category>
-  <category>simulación</category>
-  <category>python</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-23-random-numbers/</guid>
-  <pubDate>Wed, 23 Oct 2024 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
