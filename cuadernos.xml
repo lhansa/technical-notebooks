@@ -9,8 +9,411 @@
 <link>https://lhansa.github.io/technical-notebooks/cuadernos.html</link>
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Tips sobre análisis de datos</description>
-<generator>quarto-1.10.18</generator>
-<lastBuildDate>Mon, 05 Oct 2026 00:00:00 GMT</lastBuildDate>
+<generator>quarto-1.10.19</generator>
+<lastBuildDate>Wed, 07 Oct 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Tu percentil 90 de diez números puede valer 9 o 9,9</title>
+  <dc:creator>Claude </dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-10-07-percentil-90-de-diez-numeros/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Tienes los números del 1 al 10. Pides el percentil 90.</p>
+<p>numpy te dice 9,1. Excel, con <code>PERCENTILE.EXC</code>, te dice 9,9. Y numpy, con <code>method="inverted_cdf"</code>, te dice 9.</p>
+<p>Nadie se ha equivocado. El percentil 90 de una muestra no tiene una definición única.</p>
+<section id="nueve-formas-de-calcularlo" class="level2">
+<h2 class="anchored" data-anchor-id="nueve-formas-de-calcularlo">Nueve formas de calcularlo</h2>
+<p>En 1996, Rob Hyndman y Yanan Fan compararon las nueve definiciones de cuantil muestral que usaban los paquetes estadísticos de la época. Las numeraron del 1 al 9. Hoy se las sigue llamando tipos.</p>
+<p>numpy las trae todas en el argumento <code>method</code>. Las pruebo con los números del 1 al 10.</p>
+<div id="libs" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb1-3"></span>
+<span id="cb1-4">METODOS <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> {</span>
+<span id="cb1-5">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"inverted_cdf"</span>: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"averaged_inverted_cdf"</span>: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"closest_observation"</span>: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>,</span>
+<span id="cb1-6">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"interpolated_inverted_cdf"</span>: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"hazen"</span>: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"weibull"</span>: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"linear"</span>: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">7</span>,</span>
+<span id="cb1-7">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"median_unbiased"</span>: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"normal_unbiased"</span>: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">9</span>,</span>
+<span id="cb1-8">}</span></code></pre></div></div>
+</div>
+<div id="tabla-diez" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.arange(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">11</span>)</span>
+<span id="cb2-2"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> metodo, tipo <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> METODOS.items():</span>
+<span id="cb2-3">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>metodo<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:27s}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> tipo </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>tipo<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">  </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>percentile(x, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">90</span>, method<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>metodo)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>inverted_cdf                tipo 1  9.0000
+averaged_inverted_cdf       tipo 2  9.5000
+closest_observation         tipo 3  9.0000
+interpolated_inverted_cdf   tipo 4  9.0000
+hazen                       tipo 5  9.5000
+weibull                     tipo 6  9.9000
+linear                      tipo 7  9.1000
+median_unbiased             tipo 8  9.6333
+normal_unbiased             tipo 9  9.6000</code></pre>
+</div>
+</div>
+<p>Van de 9 a 9,9. Sobre una escala de 1 a 10, no es poco.</p>
+<p>El 10 que podrías esperar de un “redondea hacia arriba” sale con <code>method="higher"</code>. Es una opción que numpy añade por su cuenta.</p>
+</section>
+<section id="de-dónde-salen-las-diferencias" class="level2">
+<h2 class="anchored" data-anchor-id="de-dónde-salen-las-diferencias">De dónde salen las diferencias</h2>
+<p>Con los números del 1 al 10, cada dato vale lo mismo que su posición. Así que el percentil es la posición que cada método le asigna al 90%.</p>
+<p>El tipo 7 es el que usa numpy por defecto (<code>linear</code>). También R, y Excel con <code>PERCENTILE.INC</code>. Coloca el percentil en la posición <img src="https://latex.codecogs.com/png.latex?(n-1)p+1">. Con <img src="https://latex.codecogs.com/png.latex?n=10"> y <img src="https://latex.codecogs.com/png.latex?p=0%7B,%7D9">, eso es <img src="https://latex.codecogs.com/png.latex?9%7B,%7D1">.</p>
+<p>El tipo 6 usa <img src="https://latex.codecogs.com/png.latex?(n+1)p">, que da <img src="https://latex.codecogs.com/png.latex?9%7B,%7D9">. El tipo 5 usa <img src="https://latex.codecogs.com/png.latex?np+%5Ctfrac12">, que da <img src="https://latex.codecogs.com/png.latex?9%7B,%7D5">.</p>
+<p>Lo que cambia es dónde coloca cada uno los datos entre 0 y 1. El tipo 7 pone el 1 en 0 y el 10 en 1. Para él, el 10 es el percentil 100. El tipo 6 deja hueco por los dos lados: el 1 cae en 1/11 y el 10 en 10/11. Así el 90% le queda casi pegado al 10. El tipo 5 se queda en medio y pone el 10 en 0,95.</p>
+<p>Hyndman y Fan miraron qué propiedades razonables cumple cada definición y recomendaron el tipo 8, porque sus estimaciones salen aproximadamente insesgadas en mediana sea cual sea la distribución. Casi nadie lo usa por defecto. Yo, hasta escribir esto, no había mirado nunca qué tipo estaba usando.</p>
+</section>
+<section id="cuándo-deja-de-importar" class="level2">
+<h2 class="anchored" data-anchor-id="cuándo-deja-de-importar">Cuándo deja de importar</h2>
+<p>Diez datos son pocos. Mira qué pasa cuando hay más.</p>
+<p>Simulo muestras normales. Para cada tamaño <img src="https://latex.codecogs.com/png.latex?n"> calculo el percentil con los nueve métodos y me quedo con la distancia entre el mayor y el menor. Luego promedio sobre muchas muestras.</p>
+<div id="rango-n" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> rango(n, q, reps):</span>
+<span id="cb4-2">    np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb4-3">    muestras <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.normal(size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(reps, n))</span>
+<span id="cb4-4">    v <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([np.percentile(muestras, q, axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, method<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>m) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> m <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> METODOS])</span>
+<span id="cb4-5">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> (v.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>(axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> v.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">min</span>(axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)).mean()</span>
+<span id="cb4-6"></span>
+<span id="cb4-7">ns <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">30</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10000</span>]</span>
+<span id="cb4-8">res <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> {q: [rango(n, q, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">500</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10000</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">else</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> n <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> ns] <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> q <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">90</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">99</span>)}</span>
+<span id="cb4-9"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> q <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> res:</span>
+<span id="cb4-10">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(q, [<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(r, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> r <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> res[q]])</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>90 [0.4516, 0.1757, 0.0475, 0.0055, 0.0005]
+99 [0.0502, 0.1178, 0.3535, 0.0358, 0.004]</code></pre>
+</div>
+</div>
+<p>Para el percentil 90 la distancia se encoge deprisa. De 0,45 con diez datos a 0,0055 con mil. A partir de ahí es un detalle.</p>
+<p>El percentil 99 se porta peor.</p>
+<div id="cell-grafico-rango" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots()</span>
+<span id="cb6-2"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> q <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> res:</span>
+<span id="cb6-3">    ax.plot(ns, res[q], marker<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"o"</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"p</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>q<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb6-4">ax.set_xscale(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"log"</span>)</span>
+<span id="cb6-5">ax.set_yscale(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"log"</span>)</span>
+<span id="cb6-6">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"n"</span>)</span>
+<span id="cb6-7">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"distancia entre el mayor y el menor método"</span>)</span>
+<span id="cb6-8">ax.legend()</span>
+<span id="cb6-9">plt.show()</span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-10-07-percentil-90-de-diez-numeros/index_files/figure-html/grafico-rango-output-1.png" id="grafico-rango" width="594" height="430" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Con diez datos el p99 casi no se discute, porque casi todos los métodos devuelven el máximo de la muestra. Con cien se separan más que con ningún otro de los tamaños que pruebo. La distancia llega a 0,35, siete veces la del p90 con el mismo tamaño. Hace falta llegar a mil para que se calmen.</p>
+<p><strong>Cuanto más al extremo está el percentil, más tarda en dejar de importar el método.</strong></p>
+</section>
+<section id="un-caso-donde-duele" class="level2">
+<h2 class="anchored" data-anchor-id="un-caso-donde-duele">Un caso donde duele</h2>
+<p>Cincuenta números de una normal estándar y el percentil 99. Es el tamaño que tienes cuando miras las últimas cincuenta peticiones de un servicio.</p>
+<div id="caso-p99" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">7</span>)</span>
+<span id="cb7-2">y <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.normal(size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>)</span>
+<span id="cb7-3"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> metodo <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> METODOS:</span>
+<span id="cb7-4">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>metodo<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:27s}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>percentile(y, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">99</span>, method<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>metodo)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb7-5"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"tres mayores:"</span>, np.sort(y)[<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>:].<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>))</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>inverted_cdf                2.2476
+averaged_inverted_cdf       2.2476
+closest_observation         2.0291
+interpolated_inverted_cdf   2.1383
+hazen                       2.2476
+weibull                     2.2476
+linear                      2.1405
+median_unbiased             2.2476
+normal_unbiased             2.2476
+tres mayores: [1.7662 2.0291 2.2476]</code></pre>
+</div>
+</div>
+<p>Seis métodos devuelven el máximo de la muestra, 2,2476. Es lo que pasa cuando la posición que piden cae en el último dato o se sale por arriba.</p>
+<p><code>closest_observation</code> devuelve el segundo mayor, 2,0291. <code>linear</code> interpola y da 2,1405.</p>
+<p>La diferencia entre el más alto y el más bajo es 0,22 desviaciones típicas. Si comparas dos semanas con muestras así, ese hueco puede ser mayor que el cambio que buscas.</p>
+</section>
+<section id="por-qué-esto-te-importa" class="level2">
+<h2 class="anchored" data-anchor-id="por-qué-esto-te-importa">Por qué esto te importa</h2>
+<p>El método por defecto de tu herramienta es una decisión que alguien tomó por ti. Con miles de datos y un percentil central te da igual.</p>
+<p>Con pocos datos, o con percentiles extremos, mira el argumento <code>method</code> antes de comparar números de dos sitios. Si uno viene de Excel y otro de numpy, puede que no estén midiendo lo mismo.</p>
+<p>Y si el informe dice “p99” sin más, apunta de qué programa salió y con qué método.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>simulación</category>
+  <category>python</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-10-07-percentil-90-de-diez-numeros/</guid>
+  <pubDate>Wed, 07 Oct 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>El mismo dato da dos p-valores según lo que pensabas hacer</title>
   <dc:creator>Claude </dc:creator>
@@ -9640,363 +10043,6 @@ dtype: object</code></pre>
   <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-31-pyjanitor/</guid>
   <pubDate>Thu, 31 Oct 2024 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Evolución de la población por provincias en España</title>
-  <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2024-10-27-poblacion-evolutivo/</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>El INE tiene datos de evolución <del>trimestral</del> semestral de la población por provincias en España.</p>
-<p>En un formato horrible, por supuesto.</p>
-<div id="libs" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> pd</span>
-<span id="cb1-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> plt</span>
-<span id="cb1-3"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> locale</span></code></pre></div></div>
-</div>
-<div id="cell-read-data" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">locale.setlocale(locale.LC_TIME, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'es_ES.UTF-8'</span>)</span>
-<span id="cb2-2"></span>
-<span id="cb2-3">df_ine <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pd.read_csv(</span>
-<span id="cb2-4">    <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'ine-poblacion-provincias.csv'</span>, </span>
-<span id="cb2-5">    sep<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">';'</span>, </span>
-<span id="cb2-6">    header<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, </span>
-<span id="cb2-7">    names<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'edad'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'provincia'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'sexo'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'periodo'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'residentes'</span>]</span>
-<span id="cb2-8">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># usecols=['provincia', 'periodo', 'residentes']</span></span>
-<span id="cb2-9">)</span>
-<span id="cb2-10"></span>
-<span id="cb2-11">condicion <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> (df_ine[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'edad'</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Todas las edades'</span>) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&amp;</span> (df_ine[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'sexo'</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Total'</span>)</span>
-<span id="cb2-12">df_ine <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> df_ine.loc[condicion, [<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'provincia'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'periodo'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'residentes'</span>]]</span>
-<span id="cb2-13"></span>
-<span id="cb2-14">df_ine[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'residentes'</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pd.to_numeric(df_ine[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'residentes'</span>].<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>.replace(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'.'</span>,<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">''</span>))</span>
-<span id="cb2-15">df_ine[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'periodo'</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pd.to_datetime(df_ine[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'periodo'</span>], <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">format</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%d</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;"> de %B de %Y'</span>)</span>
-<span id="cb2-16"></span>
-<span id="cb2-17">df_ine.head()</span></code></pre></div></div>
-<div id="read-data" class="cell-output cell-output-display" data-execution_count="10">
-<div>
-
-
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">provincia</th>
-<th data-quarto-table-cell-role="th">periodo</th>
-<th data-quarto-table-cell-role="th">residentes</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">0</th>
-<td>Total Nacional</td>
-<td>2023-01-01</td>
-<td>48085361.0</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
-<td>Total Nacional</td>
-<td>2022-10-01</td>
-<td>47940295.0</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">2</th>
-<td>Total Nacional</td>
-<td>2022-07-01</td>
-<td>47781354.0</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">3</th>
-<td>Total Nacional</td>
-<td>2022-04-01</td>
-<td>47609145.0</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">4</th>
-<td>Total Nacional</td>
-<td>2022-01-01</td>
-<td>47486727.0</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<p>Si los tratas un poco, puedes usar mi librería favorita para hacer gráficos, matplotlib, en la que si tuviera que trabajar dejaría mi trabajo, me pagaran lo que me pagaran.</p>
-<div id="prepara-plot" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">df_solo_provincias <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> df_ine[df_ine[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'provincia'</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">!=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Total Nacional'</span>]</span>
-<span id="cb3-2">df_solo_provincias[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'residentes'</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> df_solo_provincias[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'residentes'</span>].fillna(method<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'ffill'</span>)</span>
-<span id="cb3-3"></span>
-<span id="cb3-4">provincias_destacadas <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> [<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'28 Madrid'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'08 Barcelona'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'46 Valencia/València'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'29 Málaga'</span>]</span>
-<span id="cb3-5"></span>
-<span id="cb3-6">df_solo_provincias[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'destacada'</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> df_solo_provincias[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'provincia'</span>].<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">apply</span>(<span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">lambda</span> x: x <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">if</span> x <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> provincias_destacadas <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">else</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Otras'</span>)</span></code></pre></div></div>
-</div>
-<p>Dicen que construyendo más vivienda se solucionan los problemas de precios.</p>
-<div id="cell-plot" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">colors <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> {<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'28 Madrid'</span>: <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'blue'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'08 Barcelona'</span>: <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'red'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'46 Valencia/València'</span>: <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'green'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'29 Málaga'</span>: <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'orange'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Otras'</span>: <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'lightgray'</span>}</span>
-<span id="cb4-2"></span>
-<span id="cb4-3">df_pivot <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> df_solo_provincias.pivot(index<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'periodo'</span>, columns<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'provincia'</span>, values<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'residentes'</span>)</span>
-<span id="cb4-4"></span>
-<span id="cb4-5">fig, ax <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> plt.subplots(figsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">6</span>))</span>
-<span id="cb4-6"></span>
-<span id="cb4-7"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> provincia <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> df_pivot.columns:</span>
-<span id="cb4-8">    color <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> colors[provincia] <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">if</span> provincia <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> provincias_destacadas <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">else</span> colors[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Otras'</span>]</span>
-<span id="cb4-9">    label <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> provincia <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">if</span> provincia <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> provincias_destacadas <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">else</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'_nolegend_'</span></span>
-<span id="cb4-10">    df_pivot[provincia].plot(ax<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>ax, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>color, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>label)</span>
-<span id="cb4-11"></span>
-<span id="cb4-12">plt.title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Evolución de la población por provincias en España'</span>)</span>
-<span id="cb4-13">plt.ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Residentes (millones)'</span>)</span>
-<span id="cb4-14">plt.xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">''</span>)</span>
-<span id="cb4-15">plt.legend()</span>
-<span id="cb4-16">plt.show()</span></code></pre></div></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-10-27-poblacion-evolutivo/index_files/figure-html/plot-output-1.png" id="plot" width="799" height="506" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Suerte con pillar el ritmo a la demanda.</p>
-
-
-
- ]]></description>
-  <category>ine</category>
-  <category>python</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-10-27-poblacion-evolutivo/</guid>
-  <pubDate>Sun, 27 Oct 2024 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

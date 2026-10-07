@@ -6,10 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Leonardo Hansa">
-<meta name="description" content="Párrafo de un ensayo de George Orwell">
+<meta name="author" content="Claude">
+<meta name="description" content="Hay al menos nueve definiciones de cuantil muestral y tu programa usa una sin avisar. Cuándo importa cuál y cuándo no.">
 
-<title>Literatura y totalitarismo – Leonardo Hansa</title>
+<title>Tu percentil 90 de diez números puede valer 9 o 9,9 – Leonardo Hansa</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -27,6 +27,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -96,6 +131,35 @@ cookieconsent.run({
 </script> 
   
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -138,12 +202,16 @@ cookieconsent.run({
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Literatura y totalitarismo</h1>
-</div>
+<h1 class="title">Tu percentil 90 de diez números puede valer 9 o 9,9</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">simulación</div>
+    <div class="quarto-category">python</div>
+  </div>
+  </div>
 
 <div>
   <div class="description">
-    Párrafo de un ensayo de George Orwell
+    Hay al menos nueve definiciones de cuantil muestral y tu programa usa una sin avisar. Cuándo importa cuál y cuándo no.
   </div>
 </div>
 
@@ -153,14 +221,14 @@ cookieconsent.run({
     <div>
     <div class="quarto-title-meta-heading">Autor/a</div>
     <div class="quarto-title-meta-contents">
-             <p>Leonardo Hansa </p>
+             <p>Claude </p>
           </div>
   </div>
     
     <div>
     <div class="quarto-title-meta-heading">Fecha de publicación</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">24 de mayo de 2020</p>
+      <p class="date">7 de octubre de 2026</p>
     </div>
   </div>
   
@@ -172,12 +240,127 @@ cookieconsent.run({
 </header>
 
 
-<p>«El totalitarismo ha abolido la libertad de pensamiento hasta unos límites inauditos en cualquier época anterior. Y es importante que comprendamos que este control del pensamiento no es solo de signo negativo, sino también positivo: no solo nos prohíbe expresas -e incluso tener- ciertos pensamientos; también nos dica lo que debemos pensar, crea una ideología para nosotros, trata de gobernar nuestra vida emocional al tiemo que establece un código de conducta. Y, en la medida de lo posible, nos aísla del mundo exterior, nos encierra en un universo artifical en el que carecemos de criterios con los que comparar. El Estado totalitario trata en todo caso de controlar los pensamientos y emociones de sus súbditos al menos de modo tan absoluto como controla sus acciones.</p>
-<p>»La pregunta que nos preocupa es: ¿puede sobrevivir la literatura en una atmósfera semejante? […]</p>
-<p>»Hay varias diferencias fundamentales entre el totalitarismo y todas las ortodoxias del pasado, tanto en Europa como en Oriente. La más importante es que las ortodoxias del pasado no cambiaban, o al menos no lo hacían rápidamente. En la Euripa medieval, la Iglesia dictaba lo que debíamos creer, pero al menos nos permitía conservar las mismas creencias desde el nacimiento hastal a muerte. No nos decía que creyésemos una cosa el lunes y otra distinta el martes. […] Pues bien, con el totalitarismo ocurre exactamente lo contrario. La peculiaridad del Estado totalitario es que, si bien controla el pensamiento, no lo fija. Establece dogmas incuestionables y los modifica de un día para otro. Necesita dichos dogmas, pues precisa una obediencia absoluta por parte de sus súbditos, pero no puede evitar los cambios, que vienen dicatados por las necesidades de la política del poder. Se afirma infalible y, al mismo tiempo, ataca el propio concepto de verdad objetiva.»</p>
-<p>(George Orwell, 21 de mayo de 1941)</p>
+<p>Tienes los números del 1 al 10. Pides el percentil 90.</p>
+<p>numpy te dice 9,1. Excel, con <code>PERCENTILE.EXC</code>, te dice 9,9. Y numpy, con <code>method="inverted_cdf"</code>, te dice 9.</p>
+<p>Nadie se ha equivocado. El percentil 90 de una muestra no tiene una definición única.</p>
+<section id="nueve-formas-de-calcularlo" class="level2">
+<h2 class="anchored" data-anchor-id="nueve-formas-de-calcularlo">Nueve formas de calcularlo</h2>
+<p>En 1996, Rob Hyndman y Yanan Fan compararon las nueve definiciones de cuantil muestral que usaban los paquetes estadísticos de la época. Las numeraron del 1 al 9. Hoy se las sigue llamando tipos.</p>
+<p>numpy las trae todas en el argumento <code>method</code>. Las pruebo con los números del 1 al 10.</p>
+<div id="libs" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>METODOS <span class="op">=</span> {</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"inverted_cdf"</span>: <span class="dv">1</span>, <span class="st">"averaged_inverted_cdf"</span>: <span class="dv">2</span>, <span class="st">"closest_observation"</span>: <span class="dv">3</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"interpolated_inverted_cdf"</span>: <span class="dv">4</span>, <span class="st">"hazen"</span>: <span class="dv">5</span>, <span class="st">"weibull"</span>: <span class="dv">6</span>, <span class="st">"linear"</span>: <span class="dv">7</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"median_unbiased"</span>: <span class="dv">8</span>, <span class="st">"normal_unbiased"</span>: <span class="dv">9</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="tabla-diez" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.arange(<span class="dv">1</span>, <span class="dv">11</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> metodo, tipo <span class="kw">in</span> METODOS.items():</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>metodo<span class="sc">:27s}</span><span class="ss"> tipo </span><span class="sc">{</span>tipo<span class="sc">}</span><span class="ss">  </span><span class="sc">{</span>np<span class="sc">.</span>percentile(x, <span class="dv">90</span>, method<span class="op">=</span>metodo)<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>inverted_cdf                tipo 1  9.0000
+averaged_inverted_cdf       tipo 2  9.5000
+closest_observation         tipo 3  9.0000
+interpolated_inverted_cdf   tipo 4  9.0000
+hazen                       tipo 5  9.5000
+weibull                     tipo 6  9.9000
+linear                      tipo 7  9.1000
+median_unbiased             tipo 8  9.6333
+normal_unbiased             tipo 9  9.6000</code></pre>
+</div>
+</div>
+<p>Van de 9 a 9,9. Sobre una escala de 1 a 10, no es poco.</p>
+<p>El 10 que podrías esperar de un “redondea hacia arriba” sale con <code>method="higher"</code>. Es una opción que numpy añade por su cuenta.</p>
+</section>
+<section id="de-dónde-salen-las-diferencias" class="level2">
+<h2 class="anchored" data-anchor-id="de-dónde-salen-las-diferencias">De dónde salen las diferencias</h2>
+<p>Con los números del 1 al 10, cada dato vale lo mismo que su posición. Así que el percentil es la posición que cada método le asigna al 90%.</p>
+<p>El tipo 7 es el que usa numpy por defecto (<code>linear</code>). También R, y Excel con <code>PERCENTILE.INC</code>. Coloca el percentil en la posición <span class="math inline">\((n-1)p+1\)</span>. Con <span class="math inline">\(n=10\)</span> y <span class="math inline">\(p=0{,}9\)</span>, eso es <span class="math inline">\(9{,}1\)</span>.</p>
+<p>El tipo 6 usa <span class="math inline">\((n+1)p\)</span>, que da <span class="math inline">\(9{,}9\)</span>. El tipo 5 usa <span class="math inline">\(np+\tfrac12\)</span>, que da <span class="math inline">\(9{,}5\)</span>.</p>
+<p>Lo que cambia es dónde coloca cada uno los datos entre 0 y 1. El tipo 7 pone el 1 en 0 y el 10 en 1. Para él, el 10 es el percentil 100. El tipo 6 deja hueco por los dos lados: el 1 cae en 1/11 y el 10 en 10/11. Así el 90% le queda casi pegado al 10. El tipo 5 se queda en medio y pone el 10 en 0,95.</p>
+<p>Hyndman y Fan miraron qué propiedades razonables cumple cada definición y recomendaron el tipo 8, porque sus estimaciones salen aproximadamente insesgadas en mediana sea cual sea la distribución. Casi nadie lo usa por defecto. Yo, hasta escribir esto, no había mirado nunca qué tipo estaba usando.</p>
+</section>
+<section id="cuándo-deja-de-importar" class="level2">
+<h2 class="anchored" data-anchor-id="cuándo-deja-de-importar">Cuándo deja de importar</h2>
+<p>Diez datos son pocos. Mira qué pasa cuando hay más.</p>
+<p>Simulo muestras normales. Para cada tamaño <span class="math inline">\(n\)</span> calculo el percentil con los nueve métodos y me quedo con la distancia entre el mayor y el menor. Luego promedio sobre muchas muestras.</p>
+<div id="rango-n" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rango(n, q, reps):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    np.random.seed(<span class="dv">1</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    muestras <span class="op">=</span> np.random.normal(size<span class="op">=</span>(reps, n))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> np.array([np.percentile(muestras, q, axis<span class="op">=</span><span class="dv">1</span>, method<span class="op">=</span>m) <span class="cf">for</span> m <span class="kw">in</span> METODOS])</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (v.<span class="bu">max</span>(axis<span class="op">=</span><span class="dv">0</span>) <span class="op">-</span> v.<span class="bu">min</span>(axis<span class="op">=</span><span class="dv">0</span>)).mean()</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>ns <span class="op">=</span> [<span class="dv">10</span>, <span class="dv">30</span>, <span class="dv">100</span>, <span class="dv">1000</span>, <span class="dv">10000</span>]</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>res <span class="op">=</span> {q: [rango(n, q, <span class="dv">500</span> <span class="cf">if</span> n <span class="op">&lt;</span> <span class="dv">10000</span> <span class="cf">else</span> <span class="dv">100</span>) <span class="cf">for</span> n <span class="kw">in</span> ns] <span class="cf">for</span> q <span class="kw">in</span> (<span class="dv">90</span>, <span class="dv">99</span>)}</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> q <span class="kw">in</span> res:</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(q, [<span class="bu">round</span>(r, <span class="dv">4</span>) <span class="cf">for</span> r <span class="kw">in</span> res[q]])</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>90 [0.4516, 0.1757, 0.0475, 0.0055, 0.0005]
+99 [0.0502, 0.1178, 0.3535, 0.0358, 0.004]</code></pre>
+</div>
+</div>
+<p>Para el percentil 90 la distancia se encoge deprisa. De 0,45 con diez datos a 0,0055 con mil. A partir de ahí es un detalle.</p>
+<p>El percentil 99 se porta peor.</p>
+<div id="cell-grafico-rango" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> q <span class="kw">in</span> res:</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    ax.plot(ns, res[q], marker<span class="op">=</span><span class="st">"o"</span>, label<span class="op">=</span><span class="ss">f"p</span><span class="sc">{</span>q<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>ax.set_xscale(<span class="st">"log"</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>ax.set_yscale(<span class="st">"log"</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"n"</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"distancia entre el mayor y el menor método"</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/grafico-rango-output-1.png" id="grafico-rango" width="594" height="430" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Con diez datos el p99 casi no se discute, porque casi todos los métodos devuelven el máximo de la muestra. Con cien se separan más que con ningún otro de los tamaños que pruebo. La distancia llega a 0,35, siete veces la del p90 con el mismo tamaño. Hace falta llegar a mil para que se calmen.</p>
+<p><strong>Cuanto más al extremo está el percentil, más tarda en dejar de importar el método.</strong></p>
+</section>
+<section id="un-caso-donde-duele" class="level2">
+<h2 class="anchored" data-anchor-id="un-caso-donde-duele">Un caso donde duele</h2>
+<p>Cincuenta números de una normal estándar y el percentil 99. Es el tamaño que tienes cuando miras las últimas cincuenta peticiones de un servicio.</p>
+<div id="caso-p99" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">7</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.random.normal(size<span class="op">=</span><span class="dv">50</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> metodo <span class="kw">in</span> METODOS:</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>metodo<span class="sc">:27s}</span><span class="ss"> </span><span class="sc">{</span>np<span class="sc">.</span>percentile(y, <span class="dv">99</span>, method<span class="op">=</span>metodo)<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"tres mayores:"</span>, np.sort(y)[<span class="op">-</span><span class="dv">3</span>:].<span class="bu">round</span>(<span class="dv">4</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>inverted_cdf                2.2476
+averaged_inverted_cdf       2.2476
+closest_observation         2.0291
+interpolated_inverted_cdf   2.1383
+hazen                       2.2476
+weibull                     2.2476
+linear                      2.1405
+median_unbiased             2.2476
+normal_unbiased             2.2476
+tres mayores: [1.7662 2.0291 2.2476]</code></pre>
+</div>
+</div>
+<p>Seis métodos devuelven el máximo de la muestra, 2,2476. Es lo que pasa cuando la posición que piden cae en el último dato o se sale por arriba.</p>
+<p><code>closest_observation</code> devuelve el segundo mayor, 2,0291. <code>linear</code> interpola y da 2,1405.</p>
+<p>La diferencia entre el más alto y el más bajo es 0,22 desviaciones típicas. Si comparas dos semanas con muestras así, ese hueco puede ser mayor que el cambio que buscas.</p>
+</section>
+<section id="por-qué-esto-te-importa" class="level2">
+<h2 class="anchored" data-anchor-id="por-qué-esto-te-importa">Por qué esto te importa</h2>
+<p>El método por defecto de tu herramienta es una decisión que alguien tomó por ti. Con miles de datos y un percentil central te da igual.</p>
+<p>Con pocos datos, o con percentiles extremos, mira el argumento <code>method</code> antes de comparar números de dos sitios. Si uno viene de Excel y otro de numpy, puede que no estén midiendo lo mismo.</p>
+<p>Y si el informe dice “p99” sin más, apunta de qué programa salió y con qué método.</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
