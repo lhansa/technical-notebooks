@@ -7,14 +7,14 @@ project:
 
 website:
   title: "Leonardo Hansa"
-  description: "Tips sobre análisis de datos"
+  description: "Notes on statistics and data analysis"
   favicon: favicon.png
   navbar: 
     background: "#ffffff"
     search: false
     pinned: true
     left: 
-      - text: "Cuadernos"
+      - text: "Notebooks"
         href: "cuadernos.qmd"
         icon: "book"
       - text: "Cu-cu-trás"
@@ -46,7 +46,7 @@ format:
       echo: false
       message: false
       warning: false
-    lang: es
+    lang: en
     
 execute: 
   freeze: auto

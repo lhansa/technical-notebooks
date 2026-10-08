@@ -31,10 +31,10 @@ Y lee entero uno de los dos últimos posts, `posts/2026-09-15-collider/index.qmd
 Dos o tres. Que sean **de verdad distintas**: tres variantes del mismo enfoque no son tres opciones.
 Cada una lleva:
 
-- **Título candidato.** Afirmación o pregunta concreta. "Controlar por más variables no es ser más
-  riguroso", no "Introducción a los colliders".
+- **Título candidato**, en inglés. Afirmación o pregunta concreta. "Controlling for more variables
+  doesn't make you more rigorous", no "An introduction to colliders".
 - **La pregunta que el post responde**, en una frase.
-- **Las tres primeras frases, escritas.** Literales, no descritas. El arranque en seco es donde se
+- **Las tres primeras frases, escritas en inglés.** Literales, no descritas. El arranque en seco es donde se
   gana o se pierde al lector, y es lo único que permite comparar dos enfoques de verdad. Si aquí
   escribes "empezaría hablando de...", la ficha no sirve.
 - **El ejemplo concreto.** Esto es obligatorio. La fuerza del post del collider no son las

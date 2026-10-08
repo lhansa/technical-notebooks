@@ -104,8 +104,9 @@ una coja.
 Cinco, numeradas. Cada una con estos campos, en este orden, porque el issue semanal y los sub-issues
 los leen así:
 
-- **Título.** En la forma del blog: afirmación o pregunta concreta. "La fórmula de la varianza del
-  libro no aguanta la coma flotante", no "Algoritmos numéricos para la varianza".
+- **Título.** En inglés, que es el idioma en que sale el post, y en la forma del blog: afirmación o
+  pregunta concreta. "The textbook variance formula breaks in floating point", no "Numerical
+  algorithms for the variance". El resto de la ficha, en español.
 - **Campo.** Uno: estadística, machine learning, programación o matemáticas.
 - **La idea.** Dos frases. Lo que el post contaría.
 - **Referencia.** La cita completa, con DOI o URL.

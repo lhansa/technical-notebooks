@@ -179,12 +179,19 @@ Si uno contradice `CLAUDE.md`, manda `CLAUDE.md`, y lo dices en el PR.
 
 ### El borrador
 
+El post va en inglés: lo dice `CLAUDE.md` en **Idioma**. El post de referencia está en español; de
+él coges el ritmo, no las palabras.
+
 El arranque ya está escrito: son las tres primeras frases de la ficha. Empieza por ahí.
+
+Si el título de la ficha o del sub-issue llega en español, tradúcelo con la misma forma (afirmación
+o pregunta concreta) y dilo en una línea del PR. Pasa con los temas propios y con las fichas
+anteriores al cambio de idioma.
 
 Los números que afirmes salen de lo que devolvió `laboratorio`. Ninguno de otro sitio.
 
-Crea la carpeta y el fichero: `posts/YYYY-MM-DD-titulo-en-kebab-case/index.qmd`. En modo
-desatendido, la fecha es la de hoy, la de la fase 0.
+Crea la carpeta y el fichero: `posts/YYYY-MM-DD-title-in-kebab-case/index.qmd`, con el slug en
+inglés. En modo desatendido, la fecha es la de hoy, la de la fase 0.
 
 ## Fase 4 — La revisión en frío
 

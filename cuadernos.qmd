@@ -1,5 +1,5 @@
 ---
-title: "Cuadernos"
+title: "Notebooks"
 listing:
   - id: estadistica
     contents: posts
@@ -14,7 +14,7 @@ listing:
     sort-ui: false
     filter-ui: false
     field-display-names:
-      title: "Tema"
+      title: "Topic"
       categories: "Tags"
   - id: exploraciones
     contents: posts
@@ -28,7 +28,7 @@ listing:
     sort-ui: false
     filter-ui: false
     field-display-names:
-      title: "Tema"
+      title: "Topic"
       categories: "Tags"
   - id: herramientas
     contents: posts
@@ -42,7 +42,7 @@ listing:
     sort-ui: false
     filter-ui: false
     field-display-names:
-      title: "Tema"
+      title: "Topic"
       categories: "Tags"
   - id: lecturas
     contents: posts
@@ -56,7 +56,7 @@ listing:
     sort-ui: false
     filter-ui: false
     field-display-names:
-      title: "Tema"
+      title: "Topic"
       categories: "Tags"
   - id: feed
     contents: posts
@@ -70,30 +70,30 @@ page-layout: full
 title-block-banner: false
 ---
 
-## Estadística
+## Statistics
 
-Ideas de estadística y modelado, con o sin simulación.
+Ideas from statistics and modelling, with or without simulation.
 
 ::: {#estadistica}
 :::
 
-## Exploraciones
+## Explorations
 
-Un conjunto de datos real, y lo que sale al mirarlo.
+A real dataset, and what turns up when you look at it.
 
 ::: {#exploraciones}
 :::
 
-## Herramientas
+## Tools
 
-R, Python, rendimiento, limpieza y gráficos.
+R, Python, performance, cleaning and plots.
 
 ::: {#herramientas}
 :::
 
-## Lecturas
+## Readings
 
-Notas de libros.
+Notes on books.
 
 ::: {#lecturas}
 :::
