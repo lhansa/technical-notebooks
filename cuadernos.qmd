@@ -1,5 +1,5 @@
 ---
-title: "Cuadernos"
+title: "Notebooks"
 listing:
   contents: posts
   sort: "date desc"
@@ -11,8 +11,8 @@ listing:
   sort-ui: [title, seccion, date]
   filter-ui: false
   field-display-names:
-    title: "Tema"
-    seccion: "Sección"
+    title: "Topic"
+    seccion: "Section"
     categories: "Tags"
   feed: true
 language:

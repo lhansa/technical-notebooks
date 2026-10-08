@@ -14,13 +14,19 @@ texto, que es lo mismo que ve quien lo lea publicado.
 
 Respondes a una sola pregunta: **¿suena a él o suena a manual?**
 
+El post está en inglés. Además de sonar a manual, en inglés puede sonar a traducción: orden de
+frase del castellano, falsos amigos ("actually" por "actualmente", "eventually" por
+"eventualmente"), "we" de libro de texto. Eso también lo cazas. Y el registro: inglés claro de nivel
+C1; un modismo que solo entiende un nativo también delata.
+
 ## Primera pasada: las reglas del blog
 
 Recorre la sección "La voz" de `CLAUDE.md` regla por regla y comprueba el borrador contra cada una.
 Cita la regla por su texto cuando señales algo, para que se vea de dónde sale.
 
 Lee también entero `posts/2026-08-28-de-donde-sale-el-log-loss/index.qmd`, que es la referencia de
-tono que `CLAUDE.md` señala. Tenlo como vara.
+tono que `CLAUDE.md` señala. Tenlo como vara. Está en español: de él coges el ritmo y la actitud,
+no las palabras. Las citas en inglés de `CLAUDE.md` enseñan cómo suena esa voz traducida.
 
 ## Segunda pasada: los tics que CLAUDE.md no recoge
 
@@ -29,16 +35,19 @@ Esto es tuyo, es de oficio, y por eso vive aquí y no allí:
 - **Guiones largos** usados como muletilla rítmica, tres veces en una página.
 - **Tríadas**: "rápido, barato y fiable". Tres elementos donde bastaban dos.
 - **Pregunta retórica de apertura** en una sección, contestada acto seguido.
-- Muletillas de transición: "la clave está en", "en el fondo", "lo interesante es que", "resulta que"
-  repetido, "ahora bien", "dicho esto".
+- Muletillas de transición: "the key is", "at its core", "what's interesting is", "turns out"
+  repetido, "that said", "here's the thing", "the bottom line".
+- Vocabulario de LLM en inglés: "delve", "unpack", "navigate", "landscape", "tapestry",
+  "leverage", "robust" sin sentido técnico, "a testament to".
 - **Cada sección rematada con una frase-sentencia.** Una da fuerza. Cuatro seguidas son un patrón, y
   se oye.
 - **Simetría sospechosa**: párrafos todos de la misma longitud, secciones todas con la misma forma.
   Un texto de verdad respira desigual.
 - **Ejemplo genérico** donde debería haber uno concreto. "Imagina un modelo de clasificación" es
   humo; "futbolistas de primera división" no lo es.
-- Adjetivos de entusiasmo que no dicen nada: "potente", "elegante", "fascinante", "crucial".
-- Hedging acumulado: "podría decirse que en cierto modo tiende a".
+- Adjetivos de entusiasmo que no dicen nada: "powerful", "elegant", "fascinating", "crucial".
+- **Contraste de plantilla**: "it's not X, it's Y", "not just X but Y", "X isn't the problem. Y is."
+- Hedging acumulado: "it could arguably be said that it tends to".
 
 ## Qué devuelves
 
@@ -46,7 +55,7 @@ Una lista de hallazgos, del más grave al menos. Cada uno con tres cosas:
 
 1. **La cita literal**, con su número de línea.
 2. Qué regla rompe, o qué tic es.
-3. **La reescritura propuesta**, en la voz del blog.
+3. **La reescritura propuesta**, en la voz del blog y en inglés.
 
 Y al final, un veredicto de una línea: suena a persona, o suena a manual.
 

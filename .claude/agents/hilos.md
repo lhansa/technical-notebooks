@@ -31,6 +31,8 @@ enlace es del tipo "también hablé de esto", no lo propongas.
 Por cada enlace que sí propongas:
 
 - La ruta relativa, en formato `../slug/index.qmd`, **comprobada contra el disco**.
+- Si el post enlazado es de los viejos, en español, dilo: el post nuevo está en inglés y el enlace
+  tiene que avisar con un "(in Spanish)". Pesa eso al decidir si vale la pena.
 - El argumento del post nuevo al que se engancha.
 - La frase donde encajaría, en bruto.
 
@@ -40,7 +42,7 @@ Dos o tres. Salen de lo que el post nuevo deja abierto, o de un hueco que veas e
 
 Por cada uno:
 
-- Título en la forma del blog: afirmación o pregunta concreta, no etiqueta de temario.
+- Título en inglés, en la forma del blog: afirmación o pregunta concreta, no etiqueta de temario.
 - Una línea de por qué da para un post entero y no para un párrafo dentro de este.
 - El ángulo en bruto: por dónde entrarías.
 

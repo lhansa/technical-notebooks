@@ -49,14 +49,16 @@ decisión suya, no tuya.
 
 Comprueba, y arregla lo que puedas arreglar sin tocar la prosa:
 
-- Carpeta `posts/YYYY-MM-DD-titulo-en-kebab-case/index.qmd`, sin acentos ni eñes en el slug.
+- Carpeta `posts/YYYY-MM-DD-title-in-kebab-case/index.qmd`, con el slug en inglés.
+- Título, `description` y cuerpo en inglés. Si queda algo en español, para y dilo: no lo traduces
+  tú aquí, porque es tocar la prosa.
 - La `date` del front matter **coincide con la fecha del slug**. Hay cuatro posts viejos donde no
   coinciden; son deuda, no precedente.
 - Están los siete campos: `title`, `description`, `description-meta`, `author`, `date`, `seccion`,
   `categories`.
 - `description` y `description-meta` son **idénticas**, carácter a carácter.
-- La `seccion` es una de las cuatro de `CLAUDE.md` y los tags de `categories` salen de su lista.
-  Ninguno inventado.
+- La `seccion` es una de las cuatro de `CLAUDE.md` y los tags de `categories` salen de su lista, en
+  inglés. Ninguno inventado ni copiado de un post viejo en español.
 - Si el post ejecuta código, lleva su bloque `execute:` y `freeze: true`.
 
 ### La autoría: parada dura
@@ -65,7 +67,7 @@ Todo lo que sale de este pipeline lo ha escrito Claude, así que la regla de `CL
 siempre. Comprueba que hay una de las dos formas:
 
 ```bash
-head -20 posts/<slug>/index.qmd | grep -E 'author: "Claude"|\*Escrito por Claude\.\*'
+head -20 posts/<slug>/index.qmd | grep -E 'author: "Claude"|\*Written by Claude\.\*'
 ```
 
 Si no hay ninguna, **no commitees**. Añádela y vuelve a comprobar.

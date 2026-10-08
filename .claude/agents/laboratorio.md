@@ -32,6 +32,8 @@ que no está en `requirements.txt`, dilo en tu informe: hay que añadirla en el 
 - Las APIs que usas existen en las versiones fijadas en `requirements.txt`, no solo en la que tengas
   instalada. Un número real con una API posterior revienta el render en CI.
 - Los gráficos se generan sin avisos y se ven con los tamaños por defecto del sitio.
+- Comentarios del código, títulos y ejes de los gráficos y nombres de variables, en inglés: el post
+  sale en inglés.
 
 ## Qué devuelves
 
