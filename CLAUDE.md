@@ -159,9 +159,9 @@ después. Un cuaderno no es una sucesión de celdas con un comentario encima.
 Cada post lleva una sección y varios tags. Son cosas distintas y ninguna depende del formato: un
 post de estadística es de estadística tenga código o no.
 
-**Sección** (`seccion:`, una y solo una). Es lo que agrupa las tablas de `cuadernos.qmd`. Es una
-clave interna que no se ve en la web, así que se escribe tal cual, en español, también en los posts
-en inglés:
+**Sección** (`seccion:`, una y solo una). Es la columna Section del listado de `cuadernos.qmd`. Los
+valores van en español, también en los posts en inglés, para que la columna no se parta en dos. Se
+traducirán de una vez en todos los posts, con los tags viejos (issue #79):
 
 - `"estadística"` — una idea de estadística o de modelado explicada, con o sin simulación.
 - `"exploraciones"` — un conjunto de datos real que se explora.

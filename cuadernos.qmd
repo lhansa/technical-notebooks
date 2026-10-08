@@ -1,103 +1,22 @@
 ---
 title: "Notebooks"
 listing:
-  - id: estadistica
-    contents: posts
-    include:
-      seccion: "estadística"
-    sort: "date desc"
-    page-size: 100
-    type: table
-    fields: [title, date, categories]
-    date-format: medium
-    categories: unnumbered
-    sort-ui: false
-    filter-ui: false
-    field-display-names:
-      title: "Topic"
-      categories: "Tags"
-  - id: exploraciones
-    contents: posts
-    include:
-      seccion: "exploraciones"
-    sort: "date desc"
-    page-size: 100
-    type: table
-    fields: [title, date, categories]
-    date-format: medium
-    sort-ui: false
-    filter-ui: false
-    field-display-names:
-      title: "Topic"
-      categories: "Tags"
-  - id: herramientas
-    contents: posts
-    include:
-      seccion: "herramientas"
-    sort: "date desc"
-    page-size: 100
-    type: table
-    fields: [title, date, categories]
-    date-format: medium
-    sort-ui: false
-    filter-ui: false
-    field-display-names:
-      title: "Topic"
-      categories: "Tags"
-  - id: lecturas
-    contents: posts
-    include:
-      seccion: "lecturas"
-    sort: "date desc"
-    page-size: 100
-    type: table
-    fields: [title, date, categories]
-    date-format: medium
-    sort-ui: false
-    filter-ui: false
-    field-display-names:
-      title: "Topic"
-      categories: "Tags"
-  - id: feed
-    contents: posts
-    sort: "date desc"
-    type: table
-    fields: [title]
-    feed: true
+  contents: posts
+  sort: "date desc"
+  page-size: 100
+  type: table
+  fields: [title, seccion, categories, date]
+  date-format: medium
+  categories: numbered
+  sort-ui: [title, seccion, date]
+  filter-ui: false
+  field-display-names:
+    title: "Topic"
+    seccion: "Section"
+    categories: "Tags"
+  feed: true
 language:
   listing-page-field-categories: "Tags"
 page-layout: full
 title-block-banner: false
 ---
-
-## Statistics
-
-Ideas from statistics and modelling, with or without simulation.
-
-::: {#estadistica}
-:::
-
-## Explorations
-
-A real dataset, and what turns up when you look at it.
-
-::: {#exploraciones}
-:::
-
-## Tools
-
-R, Python, performance, cleaning and plots.
-
-::: {#herramientas}
-:::
-
-## Readings
-
-Notes on books.
-
-::: {#lecturas}
-:::
-
-<!-- Listado oculto: solo genera el feed cuadernos.xml con todos los posts. -->
-::: {#feed style="display: none;"}
-:::
