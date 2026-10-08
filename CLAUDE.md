@@ -129,7 +129,7 @@ después. Un cuaderno no es una sucesión de celdas con un comentario encima.
 Cada post lleva una sección y varios tags. Son cosas distintas y ninguna depende del formato: un
 post de estadística es de estadística tenga código o no.
 
-**Sección** (`seccion:`, una y solo una). Es lo que agrupa las tablas de `cuadernos.qmd`:
+**Sección** (`seccion:`, una y solo una). Es la columna Sección del listado de `cuadernos.qmd`:
 
 - `"estadística"` — una idea de estadística o de modelado explicada, con o sin simulación.
 - `"exploraciones"` — un conjunto de datos real que se explora.

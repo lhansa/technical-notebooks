@@ -1,103 +1,22 @@
 ---
 title: "Cuadernos"
 listing:
-  - id: estadistica
-    contents: posts
-    include:
-      seccion: "estadística"
-    sort: "date desc"
-    page-size: 100
-    type: table
-    fields: [title, date, categories]
-    date-format: medium
-    categories: unnumbered
-    sort-ui: false
-    filter-ui: false
-    field-display-names:
-      title: "Tema"
-      categories: "Tags"
-  - id: exploraciones
-    contents: posts
-    include:
-      seccion: "exploraciones"
-    sort: "date desc"
-    page-size: 100
-    type: table
-    fields: [title, date, categories]
-    date-format: medium
-    sort-ui: false
-    filter-ui: false
-    field-display-names:
-      title: "Tema"
-      categories: "Tags"
-  - id: herramientas
-    contents: posts
-    include:
-      seccion: "herramientas"
-    sort: "date desc"
-    page-size: 100
-    type: table
-    fields: [title, date, categories]
-    date-format: medium
-    sort-ui: false
-    filter-ui: false
-    field-display-names:
-      title: "Tema"
-      categories: "Tags"
-  - id: lecturas
-    contents: posts
-    include:
-      seccion: "lecturas"
-    sort: "date desc"
-    page-size: 100
-    type: table
-    fields: [title, date, categories]
-    date-format: medium
-    sort-ui: false
-    filter-ui: false
-    field-display-names:
-      title: "Tema"
-      categories: "Tags"
-  - id: feed
-    contents: posts
-    sort: "date desc"
-    type: table
-    fields: [title]
-    feed: true
+  contents: posts
+  sort: "date desc"
+  page-size: 100
+  type: table
+  fields: [title, seccion, categories, date]
+  date-format: medium
+  categories: numbered
+  sort-ui: [title, seccion, date]
+  filter-ui: false
+  field-display-names:
+    title: "Tema"
+    seccion: "Sección"
+    categories: "Tags"
+  feed: true
 language:
   listing-page-field-categories: "Tags"
 page-layout: full
 title-block-banner: false
 ---
-
-## Estadística
-
-Ideas de estadística y modelado, con o sin simulación.
-
-::: {#estadistica}
-:::
-
-## Exploraciones
-
-Un conjunto de datos real, y lo que sale al mirarlo.
-
-::: {#exploraciones}
-:::
-
-## Herramientas
-
-R, Python, rendimiento, limpieza y gráficos.
-
-::: {#herramientas}
-:::
-
-## Lecturas
-
-Notas de libros.
-
-::: {#lecturas}
-:::
-
-<!-- Listado oculto: solo genera el feed cuadernos.xml con todos los posts. -->
-::: {#feed style="display: none;"}
-:::
