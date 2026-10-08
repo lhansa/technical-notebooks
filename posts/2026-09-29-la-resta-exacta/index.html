@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.19">
@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Claude">
+<meta name="dcterms.date" content="2026-09-29">
 <meta name="description" content="Cuando restas dos flotantes parecidos, la resta sale exacta. El error ya estaba en los números antes de restar. Lo compruebo con float32 y con todos los pares de float16.">
 
 <title>Restar flotantes cercanos sale exacto: el error ya venía puesto – Leonardo Hansa</title>
@@ -99,17 +100,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   ],
   "show-item-context": false,
   "language": {
-    "search-no-results-text": "No se han encontrado resultados",
-    "search-matching-documents-text": "documentos encontrados",
-    "search-copy-link-title": "Copiar el enlace en la búsqueda",
-    "search-hide-matches-text": "Ocultar resultados adicionales",
-    "search-more-match-text": "resultado adicional en este documento",
-    "search-more-matches-text": "resultados adicionales en este documento",
-    "search-clear-button-title": "Borrar",
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
     "search-text-placeholder": "",
-    "search-detached-cancel-button-title": "Cancelar",
-    "search-submit-button-title": "Enviar",
-    "search-label": "Buscar"
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
   }
 }</script>
 
@@ -125,7 +126,7 @@ cookieconsent.run({
   "preferences_center_close_button_hide":false,
   "website_name":""
   ,
-"language":"es"
+"language":"en"
   });
 });
 </script> 
@@ -179,7 +180,7 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="../../cuadernos.html"> <i class="bi bi-book" role="img">
 </i> 
-<span class="menu-text">Cuadernos</span></a>
+<span class="menu-text">Notebooks</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="https://leonardohansa.com"> <i class="bi bi-balloon-heart" role="img">
@@ -218,16 +219,16 @@ window.Quarto = {
 <div class="quarto-title-meta">
 
     <div>
-    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
              <p>Claude </p>
           </div>
   </div>
     
     <div>
-    <div class="quarto-title-meta-heading">Fecha de publicación</div>
+    <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">29 de septiembre de 2026</p>
+      <p class="date">September 29, 2026</p>
     </div>
   </div>
   
@@ -255,7 +256,7 @@ window.Quarto = {
 <p>Primero, float32 cerca de 1. Pido <span class="math inline">\(x = 1{,}0000001\)</span> e <span class="math inline">\(y = 1\)</span>.</p>
 <div id="libs" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fractions <span class="im">import</span> Fraction</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fractions <span class="im">import</span> Fraction</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Comparo la resta de numpy con la resta exacta, hecha con fracciones.</p>
 <div id="sterbenz-float32-uno" class="cell" data-execution_count="2">
@@ -268,7 +269,7 @@ window.Quarto = {
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"x - y     :"</span>, d)</span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"exacta    :"</span>, <span class="bu">float</span>(exacta))</span>
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"error     :"</span>, Fraction(<span class="bu">float</span>(d)) <span class="op">-</span> exacta)</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"eps f32   :"</span>, np.finfo(np.float32).eps)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"eps f32   :"</span>, np.finfo(np.float32).eps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>x guardado: 1.0000001192092896
 x - y     : 1.1920929e-07
@@ -291,7 +292,7 @@ eps f32   : 1.1920929e-07</code></pre>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"x guardado :"</span>, <span class="bu">repr</span>(<span class="bu">float</span>(x)))</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"hueco      :"</span>, np.spacing(np.float32(<span class="fl">1e8</span>)))</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"x - y      :"</span>, x <span class="op">-</span> y)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"x == y     :"</span>, x <span class="op">==</span> y)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"x == y     :"</span>, x <span class="op">==</span> y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>x guardado : 100000000.0
 hueco      : 8.0
@@ -304,7 +305,7 @@ x == y     : True</code></pre>
 <p>Con <span class="math inline">\(10^8 + 5\)</span> el número se va hacia arriba.</p>
 <div id="sterbenz-1e8-cinco" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>x5 <span class="op">=</span> np.float32(<span class="fl">1e8</span> <span class="op">+</span> <span class="fl">5.0</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"guardado:"</span>, <span class="bu">repr</span>(<span class="bu">float</span>(x5)), <span class="st">"| x5 - y:"</span>, x5 <span class="op">-</span> y)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"guardado:"</span>, <span class="bu">repr</span>(<span class="bu">float</span>(x5)), <span class="st">"| x5 - y:"</span>, x5 <span class="op">-</span> y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>guardado: 100000008.0 | x5 - y: 8.0</code></pre>
 </div>
@@ -323,7 +324,7 @@ x == y     : True</code></pre>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>es_sub <span class="op">=</span> v64 <span class="op">&lt;</span> np.finfo(np.float16).tiny</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"flotantes:"</span>, v16.size, <span class="st">"| subnormales:"</span>, es_sub.<span class="bu">sum</span>())</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"mínimo:"</span>, v64.<span class="bu">min</span>(), <span class="st">"| máximo:"</span>, v64.<span class="bu">max</span>())</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"mínimo:"</span>, v64.<span class="bu">min</span>(), <span class="st">"| máximo:"</span>, v64.<span class="bu">max</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>flotantes: 31743 | subnormales: 1023
 mínimo: 5.960464477539063e-08 | máximo: 65504.0</code></pre>
@@ -345,7 +346,7 @@ mínimo: 5.960464477539063e-08 | máximo: 65504.0</code></pre>
 <span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"fuera del rango :"</span>, n[<span class="dv">2</span>], <span class="st">"| inexactas:"</span>, n[<span class="dv">3</span>])</span>
 <span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"total:"</span>, n[<span class="dv">0</span>] <span class="op">+</span> n[<span class="dv">2</span>], <span class="st">"="</span>, v16.size<span class="op">**</span><span class="dv">2</span>)</span>
 <span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"pares dentro con algún subnormal:"</span>, sub_dentro)</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"fracción inexacta fuera:"</span>, <span class="bu">round</span>(n[<span class="dv">3</span>] <span class="op">/</span> n[<span class="dv">2</span>], <span class="dv">3</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"fracción inexacta fuera:"</span>, <span class="bu">round</span>(n[<span class="dv">3</span>] <span class="op">/</span> n[<span class="dv">2</span>], <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>dentro del rango: 62944255 | inexactas: 0
 fuera del rango : 944673794 | inexactas: 881822720
@@ -369,7 +370,7 @@ fracción inexacta fuera: 0.933</code></pre>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"0.1 + 0.2     :"</span>, <span class="bu">repr</span>(a))</span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"(0.1+0.2)-0.3 :"</span>, <span class="bu">repr</span>(r))</span>
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"resta exacta  :"</span>, Fraction(r) <span class="op">==</span> Fraction(a) <span class="op">-</span> Fraction(<span class="fl">0.3</span>))</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"hueco en 0.3  :"</span>, np.spacing(<span class="fl">0.3</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"hueco en 0.3  :"</span>, np.spacing(<span class="fl">0.3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>0.1 + 0.2     : 0.30000000000000004
 (0.1+0.2)-0.3 : 5.551115123125783e-17
@@ -415,12 +416,12 @@ hueco en 0.3  : 5.551115123125783e-17</code></pre>
       // flash "checked"
       button.classList.add('code-copy-button-checked');
       var currentTitle = button.getAttribute("title");
-      button.setAttribute("title", "Copiado");
+      button.setAttribute("title", "Copied!");
       let tooltip;
       if (window.bootstrap) {
         button.setAttribute("data-bs-toggle", "tooltip");
         button.setAttribute("data-bs-placement", "left");
-        button.setAttribute("data-bs-title", "Copiado");
+        button.setAttribute("data-bs-title", "Copied!");
         tooltip = new bootstrap.Tooltip(button, 
           { trigger: "manual", 
             customClass: "code-copy-button-tooltip",

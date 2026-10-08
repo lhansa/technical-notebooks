@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.19">
@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Claude">
+<meta name="dcterms.date" content="2026-10-08">
 <meta name="description" content="Una moneda lanzada con la mano puede caer del lado en que empezó el 51 % de las veces. Te cuento cuántos lanzamientos hacen falta para notarlo.">
 
 <title>Un 51 % de caras existe y con mil lanzamientos no lo ves – Leonardo Hansa</title>
@@ -99,17 +100,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   ],
   "show-item-context": false,
   "language": {
-    "search-no-results-text": "No se han encontrado resultados",
-    "search-matching-documents-text": "documentos encontrados",
-    "search-copy-link-title": "Copiar el enlace en la búsqueda",
-    "search-hide-matches-text": "Ocultar resultados adicionales",
-    "search-more-match-text": "resultado adicional en este documento",
-    "search-more-matches-text": "resultados adicionales en este documento",
-    "search-clear-button-title": "Borrar",
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
     "search-text-placeholder": "",
-    "search-detached-cancel-button-title": "Cancelar",
-    "search-submit-button-title": "Enviar",
-    "search-label": "Buscar"
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
   }
 }</script>
 
@@ -125,7 +126,7 @@ cookieconsent.run({
   "preferences_center_close_button_hide":false,
   "website_name":""
   ,
-"language":"es"
+"language":"en"
   });
 });
 </script> 
@@ -179,7 +180,7 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="../../cuadernos.html"> <i class="bi bi-book" role="img">
 </i> 
-<span class="menu-text">Cuadernos</span></a>
+<span class="menu-text">Notebooks</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="https://leonardohansa.com"> <i class="bi bi-balloon-heart" role="img">
@@ -220,16 +221,16 @@ window.Quarto = {
 <div class="quarto-title-meta">
 
     <div>
-    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
              <p>Claude </p>
           </div>
   </div>
     
     <div>
-    <div class="quarto-title-meta-heading">Fecha de publicación</div>
+    <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">8 de octubre de 2026</p>
+      <p class="date">October 8, 2026</p>
     </div>
   </div>
   
@@ -262,13 +263,13 @@ window.Quarto = {
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> erf, erfc, sqrt</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">51</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>P0, P1, Z_A <span class="op">=</span> <span class="fl">0.5</span>, <span class="fl">0.51</span>, <span class="fl">1.959964</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>P0, P1, Z_A <span class="op">=</span> <span class="fl">0.5</span>, <span class="fl">0.51</span>, <span class="fl">1.959964</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="funciones" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> p_valor(caras, n, p0<span class="op">=</span>P0):</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Test normal bilateral de H0: p = p0."""</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> (caras <span class="op">/</span> n <span class="op">-</span> p0) <span class="op">/</span> sqrt(p0 <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> p0) <span class="op">/</span> n)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> z, erfc(<span class="bu">abs</span>(z) <span class="op">/</span> sqrt(<span class="dv">2</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> z, erfc(<span class="bu">abs</span>(z) <span class="op">/</span> sqrt(<span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Ahora lanzo la moneda sesgada mil veces.</p>
 <div id="caso-1000" class="cell" data-execution_count="3">
@@ -277,7 +278,7 @@ window.Quarto = {
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>z, p <span class="op">=</span> p_valor(caras, n)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"e.e. teorico:"</span>, <span class="bu">round</span>(sqrt(P1 <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> P1) <span class="op">/</span> n), <span class="dv">4</span>))</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"caras:"</span>, caras, <span class="st">"proporcion:"</span>, caras <span class="op">/</span> n)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"z:"</span>, <span class="bu">round</span>(z, <span class="dv">3</span>), <span class="st">"p-valor:"</span>, <span class="bu">round</span>(p, <span class="dv">4</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"z:"</span>, <span class="bu">round</span>(z, <span class="dv">3</span>), <span class="st">"p-valor:"</span>, <span class="bu">round</span>(p, <span class="dv">4</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>e.e. teorico: 0.0158
 caras: 480 proporcion: 0.48
@@ -296,7 +297,7 @@ z: -1.265 p-valor: 0.2059</code></pre>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>z, p <span class="op">=</span> p_valor(caras, n)</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"e.e. teorico:"</span>, <span class="bu">round</span>(sqrt(P1 <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> P1) <span class="op">/</span> n), <span class="dv">4</span>))</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"caras:"</span>, caras, <span class="st">"proporcion:"</span>, caras <span class="op">/</span> n)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"z:"</span>, <span class="bu">round</span>(z, <span class="dv">3</span>), <span class="st">"p-valor:"</span>, <span class="bu">round</span>(p, <span class="dv">4</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"z:"</span>, <span class="bu">round</span>(z, <span class="dv">3</span>), <span class="st">"p-valor:"</span>, <span class="bu">round</span>(p, <span class="dv">4</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>e.e. teorico: 0.005
 caras: 5120 proporcion: 0.512
@@ -317,7 +318,7 @@ z: 2.4 p-valor: 0.0164</code></pre>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    d <span class="op">=</span> <span class="bu">abs</span>(p <span class="op">-</span> P0) <span class="op">*</span> np.sqrt(n)</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    s0, s1 <span class="op">=</span> sqrt(P0 <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> P0)), sqrt(p <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> p))</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    cdf <span class="op">=</span> <span class="kw">lambda</span> x: <span class="fl">0.5</span> <span class="op">*</span> (<span class="dv">1</span> <span class="op">+</span> np.vectorize(erf)(x <span class="op">/</span> sqrt(<span class="dv">2</span>)))</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cdf((d <span class="op">-</span> Z_A <span class="op">*</span> s0) <span class="op">/</span> s1) <span class="op">+</span> cdf((<span class="op">-</span>d <span class="op">-</span> Z_A <span class="op">*</span> s0) <span class="op">/</span> s1)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cdf((d <span class="op">-</span> Z_A <span class="op">*</span> s0) <span class="op">/</span> s1) <span class="op">+</span> cdf((<span class="op">-</span>d <span class="op">-</span> Z_A <span class="op">*</span> s0) <span class="op">/</span> s1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Los dos términos son las dos colas del test: una por cada lado del test. La segunda es rechazar por el lado contrario y, con estos tamaños, vale casi cero.</p>
 <div id="potencia-simulada" class="cell" data-execution_count="6">
@@ -331,7 +332,7 @@ z: 2.4 p-valor: 0.0164</code></pre>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="st">'n'</span><span class="sc">:&gt;7}</span><span class="ss"> | </span><span class="sc">{</span><span class="st">'sim 0,51'</span><span class="sc">:&gt;8}</span><span class="ss"> </span><span class="sc">{</span><span class="st">'teo 0,51'</span><span class="sc">:&gt;8}</span><span class="ss">"</span>)</span>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n <span class="kw">in</span> rejilla:</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>n<span class="sc">:&gt;7}</span><span class="ss"> | </span><span class="sc">{</span>potencia_simulada(n, <span class="fl">0.51</span>)<span class="sc">:8.3f}</span><span class="ss"> </span><span class="sc">{</span>potencia_teorica(n, <span class="fl">0.51</span>)<span class="sc">:8.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>n<span class="sc">:&gt;7}</span><span class="ss"> | </span><span class="sc">{</span>potencia_simulada(n, <span class="fl">0.51</span>)<span class="sc">:8.3f}</span><span class="ss"> </span><span class="sc">{</span>potencia_teorica(n, <span class="fl">0.51</span>)<span class="sc">:8.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      n | sim 0,51 teo 0,51
    1000 |    0.095    0.097
@@ -356,7 +357,7 @@ z: 2.4 p-valor: 0.0164</code></pre>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    pot <span class="op">=</span> potencia_teorica(grid, p)</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    n50 <span class="op">=</span> grid[np.argmax(pot <span class="op">&gt;=</span> <span class="fl">0.5</span>)]</span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    n80 <span class="op">=</span> grid[np.argmax(pot <span class="op">&gt;=</span> <span class="fl">0.8</span>)]</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"p=</span><span class="sc">{</span>p<span class="sc">}</span><span class="ss">: n para potencia 0,5 = </span><span class="sc">{</span>n50<span class="sc">}</span><span class="ss">; para 0,8 = </span><span class="sc">{</span>n80<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"p=</span><span class="sc">{</span>p<span class="sc">}</span><span class="ss">: n para potencia 0,5 = </span><span class="sc">{</span>n50<span class="sc">}</span><span class="ss">; para 0,8 = </span><span class="sc">{</span>n80<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>p=0.51: n para potencia 0,5 = 9700; para 0,8 = 19700
 p=0.508: n para potencia 0,5 = 15100; para 0,8 = 30700</code></pre>
@@ -374,7 +375,7 @@ p=0.508: n para potencia 0,5 = 15100; para 0,8 = 30700</code></pre>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"lanzamientos (n)"</span>)</span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"potencia"</span>)</span>
 <span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -421,12 +422,12 @@ p=0.508: n para potencia 0,5 = 15100; para 0,8 = 30700</code></pre>
       // flash "checked"
       button.classList.add('code-copy-button-checked');
       var currentTitle = button.getAttribute("title");
-      button.setAttribute("title", "Copiado");
+      button.setAttribute("title", "Copied!");
       let tooltip;
       if (window.bootstrap) {
         button.setAttribute("data-bs-toggle", "tooltip");
         button.setAttribute("data-bs-placement", "left");
-        button.setAttribute("data-bs-title", "Copiado");
+        button.setAttribute("data-bs-title", "Copied!");
         tooltip = new bootstrap.Tooltip(button, 
           { trigger: "manual", 
             customClass: "code-copy-button-tooltip",

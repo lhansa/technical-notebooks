@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.10.19">
@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Claude">
+<meta name="dcterms.date" content="2026-10-01">
 <meta name="description" content="Con 50 variables y 200 filas, varios subconjuntos de variables validan casi igual y comparten la mitad de sus columnas. Sus predicciones, fila a fila, no coinciden. Con simulación.">
 
 <title>Dos modelos casi empatados pueden predecir distinto – Leonardo Hansa</title>
@@ -99,17 +100,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   ],
   "show-item-context": false,
   "language": {
-    "search-no-results-text": "No se han encontrado resultados",
-    "search-matching-documents-text": "documentos encontrados",
-    "search-copy-link-title": "Copiar el enlace en la búsqueda",
-    "search-hide-matches-text": "Ocultar resultados adicionales",
-    "search-more-match-text": "resultado adicional en este documento",
-    "search-more-matches-text": "resultados adicionales en este documento",
-    "search-clear-button-title": "Borrar",
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
     "search-text-placeholder": "",
-    "search-detached-cancel-button-title": "Cancelar",
-    "search-submit-button-title": "Enviar",
-    "search-label": "Buscar"
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
   }
 }</script>
 
@@ -125,7 +126,7 @@ cookieconsent.run({
   "preferences_center_close_button_hide":false,
   "website_name":""
   ,
-"language":"es"
+"language":"en"
   });
 });
 </script> 
@@ -179,7 +180,7 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="../../cuadernos.html"> <i class="bi bi-book" role="img">
 </i> 
-<span class="menu-text">Cuadernos</span></a>
+<span class="menu-text">Notebooks</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="https://leonardohansa.com"> <i class="bi bi-balloon-heart" role="img">
@@ -220,16 +221,16 @@ window.Quarto = {
 <div class="quarto-title-meta">
 
     <div>
-    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
              <p>Claude </p>
           </div>
   </div>
     
     <div>
-    <div class="quarto-title-meta-heading">Fecha de publicación</div>
+    <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">1 de octubre de 2026</p>
+      <p class="date">October 1, 2026</p>
     </div>
   </div>
   
@@ -250,7 +251,7 @@ window.Quarto = {
 <p>El ruido de la respuesta tiene la misma desviación que la señal. Con eso, el R² más alto que alcanzaría un modelo perfecto es 0,5.</p>
 <div id="libs" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="datos" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">2024</span>)</span>
@@ -264,7 +265,7 @@ window.Quarto = {
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>orden <span class="op">=</span> np.random.permutation(n)</span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>tr, va <span class="op">=</span> orden[:<span class="dv">100</span>], orden[<span class="dv">100</span>:]</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"R2 teorico maximo:"</span>, <span class="bu">round</span>(senal.var() <span class="op">/</span> (senal.var() <span class="op">+</span> sigma<span class="op">**</span><span class="dv">2</span>), <span class="dv">3</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"R2 teorico maximo:"</span>, <span class="bu">round</span>(senal.var() <span class="op">/</span> (senal.var() <span class="op">+</span> sigma<span class="op">**</span><span class="dv">2</span>), <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>R2 teorico maximo: 0.5</code></pre>
 </div>
@@ -290,14 +291,14 @@ window.Quarto = {
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    A <span class="op">=</span> np.column_stack([np.ones(<span class="bu">len</span>(tr)), X[tr][:, S]])</span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    coef <span class="op">=</span> np.linalg.lstsq(A, y[tr], rcond<span class="op">=</span><span class="va">None</span>)[<span class="dv">0</span>]</span>
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    res <span class="op">=</span> y[tr] <span class="op">-</span> A <span class="op">@</span> coef</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span> <span class="op">-</span> (res <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>() <span class="op">/</span> ((y[tr] <span class="op">-</span> y[tr].mean()) <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span> <span class="op">-</span> (res <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>() <span class="op">/</span> ((y[tr] <span class="op">-</span> y[tr].mean()) <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="azar" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">11</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>azar <span class="op">=</span> [np.sort(np.random.choice(p, k, replace<span class="op">=</span><span class="va">False</span>)) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2000</span>)]</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>r2_azar <span class="op">=</span> np.array([ajusta(S)[<span class="dv">0</span>] <span class="cf">for</span> S <span class="kw">in</span> azar])</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"mejor R2 de validacion:"</span>, <span class="bu">round</span>(r2_azar.<span class="bu">max</span>(), <span class="dv">4</span>))</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"R2 medio:"</span>, <span class="bu">round</span>(r2_azar.mean(), <span class="dv">4</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"R2 medio:"</span>, <span class="bu">round</span>(r2_azar.mean(), <span class="dv">4</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>mejor R2 de validacion: 0.3196
 R2 medio: 0.0012</code></pre>
@@ -321,7 +322,7 @@ R2 medio: 0.0012</code></pre>
 <span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>r2_cadena <span class="op">=</span> np.array([ajusta(S)[<span class="dv">0</span>] <span class="cf">for</span> S <span class="kw">in</span> cadena])</span>
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"subconjuntos distintos:"</span>, <span class="bu">len</span>({<span class="bu">tuple</span>(s) <span class="cf">for</span> s <span class="kw">in</span> cadena}), <span class="st">"de"</span>, <span class="bu">len</span>(cadena))</span>
 <span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"mejor R2 de validacion:"</span>, <span class="bu">round</span>(r2_cadena.<span class="bu">max</span>(), <span class="dv">4</span>))</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"R2 medio:"</span>, <span class="bu">round</span>(r2_cadena.mean(), <span class="dv">4</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"R2 medio:"</span>, <span class="bu">round</span>(r2_cadena.mean(), <span class="dv">4</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>subconjuntos distintos: 1860 de 2000
 mejor R2 de validacion: 0.3261
@@ -353,7 +354,7 @@ R2 medio: 0.0373</code></pre>
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> tol <span class="kw">in</span> (<span class="fl">0.01</span>, <span class="fl">0.02</span>, <span class="fl">0.05</span>):</span>
 <span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        e <span class="op">=</span> empates(c, r, tol)</span>
 <span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(nombre, tol, {a: (<span class="bu">round</span>(b, <span class="dv">3</span>) <span class="cf">if</span> <span class="bu">isinstance</span>(b, <span class="bu">float</span>) <span class="cf">else</span> b)</span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>                            <span class="cf">for</span> a, b <span class="kw">in</span> e.items() <span class="cf">if</span> a <span class="op">!=</span> <span class="st">"conjunto"</span>})</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>                            <span class="cf">for</span> a, b <span class="kw">in</span> e.items() <span class="cf">if</span> a <span class="op">!=</span> <span class="st">"conjunto"</span>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>azar 0.01 {'empatados': 1, 'distintos': 1, 'solape_pares': None, 'solape_mejor': None, 'ruido_medio': 3.0}
 azar 0.02 {'empatados': 1, 'distintos': 1, 'solape_pares': None, 'solape_mejor': None, 'ruido_medio': 3.0}
@@ -387,7 +388,7 @@ cadena 0.05 {'empatados': 9, 'distintos': 9, 'solape_pares': 5.806, 'solape_mejo
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"correlacion predicciones:"</span>, <span class="bu">round</span>(np.corrcoef(pA, pB)[<span class="dv">0</span>, <span class="dv">1</span>], <span class="dv">3</span>))</span>
 <span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"sd residual (A):"</span>, <span class="bu">round</span>(sd_res, <span class="dv">3</span>), <span class="st">" sd de las predicciones:"</span>, <span class="bu">round</span>(pA.std(), <span class="dv">3</span>))</span>
 <span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"dif media abs:"</span>, <span class="bu">round</span>(dif.mean(), <span class="dv">3</span>))</span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"filas con dif &gt; sd residual:"</span>, <span class="bu">round</span>((dif <span class="op">&gt;</span> sd_res).mean(), <span class="dv">3</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"filas con dif &gt; sd residual:"</span>, <span class="bu">round</span>((dif <span class="op">&gt;</span> sd_res).mean(), <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>A: [4, 6, 7, 8, 9, 10, 11, 13, 31, 39] 
 B: [0, 2, 4, 5, 8, 10, 11, 24, 31, 32] 
@@ -409,7 +410,7 @@ filas con dif &gt; sd residual: 0.11</code></pre>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>ax.plot(lim, lim, color<span class="op">=</span><span class="st">"grey"</span>)</span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"predicción del modelo A"</span>)</span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"predicción del modelo B"</span>)</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -457,12 +458,12 @@ filas con dif &gt; sd residual: 0.11</code></pre>
       // flash "checked"
       button.classList.add('code-copy-button-checked');
       var currentTitle = button.getAttribute("title");
-      button.setAttribute("title", "Copiado");
+      button.setAttribute("title", "Copied!");
       let tooltip;
       if (window.bootstrap) {
         button.setAttribute("data-bs-toggle", "tooltip");
         button.setAttribute("data-bs-placement", "left");
-        button.setAttribute("data-bs-title", "Copiado");
+        button.setAttribute("data-bs-title", "Copied!");
         tooltip = new bootstrap.Tooltip(button, 
           { trigger: "manual", 
             customClass: "code-copy-button-tooltip",
