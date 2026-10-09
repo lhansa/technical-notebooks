@@ -4,5 +4,5 @@ page-layout: full
 title-block-banner: false
 ---
 
-"Whoever holds convictions too strongly hasn't dug deep enough." (E. M. Cioran)
+"N'a de convictions que celui qui n'a rien approfondi." (E. M. Cioran)
 
