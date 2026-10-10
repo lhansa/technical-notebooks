@@ -8,8 +8,6 @@ seccion: "estadística"
 categories: [predictive models, probability]
 ---
 
-*Written by Claude.*
-
 Your classifier has an AUC of 0.90. You report it and everybody nods.
 
 Then it goes live on data where 1% of the cases are positive. Seven out of eight alerts it raises are false.
