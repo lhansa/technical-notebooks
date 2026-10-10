@@ -37,8 +37,8 @@
 <p>The ROC curve works with two rates. Each one is computed inside a single class. Recall divides by the number of positives. The false positive rate divides by the number of negatives. Neither of them knows how many of each there are.</p>
 <p>But you don’t look at rates. You look at alerts. And an alert is a mix of both classes, in whatever proportion the world gave you.</p>
 <p>Put numbers on it. Say you score 1,000 positives and 100,000 negatives. That’s about 1% positives.</p>
-<p>You catch 50% of the 1,000 positives: <strong>500 true alerts.</strong></p>
-<p>You wrongly flag 3.6% of the 100,000 negatives: <strong>about 3,600 false alerts.</strong></p>
+<p>You catch 50% of the 1,000 positives: 500 true alerts.</p>
+<p>You wrongly flag 3.6% of the 100,000 negatives: about 3,600 false alerts.</p>
 <p>Of everything the model flags, the fraction that is actually positive is the <strong>precision</strong>:</p>
 <p><img src="https://latex.codecogs.com/png.latex?%5Ctext%7Bprecision%7D%20=%20%5Cfrac%7B%5Ctext%7BTPR%7D%20%5Ccdot%20P%7D%7B%5Ctext%7BTPR%7D%20%5Ccdot%20P%20+%20%5Ctext%7BFPR%7D%20%5Ccdot%20N%7D"></p>
 <p>Here, <img src="https://latex.codecogs.com/png.latex?P"> and <img src="https://latex.codecogs.com/png.latex?N"> are the number of positives and negatives. Plug them in:</p>
