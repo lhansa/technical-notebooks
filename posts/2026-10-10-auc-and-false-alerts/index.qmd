@@ -36,9 +36,9 @@ But you don't look at rates. You look at alerts. And an alert is a mix of both c
 
 Put numbers on it. Say you score 1,000 positives and 100,000 negatives. That's about 1% positives.
 
-You catch 50% of the 1,000 positives: **500 true alerts.**
+You catch 50% of the 1,000 positives: 500 true alerts.
 
-You wrongly flag 3.6% of the 100,000 negatives: **about 3,600 false alerts.**
+You wrongly flag 3.6% of the 100,000 negatives: about 3,600 false alerts.
 
 Of everything the model flags, the fraction that is actually positive is the **precision**:
 
