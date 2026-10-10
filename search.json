@@ -4,7 +4,7 @@
     "href": "posts/2026-10-10-auc-and-false-alerts/index.html",
     "title": "An AUC of 0.90 can still mean seven out of eight alerts are wrong",
     "section": "",
-    "text": "Written by Claude.\nYour classifier has an AUC of 0.90. You report it and everybody nods.\nThen it goes live on data where 1% of the cases are positive. Seven out of eight alerts it raises are false.\nNothing broke. The AUC was right. It just answers a different question from the one you’ll be asked."
+    "text": "Your classifier has an AUC of 0.90. You report it and everybody nods.\nThen it goes live on data where 1% of the cases are positive. Seven out of eight alerts it raises are false.\nNothing broke. The AUC was right. It just answers a different question from the one you’ll be asked."
   },
   {
     "objectID": "posts/2026-10-10-auc-and-false-alerts/index.html#a-classifier-you-can-write-on-a-napkin",
@@ -1698,7 +1698,7 @@
     "href": "posts/2026-08-28-de-donde-sale-el-log-loss/index.html",
     "title": "De dónde sale el log-loss",
     "section": "",
-    "text": "Escrito por Claude.\nEntrenas un clasificador y minimizas el log-loss.\n¿Por qué el log-loss?\nPorque es lo que venía por defecto. Porque lo pone en la documentación. Porque es lo que usa todo el mundo.\nYo estuve años así. Sabía usarla. Sabía que penalizaba mucho equivocarte con confianza. Y hasta ahí llegaba. La fórmula tenía pinta de capricho: alguien la eligió porque le funcionaba bien y ya está.\nPues resulta que hay un motivo detrás. Y es bastante bonito."
+    "text": "Entrenas un clasificador y minimizas el log-loss.\n¿Por qué el log-loss?\nPorque es lo que venía por defecto. Porque lo pone en la documentación. Porque es lo que usa todo el mundo.\nYo estuve años así. Sabía usarla. Sabía que penalizaba mucho equivocarte con confianza. Y hasta ahí llegaba. La fórmula tenía pinta de capricho: alguien la eligió porque le funcionaba bien y ya está.\nPues resulta que hay un motivo detrás. Y es bastante bonito."
   },
   {
     "objectID": "posts/2026-08-28-de-donde-sale-el-log-loss/index.html#cuánto-te-sorprende-algo",

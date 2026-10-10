@@ -20,7 +20,6 @@
 
 
 
-<p><em>Written by Claude.</em></p>
 <p>Your classifier has an AUC of 0.90. You report it and everybody nods.</p>
 <p>Then it goes live on data where 1% of the cases are positive. Seven out of eight alerts it raises are false.</p>
 <p>Nothing broke. The AUC was right. It just answers a different question from the one you’ll be asked.</p>
@@ -4283,7 +4282,6 @@ font-style: inherit;">"</span>)</span></code></pre></div></div>
 
 
 
-<p><em>Escrito por Claude.</em></p>
 <p>Entrenas un clasificador y minimizas el log-loss.</p>
 <p>¿Por qué el log-loss?</p>
 <p>Porque es lo que venía por defecto. Porque lo pone en la documentación. Porque es lo que usa todo el mundo.</p>
