@@ -154,12 +154,42 @@ En modo desatendido mergeas tú si se cumplen las dos cosas:
 - **`rigor` no dejó nada falso sin arreglar.** Lo imprecisa no para el merge. Lo no confirmado
   tampoco, si el post no se apoya en ello.
 
-Si las dos se cumplen, mira con `pull_request_read` y `get` que el PR es mergeable. Un
-`mergeable_state` de `unstable` solo dice que hay checks sin terminar, como la revisión de voz, y
-no para el merge; `dirty` es un conflicto y sí. Mergea con
+Antes del merge, la revisión de voz (abajo). Después, mira con `pull_request_read` y `get` que el
+PR es mergeable. Un `mergeable_state` de `unstable` solo dice que hay checks sin terminar, como la
+segunda pasada de la revisión de voz que lanza tu propio push, y no para el merge; `dirty` es un
+conflicto y sí. Mergea con
 `merge_pull_request`, método `merge`, como el resto del historial. Luego comprueba con `issue_read`
 que el sub-issue se ha cerrado; si no, ciérralo tú con `state_reason: completed`. Y usa la skill
 `semana` solo para su punto 5, el cierre: si era el último post de la semana, cierra el semanal.
+
+### La revisión de voz, antes del merge
+
+Al abrir el PR, el workflow `Claude Code Review` (`.github/workflows/claude-code-review.yml`) hace
+una auditoría de voz con las reglas de `oido` y deja los hallazgos como comentarios en línea. Tarda
+un par de minutos. Si mergeas antes, los comentarios llegan a un post ya publicado y nadie los
+aplica. Así que **esperas a que termine**.
+
+1. Con `pull_request_read` y `get_check_runs`, busca el check `claude-review`. Mientras no esté
+   `completed`, espera un minuto con Bash (`sleep 60`; si el entorno no deja dormir en primer plano,
+   lánzalo en segundo plano y sigue cuando acabe) y vuelve a mirar. Como mucho, 15 minutos.
+2. Cuando termine, lee los hilos con `get_review_comments`. Cuentan los del bot de revisión, que es
+   el autor `claude`. Si no hay ninguno, pasa al merge.
+3. Fíltralos como los de `oido` en la fase 4 de `/post`: aplicas los que delatan de verdad o rompen
+   una regla de `CLAUDE.md` citada con su texto, y dejas pasar lo defendible. Una regla rota no es
+   defendible.
+4. Si aplicas alguno, vuelve a renderizar (punto 3), commit "Aplica la revisión de voz" y push a la
+   misma rama.
+5. Deja un comentario en el PR con `add_issue_comment`: por cada hallazgo, una línea con aplicado o
+   no y, si no, por qué. Con el pie.
+
+**Una sola ronda.** Tu push lanza otra vez el workflow. No lo esperes: mergea. Lo que diga esa
+segunda pasada lo mira él después, como el resto de comentarios del PR mergeado.
+
+Si a los 15 minutos el check no ha terminado, o ha terminado en fallo, mergea igualmente y dilo en
+el comentario del PR: "La revisión de voz no llegó a tiempo" o "La revisión de voz falló". La
+revisión de voz no bloquea la publicación; solo la retrasa unos minutos cuando funciona.
+
+### Cuándo no mergear
 
 Si `rigor` dejó algo falso sin arreglar, **no mergees**. Deja el PR abierto y comenta en el
 sub-issue, con `add_issue_comment`: qué frase, en qué línea, qué dijo `rigor` y el enlace al PR.
