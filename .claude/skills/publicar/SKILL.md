@@ -64,13 +64,16 @@ Comprueba, y arregla lo que puedas arreglar sin tocar la prosa:
 ### La autoría: parada dura
 
 Todo lo que sale de este pipeline lo ha escrito Claude, así que la regla de `CLAUDE.md` aplica
-siempre. Comprueba que hay una de las dos formas:
+siempre. Comprueba que el autor es Claude:
 
 ```bash
-head -20 posts/<slug>/index.qmd | grep -E 'author: "Claude"|\*Written by Claude\.\*'
+head -12 posts/<slug>/index.qmd | grep -E '^author: "Claude"'
 ```
 
-Si no hay ninguna, **no commitees**. Añádela y vuelve a comprobar.
+Si no sale, **no commitees**. Pon `author: "Claude"` y vuelve a comprobar.
+
+Si debajo del front matter hay una línea `*Written by Claude.*` o `*Escrito por Claude.*`, quítala
+junto con la línea en blanco que la sigue. Sobra, porque el autor ya sale en la cabecera.
 
 ## 3. El render
 

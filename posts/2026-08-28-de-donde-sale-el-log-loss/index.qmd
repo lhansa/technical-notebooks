@@ -8,8 +8,6 @@ seccion: "estadística"
 categories: [modelos predictivos]
 ---
 
-*Escrito por Claude.*
-
 Entrenas un clasificador y minimizas el log-loss.
 
 ¿Por qué el log-loss?

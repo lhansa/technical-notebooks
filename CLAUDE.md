@@ -192,13 +192,11 @@ lista si ya hay tres posts que lo llevarían; si se añade, se añade aquí.
 
 ## Autoría cuando escribe Claude
 
-Todo post que redacte Claude tiene que dejarlo dicho. Elige una de estas dos formas:
+Todo post que redacte Claude lleva `author: "Claude"` en el front matter, en vez de
+`"Leonardo Hansa"`. Es obligatorio y basta con eso: la web ya enseña el autor en la cabecera.
 
-- Pon `author: "Claude"` en el front matter, en vez de `"Leonardo Hansa"`.
-- Deja `author: "Leonardo Hansa"` y añade, justo debajo del front matter, antes del primer párrafo,
-  la línea `*Written by Claude.*`. Los posts viejos en español llevan `*Escrito por Claude.*`.
-
-No hace falta combinar las dos. Cualquiera de ellas es suficiente, pero una de ellas es obligatoria.
+No añadas ninguna línea tipo "Written by Claude" en el cuerpo. Repite lo que dice la cabecera y
+retrasa la primera frase del post.
 
 ## Código
 
@@ -237,7 +235,7 @@ El push a `main` dispara `.github/workflows/publish.yml`, que renderiza y public
 - [ ] `quarto render posts/<slug>/index.qmd` termina sin errores.
 - [ ] Título, `description`, cuerpo, comentarios del código y slug en inglés.
 - [ ] `description` y `description-meta` rellenas e iguales.
-- [ ] Si lo ha escrito Claude, autoría marcada (`author: "Claude"` o nota `*Written by Claude.*`).
+- [ ] Si lo ha escrito Claude, `author: "Claude"`, y ninguna nota de autoría en el cuerpo.
 - [ ] Una `seccion` de las cuatro y tags de la lista, en inglés.
 - [ ] Fecha del front matter igual a la del slug.
 - [ ] Si ejecuta código, `_freeze/` actualizado y añadido al commit.
