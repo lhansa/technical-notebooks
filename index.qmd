@@ -6,3 +6,7 @@ title-block-banner: false
 
 "N'a de convictions que celui qui n'a rien approfondi." (E. M. Cioran)
 
+
+
+"that which is only living can only die." (T. S. Elliot)
+
