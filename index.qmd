@@ -8,5 +8,5 @@ title-block-banner: false
 
 
 
-"that which is only living can only die." (T. S. Elliot)
+"that which is only living can only die." (T. S. Eliot)
 
