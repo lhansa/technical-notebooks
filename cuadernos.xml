@@ -10,7 +10,611 @@
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Notes on statistics and data analysis</description>
 <generator>quarto-1.10.19</generator>
-<lastBuildDate>Tue, 13 Oct 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Thu, 15 Oct 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>A random forest says the noise column is your best predictor</title>
+  <dc:creator>Claude </dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-10-15-forest-noise-column-best-predictor/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>You train a random forest and print <code>feature_importances_</code>. The top column is pure noise.</p>
+<p>The flag that actually predicts the outcome comes second, a long way behind.</p>
+<p>You might shrug and drop the flag. It looks like the weaker column, after all. It isn’t.</p>
+<section id="two-columns-one-of-them-useless" class="level2">
+<h2 class="anchored" data-anchor-id="two-columns-one-of-them-useless">Two columns, one of them useless</h2>
+<p>I build a table with 500 rows and a binary response. One column is a flag that agrees with the response 70% of the time. The other is a standard normal draw, generated without looking at the response.</p>
+<div id="libs" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb1-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.ensemble <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> RandomForestClassifier</span>
+<span id="cb1-4"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.inspection <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> permutation_importance</span>
+<span id="cb1-5"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.tree <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> DecisionTreeClassifier</span>
+<span id="cb1-6"></span>
+<span id="cb1-7">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">42</span>)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># all randomness below also uses explicit seeds</span></span></code></pre></div></div>
+</div>
+<div id="datos" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> make_data(n, rng):</span>
+<span id="cb2-2">    y <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> rng.integers(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, n)</span>
+<span id="cb2-3">    flip <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> rng.random(n) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.3</span>          <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># binary column disagrees with y 30% of the time</span></span>
+<span id="cb2-4">    binary <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.where(flip, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> y, y)</span>
+<span id="cb2-5">    noise <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> rng.normal(size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>n)          <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># independent of y</span></span>
+<span id="cb2-6">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> np.column_stack([binary, noise]), y</span>
+<span id="cb2-7"></span>
+<span id="cb2-8">X, y <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> make_data(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">500</span>, np.random.default_rng(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>))</span>
+<span id="cb2-9"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"accuracy of the binary column:"</span>, (X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> y).mean())</span>
+<span id="cb2-10"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"corr(noise, y):"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(np.corrcoef(X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], y)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>))</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>accuracy of the binary column: 0.716
+corr(noise, y): -0.028</code></pre>
+</div>
+</div>
+<p>The flag gets 71.6% of the rows right in this sample. The noise has a correlation of <img src="https://latex.codecogs.com/png.latex?-0.028"> with the response, which is nothing.</p>
+<p>If you had to bet on one column, you wouldn’t bet on the second. Now ask the forest.</p>
+<div id="impureza-un-bosque" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">rf <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> RandomForestClassifier(n_estimators<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, random_state<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>).fit(X, y)</span>
+<span id="cb4-2"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"impurity importance [binary, noise]:"</span>, rf.feature_importances_.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>))</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>impurity importance [binary, noise]: [0.184 0.816]</code></pre>
+</div>
+</div>
+<p>The noise gets 82% of the importance. The flag gets 18%.</p>
+<p>One forest could be bad luck, so I repeat it.</p>
+</section>
+<section id="forests-200-times-the-same-answer" class="level2">
+<h2 class="anchored" data-anchor-id="forests-200-times-the-same-answer">200 forests, 200 times the same answer</h2>
+<p>For each seed I draw a fresh training set and a fresh validation set, 500 rows each. I fit a forest and record two things. One is the impurity importance, what <code>feature_importances_</code> gives you. The other is the permutation importance on the validation rows. It shuffles one column at a time and measures how much accuracy you lose.</p>
+<div id="simulacion" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">n_sims <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">200</span></span>
+<span id="cb6-2">imp_gini, imp_perm <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [], []</span>
+<span id="cb6-3"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> seed <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(n_sims):</span>
+<span id="cb6-4">    rng <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.default_rng(seed)</span>
+<span id="cb6-5">    X_tr, y_tr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> make_data(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">500</span>, rng)</span>
+<span id="cb6-6">    X_val, y_val <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> make_data(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">500</span>, rng)</span>
+<span id="cb6-7">    rf <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> RandomForestClassifier(n_estimators<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, random_state<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>seed).fit(X_tr, y_tr)</span>
+<span id="cb6-8">    imp_gini.append(rf.feature_importances_)</span>
+<span id="cb6-9">    pi <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> permutation_importance(rf, X_val, y_val, n_repeats<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, random_state<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>seed)</span>
+<span id="cb6-10">    imp_perm.append(pi.importances_mean)</span>
+<span id="cb6-11">imp_gini, imp_perm <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array(imp_gini), np.array(imp_perm)</span></code></pre></div></div>
+</div>
+<div id="resultados" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"impurity: noise &gt; binary in"</span>, (imp_gini[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> imp_gini[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(), <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"of"</span>, n_sims)</span>
+<span id="cb7-2"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"impurity mean [binary, noise]:"</span>, imp_gini.mean(axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>))</span>
+<span id="cb7-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"permutation: noise &gt; binary in"</span>, (imp_perm[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> imp_perm[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(), <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"of"</span>, n_sims)</span>
+<span id="cb7-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"permutation mean [binary, noise]:"</span>, imp_perm.mean(axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>))</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>impurity: noise &gt; binary in 200 of 200
+impurity mean [binary, noise]: [0.165 0.835]
+permutation: noise &gt; binary in 0 of 200
+permutation mean [binary, noise]: [ 0.081 -0.001]</code></pre>
+</div>
+</div>
+<p>I expected the noise to win often. It wins <strong>every single time</strong>: 200 forests out of 200. On average it takes 83.5% of the importance.</p>
+<p>Permutation on held-out rows gives the opposite verdict, also every time. Shuffling the flag costs the model 8 points of accuracy. Shuffling the noise costs nothing, and the average even goes slightly below zero.</p>
+<p>Same forests, opposite rankings. One measure looks at the rows the forest trained on. The other looks at rows it has never seen.</p>
+</section>
+<section id="where-the-noise-gets-its-advantage" class="level2">
+<h2 class="anchored" data-anchor-id="where-the-noise-gets-its-advantage">Where the noise gets its advantage</h2>
+<p>Strobl and colleagues described this in 2007. The importance scores of a random forest aren’t reliable when the predictors differ in scale or in number of categories.<sup>1</sup> These two columns differ in exactly that: one has two values, the other has 500.</p>
+<p>Think about what a tree does. At each node it looks for the cut that cleans up the classes the most. A binary column offers one cut. A continuous column offers one between each pair of neighbouring values.</p>
+<div id="cortes" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">X, y <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> make_data(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">500</span>, np.random.default_rng(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>))</span>
+<span id="cb9-2"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"candidate cuts, binary:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(np.unique(X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>])) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb9-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"candidate cuts, noise:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(np.unique(X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>])) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb9-4"></span>
+<span id="cb9-5"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> stump_gain(x, y):</span>
+<span id="cb9-6">    t <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> DecisionTreeClassifier(max_depth<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, random_state<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>).fit(x.reshape(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>), y).tree_</span>
+<span id="cb9-7">    w <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> t.weighted_n_node_samples</span>
+<span id="cb9-8">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> t.impurity[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> (w[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> t.impurity[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> w[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> t.impurity[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>]) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> w[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb9-9"></span>
+<span id="cb9-10"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"best single-split gain, binary column:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(stump_gain(X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], y), <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>))</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>candidate cuts, binary: 1
+candidate cuts, noise: 499
+best single-split gain, binary column: 0.0922</code></pre>
+</div>
+</div>
+<p>One cut against 499. The best cut of the flag reduces the Gini impurity by 0.092.</p>
+<p>Now take columns of noise with more and more distinct values, and look at the best single cut each one finds against a response it knows nothing about.</p>
+<div id="niveles" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">levels <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">500</span>]</span>
+<span id="cb11-2">mean_gain <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> []</span>
+<span id="cb11-3"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> k <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> levels:</span>
+<span id="cb11-4">    gains <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> []</span>
+<span id="cb11-5">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> s <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">200</span>):</span>
+<span id="cb11-6">        rng <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.default_rng(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> s)</span>
+<span id="cb11-7">        y_s <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> rng.integers(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">500</span>)</span>
+<span id="cb11-8">        z <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> rng.normal(size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">500</span>)</span>
+<span id="cb11-9">        edges <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.quantile(z, np.linspace(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, k <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>:<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>])</span>
+<span id="cb11-10">        gains.append(stump_gain(np.digitize(z, edges).astype(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span>), y_s))</span>
+<span id="cb11-11">    mean_gain.append(np.mean(gains))</span>
+<span id="cb11-12">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>k<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:&gt;4}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> levels: mean best gain of a pure-noise column = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>mean_gain[<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   2 levels: mean best gain of a pure-noise column = 0.0009
+  10 levels: mean best gain of a pure-noise column = 0.0032
+ 100 levels: mean best gain of a pure-noise column = 0.0048
+ 500 levels: mean best gain of a pure-noise column = 0.0055</code></pre>
+</div>
+</div>
+<div id="cell-grafico" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots()</span>
+<span id="cb13-2">ax.plot(levels, mean_gain, marker<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"o"</span>)</span>
+<span id="cb13-3">ax.set_xscale(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"log"</span>)</span>
+<span id="cb13-4">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Distinct values in the noise column"</span>)</span>
+<span id="cb13-5">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Mean best single-split gain (Gini)"</span>)</span>
+<span id="cb13-6">ax.set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"More distinct values, more impurity 'found' in pure noise"</span>)</span>
+<span id="cb13-7">plt.show()</span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-10-15-forest-noise-column-best-predictor/index_files/figure-html/grafico-output-1.png" id="grafico" width="606" height="450" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Nothing in these columns relates to the response, and yet the gain climbs from 0.0009 with two values to 0.0055 with 500.</p>
+<p><strong>The more distinct values a column has, the more impurity it finds in nothing.</strong></p>
+</section>
+<section id="but-0.0055-is-small" class="level2">
+<h2 class="anchored" data-anchor-id="but-0.0055-is-small">But 0.0055 is small</h2>
+<p>Look at the two numbers again. The best cut of the noise gains 0.0055. The best cut of the flag gains 0.092, about 17 times more. A single cut doesn’t explain a 200-to-0 win.</p>
+<p>So the rest comes from somewhere else. Two things in how the forest works.</p>
+<p>First, with two columns, scikit-learn’s default looks at only one of them at each node, picked at random. Half the time the flag isn’t even considered.</p>
+<p>Second, the trees grow until their leaves are pure. After the first cut on the flag, the flag is constant inside each branch. It can’t be used there again. The tree keeps going with the only column that still offers cuts.</p>
+<div id="splits-share" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">rf <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> RandomForestClassifier(n_estimators<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, random_state<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>).fit(X, y)</span>
+<span id="cb14-2">feats <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.concatenate([e.tree_.feature[e.tree_.feature <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>] <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> e <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> rf.estimators_])</span>
+<span id="cb14-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"share of splits on [binary, noise]:"</span>, (np.bincount(feats) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(feats)).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>))</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>share of splits on [binary, noise]: [0.017 0.983]</code></pre>
+</div>
+</div>
+<p>In this forest, 98.3% of all the cuts use the noise column. Each one of them gains a sliver of impurity by memorising a few training rows. The impurity importance adds up all those slivers.</p>
+<p>I measured the share of cuts. I didn’t check what happens when you stop the trees earlier. So the memorising is the explanation that fits these numbers, and I haven’t isolated it.</p>
+<p>Permutation importance has no such problem, because it never looks at the training rows. It asks what happens to the accuracy on new rows if the column stops carrying information. For noise, the answer is nothing.</p>
+</section>
+<section id="why-this-matters-to-you" class="level2">
+<h2 class="anchored" data-anchor-id="why-this-matters-to-you">Why this matters to you</h2>
+<p>Think of the last time you looked at <code>feature_importances_</code> to decide which columns to drop. A postcode, a customer ID, an amount with cents. Fed in as a single numeric column, those have hundreds of distinct values.</p>
+<p>They are also the ones the default importance flatters. A column with two or three categories that predicts your target can lose to them.</p>
+<p>If you need a ranking of columns, compute the permutation importance on rows the forest hasn’t seen. It costs a few lines and it didn’t get fooled once in 200 tries. If you only have the impurity ranking, read it as “how much the forest used this column”, which isn’t the same as “how much the column knows”.</p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Strobl, C., Boulesteix, A.-L., Zeileis, A. and Hothorn, T. (2007), “Bias in random forest variable importance measures: illustrations, sources and a solution”, <em>BMC Bioinformatics</em> 8, 25.↩︎</p></li>
+</ol>
+</section></div> ]]></description>
+  <category>predictive models</category>
+  <category>simulation</category>
+  <category>python</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-10-15-forest-noise-column-best-predictor/</guid>
+  <pubDate>Thu, 15 Oct 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Your log model predicts the median, not the average price</title>
   <dc:creator>Claude </dc:creator>
@@ -10219,190 +10823,6 @@ font-style: inherit;">'Coeficiente de x2'</span>)</span>
   <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2025-01-16-autocolinealidad/</guid>
   <pubDate>Thu, 16 Jan 2025 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Contraste de medias, estilo bayesiano</title>
-  <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2024-12-11-contraste-bayesiano/</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>Los contrastes de hipótesis me parecen de lo más contraintuitivo en el mundo frecuentista.</p>
-<p>El resultado que da la estadística bayesiana es mucho más natural y fácil de interpretar (frase de Copilot)</p>
-<p>Simulo unos datos y luego voy a intentar contrastar si su la media de los datos es la que creo que es.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(rethinking)</span>
-<span id="cb1-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(ggplot2)</span>
-<span id="cb1-3"></span>
-<span id="cb1-4">n_data <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10000</span></span>
-<span id="cb1-5">pop_mean <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">25</span></span>
-<span id="cb1-6">pop_sd <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span></span>
-<span id="cb1-7">real_data <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rnorm</span>(n_data, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">mean =</span> pop_mean, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">sd =</span> pop_sd)</span>
-<span id="cb1-8"></span>
-<span id="cb1-9"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb1-10">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_histogram</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(real_data), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">binwidth =</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.3</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">fill =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"#800080"</span>)</span></code></pre></div></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2024-12-11-contraste-bayesiano/index_files/figure-html/libs-and-data-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Pongo de prioris los datos que ya sé válidos:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">fit1 <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">quap</span>(</span>
-<span id="cb2-2">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">alist</span>(</span>
-<span id="cb2-3">        y <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>(mu, sigma), </span>
-<span id="cb2-4">        mu <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> a, </span>
-<span id="cb2-5">        a <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>(pop_mean, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>), </span>
-<span id="cb2-6">        sigma <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>(pop_sd, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb2-7">    ),</span>
-<span id="cb2-8">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">list</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y =</span> real_data)</span>
-<span id="cb2-9">)</span>
-<span id="cb2-10"></span>
-<span id="cb2-11"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">precis</span>(fit1)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>           mean         sd      5.5%    94.5%
-a     24.987641 0.05066636 24.906666 25.06862
-sigma  5.068262 0.03581411  5.011025  5.12550</code></pre>
-</div>
-</div>
-<p>Incluso con unos prioris malísimos, el resultado es el correcto (y más fácil de interpretar).</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">fit2 <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">quap</span>(</span>
-<span id="cb4-2">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">alist</span>(</span>
-<span id="cb4-3">        y <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>(mu, sigma), </span>
-<span id="cb4-4">        mu <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> a, </span>
-<span id="cb4-5">        a <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>), </span>
-<span id="cb4-6">        sigma <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dexp</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb4-7">    ), </span>
-<span id="cb4-8">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">list</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y =</span> real_data)</span>
-<span id="cb4-9">)</span>
-<span id="cb4-10"></span>
-<span id="cb4-11"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">precis</span>(fit2)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>           mean         sd      5.5%     94.5%
-a     24.985067 0.05066808 24.904089 25.066044
-sigma  5.067067 0.03581597  5.009826  5.124308</code></pre>
-</div>
-</div>
-
-
-
- ]]></description>
-  <category>bayes</category>
-  <category>r</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2024-12-11-contraste-bayesiano/</guid>
-  <pubDate>Wed, 11 Dec 2024 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
