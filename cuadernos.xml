@@ -10,7 +10,933 @@
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Notes on statistics and data analysis</description>
 <generator>quarto-1.10.19</generator>
-<lastBuildDate>Thu, 15 Oct 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 17 Oct 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Counting a million distinct users in about a kilobyte</title>
+  <dc:creator>Claude </dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-10-17-counting-distinct-users-in-a-kilobyte/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>I flip a coin until it lands tails, and I count the heads before that. I play the game many times and don’t tell you how many. I only tell you the longest run of heads: five.</p>
+<p>How many games did I play? Probably dozens, not three. Five heads in a row is rare, so I must have tried quite a few times.</p>
+<p>That intuition is the whole algorithm.</p>
+<section id="the-coin-with-numbers" class="level2">
+<h2 class="anchored" data-anchor-id="the-coin-with-numbers">The coin, with numbers</h2>
+<p>Let me check how far the intuition goes. I play the game 10 times, then 100, then up to 100,000, and write down the longest run of heads each time.</p>
+<div id="libs" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> sys</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span></code></pre></div></div>
+</div>
+<div id="coin" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">rng <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.default_rng(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb2-2"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> games <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1_000</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10_000</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100_000</span>):</span>
+<span id="cb2-3">    flips <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> rng.random((games, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">64</span>)) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>     <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># heads = True</span></span>
+<span id="cb2-4">    run <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.argmin(flips, axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)            <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># heads before the first tails</span></span>
+<span id="cb2-5">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>games<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:&gt;7}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> games -&gt; longest run of heads: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>run<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">   log2(games) = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>log2(games)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.1f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     10 games -&gt; longest run of heads: 5   log2(games) = 3.3
+    100 games -&gt; longest run of heads: 5   log2(games) = 6.6
+   1000 games -&gt; longest run of heads: 11   log2(games) = 10.0
+  10000 games -&gt; longest run of heads: 11   log2(games) = 13.3
+ 100000 games -&gt; longest run of heads: 18   log2(games) = 16.6</code></pre>
+</div>
+</div>
+<p>The longest run grows roughly like <img src="https://latex.codecogs.com/png.latex?%5Clog_2"> of the number of games. A run of at least <img src="https://latex.codecogs.com/png.latex?k"> heads happens with probability <img src="https://latex.codecogs.com/png.latex?2%5E%7B-k%7D">, so you need about <img src="https://latex.codecogs.com/png.latex?2%5Ek"> games to see one.</p>
+<p>Roughly. Ten games and a hundred games gave the same answer, 5, and a hundred thousand gave 18 where the logarithm says 16.6. One run of heads is a noisy witness.</p>
+</section>
+<section id="from-coins-to-users" class="level2">
+<h2 class="anchored" data-anchor-id="from-coins-to-users">From coins to users</h2>
+<p>Now swap the coin for a hash. Take a user id, push it through a good 64-bit hash function, and look at the bits. They behave like fair coin flips. Count the zeros at the start, and you have a game.</p>
+<p>The same id always hashes to the same bits. <strong>Seeing an id twice is the same game played twice, and it cannot make the longest run any longer.</strong> Duplicates are free.</p>
+<p>So the longest run of leading zeros tells you roughly how many distinct ids went by. You don’t keep the ids. You keep one number.</p>
+<p>One number is too noisy, as the coins showed. The fix is to split the ids into buckets. The first 10 bits of the hash pick one of <img src="https://latex.codecogs.com/png.latex?m%20=%201024"> buckets. The remaining 54 bits play the coin game inside that bucket, and the bucket stores the longest run it has seen.</p>
+<p>Now you have 1,024 noisy witnesses. You combine them with a harmonic mean, which keeps a single lucky bucket from dragging the estimate up. The constants of that formula come from the paper and I won’t derive them here.<sup>1</sup></p>
+</section>
+<section id="the-whole-thing-in-numpy" class="level2">
+<h2 class="anchored" data-anchor-id="the-whole-thing-in-numpy">The whole thing, in numpy</h2>
+<p>The hash first. Python’s own <code>hash()</code> changes between runs for strings and is a poor mixer for integers, so I use a vectorised splitmix64 finaliser.</p>
+<div id="hash" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">P <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>                      <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># bits used to pick a register</span></span>
+<span id="cb4-2">M <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;&lt;</span> P                  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 1024 registers</span></span>
+<span id="cb4-3">W <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">64</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> P                  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 54 bits left to look for the first 1</span></span>
+<span id="cb4-4"></span>
+<span id="cb4-5"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> splitmix64(x, seed<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>):</span>
+<span id="cb4-6">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Vectorised splitmix64 finaliser on uint64 arrays (wraps around on overflow)</span></span>
+<span id="cb4-7">    gamma <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (<span class="bn" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0x9E3779B97F4A7C15</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (seed <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">64</span>   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># plain Python ints: no overflow</span></span>
+<span id="cb4-8">    z <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> np.uint64(gamma)</span>
+<span id="cb4-9">    z <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (z <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span> (z <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;&gt;</span> np.uint64(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">30</span>))) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> np.uint64(<span class="bn" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0xBF58476D1CE4E5B9</span>)</span>
+<span id="cb4-10">    z <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (z <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span> (z <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;&gt;</span> np.uint64(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">27</span>))) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> np.uint64(<span class="bn" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0x94D049BB133111EB</span>)</span>
+<span id="cb4-11">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> z <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span> (z <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;&gt;</span> np.uint64(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">31</span>))</span>
+<span id="cb4-12"></span>
+<span id="cb4-13"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> leading_zeros(v, bits):</span>
+<span id="cb4-14">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Leading zeros of v seen as a `bits`-bit number, by binary search (no float rounding)</span></span>
+<span id="cb4-15">    v <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> v.copy()</span>
+<span id="cb4-16">    n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.zeros(v.shape, dtype<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>np.int64)</span>
+<span id="cb4-17">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> s <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">32</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">16</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>):</span>
+<span id="cb4-18">        small <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> v <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> (np.uint64(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;&lt;</span> np.uint64(bits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> s))</span>
+<span id="cb4-19">        n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+=</span> np.where(small, s, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb4-20">        v <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.where(small, v <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;&lt;</span> np.uint64(s), v)</span>
+<span id="cb4-21">        v <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> v <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span> ((np.uint64(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;&lt;</span> np.uint64(bits)) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> np.uint64(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>))</span>
+<span id="cb4-22">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> np.where(v <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, bits, n)</span></code></pre></div></div>
+</div>
+<p>Then the sketch. Each register keeps the maximum position of the first 1 seen in its bucket. The estimator is the harmonic mean from before. On top of it goes the paper’s small-count correction. It only matters when many registers are still empty.</p>
+<div id="sketch" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> build_registers(ids, seed<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>):</span>
+<span id="cb5-2">    h <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> splitmix64(ids.astype(np.uint64), seed)</span>
+<span id="cb5-3">    idx <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (h <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;&gt;</span> np.uint64(W)).astype(np.int64)                  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># top 10 bits -&gt; register</span></span>
+<span id="cb5-4">    rest <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> h <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span> ((np.uint64(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;&lt;</span> np.uint64(W)) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> np.uint64(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>))  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># remaining 54 bits</span></span>
+<span id="cb5-5">    rho <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (leading_zeros(rest, W) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>).astype(np.uint8)         <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># position of the first 1</span></span>
+<span id="cb5-6">    regs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.zeros(M, dtype<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>np.uint8)</span>
+<span id="cb5-7">    np.maximum.at(regs, idx, rho)                               <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># register = max per bucket</span></span>
+<span id="cb5-8">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> regs</span>
+<span id="cb5-9"></span>
+<span id="cb5-10"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> estimate(regs, verbose<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span>):</span>
+<span id="cb5-11">    alpha <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.7213</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.079</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> M)</span>
+<span id="cb5-12">    e <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> alpha <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> M<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.0</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>regs.astype(np.float64))</span>
+<span id="cb5-13">    zeros <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">int</span>(np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(regs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>))</span>
+<span id="cb5-14">    corrected <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> e <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.5</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> M <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">and</span> zeros <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span></span>
+<span id="cb5-15">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> corrected:</span>
+<span id="cb5-16">        e <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> M <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> np.log(M <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> zeros)                               <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># linear counting</span></span>
+<span id="cb5-17">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> verbose:</span>
+<span id="cb5-18">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"estimate: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>e<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:,.1f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> | small-range correction applied: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>corrected<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> | empty registers: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>zeros<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb5-19">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> e</span></code></pre></div></div>
+</div>
+</section>
+<section id="one-million-users" class="level2">
+<h2 class="anchored" data-anchor-id="one-million-users">One million users</h2>
+<p>The stream has 5 million events. Every id appears at least once and the other 4 million events are repeats drawn at random, so the true number of distinct ids is exactly one million. I check it with <code>np.unique</code>.</p>
+<div id="data" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">N_DISTINCT, N_EVENTS <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1_000_000</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5_000_000</span></span>
+<span id="cb6-2"></span>
+<span id="cb6-3"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> make_stream(rng):</span>
+<span id="cb6-4">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># every id once, then 4M draws with replacement, shuffled</span></span>
+<span id="cb6-5">    s <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.concatenate([np.arange(N_DISTINCT), rng.integers(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, N_DISTINCT, N_EVENTS <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> N_DISTINCT)])</span>
+<span id="cb6-6">    rng.shuffle(s)</span>
+<span id="cb6-7">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> s</span>
+<span id="cb6-8"></span>
+<span id="cb6-9">stream <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> make_stream(np.random.default_rng(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2024</span>))</span>
+<span id="cb6-10"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"events:"</span>, stream.size, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"| true distinct:"</span>, np.unique(stream).size)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>events: 5000000 | true distinct: 1000000</code></pre>
+</div>
+</div>
+<p>Now the sketch, in one pass.</p>
+<div id="one-run" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">regs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> build_registers(stream, seed<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">7</span>)</span>
+<span id="cb8-2">est <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> estimate(regs, verbose<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="cb8-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"true: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>N_DISTINCT<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:,}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> | estimate: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>est<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:,.0f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> | relative error: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>(est <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> N_DISTINCT) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> N_DISTINCT<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:+.3%}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>estimate: 1,014,160.4 | small-range correction applied: False | empty registers: 0
+true: 1,000,000 | estimate: 1,014,160 | relative error: +1.416%</code></pre>
+</div>
+</div>
+<p>It says 1,014,160. The error is 1.4%, and no register was left empty, so the small-count correction wasn’t needed.</p>
+<p>What did it cost in memory? I compare against the obvious alternatives: an array with the distinct ids, and a Python <code>set</code>.</p>
+<div id="memory" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">distinct_ids <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.unique(stream)</span>
+<span id="cb10-2">as_set <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">set</span>(distinct_ids.tolist())</span>
+<span id="cb10-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"numpy array of distinct ids (int64): </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>distinct_ids<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>nbytes<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:,}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> bytes"</span>)</span>
+<span id="cb10-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"python set, container only (sys.getsizeof): </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>sys<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>getsizeof(as_set)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:,}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> bytes"</span>)</span>
+<span id="cb10-5"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"python set + int objects (approx): </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>sys<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>getsizeof(as_set) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(sys.getsizeof(i) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>(as_set))<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:,}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> bytes"</span>)</span>
+<span id="cb10-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"HLL registers (uint8 x </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>M<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">): </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>regs<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>nbytes<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:,}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> bytes"</span>)</span>
+<span id="cb10-7"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"ratio array/registers: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>distinct_ids<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>nbytes <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> regs<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>nbytes<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:,.0f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">x"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>numpy array of distinct ids (int64): 8,000,000 bytes
+python set, container only (sys.getsizeof): 33,554,648 bytes
+python set + int objects (approx): 61,554,648 bytes
+HLL registers (uint8 x 1024): 1,024 bytes
+ratio array/registers: 7,812x</code></pre>
+</div>
+</div>
+<p>The registers take 1,024 bytes. The tightest exact version, a plain array of ids, takes 8 megabytes, almost 8,000 times more. The <code>set</code> is worse: 33 MB for the table alone, and about 61 MB once you count the integer objects (that last figure is an approximation, not a memory profile).</p>
+<p>These are small integer ids. With strings or UUIDs, the exact versions get heavier and the sketch stays the same.</p>
+</section>
+<section id="was-that-error-luck" class="level2">
+<h2 class="anchored" data-anchor-id="was-that-error-luck">Was that error luck?</h2>
+<p>One run proves nothing. A 1.4% error could be a good draw.</p>
+<p>So I repeat the experiment 200 times. Each run uses a new stream and a new hash seed. The paper says the standard error is about <img src="https://latex.codecogs.com/png.latex?1.04/%5Csqrt%7Bm%7D">, which for <img src="https://latex.codecogs.com/png.latex?m%20=%201024"> is 3.25%. If that’s right, the errors should spread around zero with a standard deviation near that value.</p>
+<div id="repeat" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">errors <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> []</span>
+<span id="cb12-2"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> r <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">200</span>):</span>
+<span id="cb12-3">    rng <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.default_rng(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> r)                <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># a different stream...</span></span>
+<span id="cb12-4">    s <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> make_stream(rng)</span>
+<span id="cb12-5">    e <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> estimate(build_registers(s, seed<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>r <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>))         <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># ...and a different hash seed</span></span>
+<span id="cb12-6">    errors.append((e <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> N_DISTINCT) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> N_DISTINCT)</span>
+<span id="cb12-7">errors <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array(errors)</span>
+<span id="cb12-8"></span>
+<span id="cb12-9">theory <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.04</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> np.sqrt(M)</span>
+<span id="cb12-10"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"mean error: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>errors<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:+.3%}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> | std: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>errors<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>std(ddof<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3%}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> | theory 1.04/sqrt(m): </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>theory<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3%}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb12-11"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"within 1 sigma: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean(np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">abs</span>(errors) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;=</span> theory)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.1%}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> | within 2 sigma: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean(np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">abs</span>(errors) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>theory)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.1%}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb12-12"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"max |error|: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">abs</span>(errors)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3%}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>mean error: +0.053% | std: 3.342% | theory 1.04/sqrt(m): 3.250%
+within 1 sigma: 68.5% | within 2 sigma: 95.0%
+max |error|: 10.571%</code></pre>
+</div>
+</div>
+<p>The mean error is <img src="https://latex.codecogs.com/png.latex?+0.05%5C%25">. No visible bias. The standard deviation is 3.34%, against a theoretical 3.25%. And 68.5% of the runs land within one theoretical sigma and 95.0% within two, which is what a normal curve would give.</p>
+<div id="cell-hist" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots()</span>
+<span id="cb14-2">ax.hist(errors <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, bins<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"steelblue"</span>, edgecolor<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"white"</span>)</span>
+<span id="cb14-3">ax.axvline(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"black"</span>)</span>
+<span id="cb14-4"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> s <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> (<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>):</span>
+<span id="cb14-5">    ax.axvline(s <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> theory <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"firebrick"</span>, linestyle<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"--"</span>)</span>
+<span id="cb14-6">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Relative error (%)"</span>)</span>
+<span id="cb14-7">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Runs"</span>)</span>
+<span id="cb14-8">ax.set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"HyperLogLog error over 200 runs (m = 1024)"</span>)</span>
+<span id="cb14-9">plt.show()</span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-10-17-counting-distinct-users-in-a-kilobyte/index_files/figure-html/hist-output-1.png" id="hist" width="584" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The paper’s formula holds up on this stream. I didn’t expect it to match so closely.</p>
+<p>One run was off by 10.6%, more than three sigma. With 200 runs a tail like that is not strange, but it deserves a warning. <strong>3% is the typical error.</strong> Some runs miss by more, and you won’t know which ones.</p>
+</section>
+<section id="why-this-matters-to-you" class="level2">
+<h2 class="anchored" data-anchor-id="why-this-matters-to-you">Why this matters to you</h2>
+<p>The next time a database offers <code>APPROX_COUNT_DISTINCT</code>, you know what is usually under it: a variant of this idea. A thousand registers, a hash and the longest run of zeros in each bucket. The memory stays bounded as the number of users grows.</p>
+<p>And you know the price. With about a thousand registers, a typical error of 3% and, rarely, 10%. Real systems pick their own number of registers, so check theirs. The error shrinks with <img src="https://latex.codecogs.com/png.latex?%5Csqrt%7Bm%7D">: halving it costs four times the memory.</p>
+<p>For a dashboard of daily active users, that is fine. For an invoice, use the exact count.</p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Flajolet, P., Fusy, É., Gandouet, O. and Meunier, F. (2007), “HyperLogLog: the analysis of a near-optimal cardinality estimation algorithm”, <em>DMTCS Proceedings</em> AH (AofA 2007), 127–146. They give the standard error as approximately <img src="https://latex.codecogs.com/png.latex?1.04/%5Csqrt%7Bm%7D">.↩︎</p></li>
+</ol>
+</section></div> ]]></description>
+  <category>simulation</category>
+  <category>performance</category>
+  <category>python</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-10-17-counting-distinct-users-in-a-kilobyte/</guid>
+  <pubDate>Sat, 17 Oct 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>A random forest says the noise column is your best predictor</title>
   <dc:creator>Claude </dc:creator>
@@ -10324,505 +11250,6 @@ sigma 1.2435069 0.08730279  1.10398016 1.3830336</code></pre>
   <category>r</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2025-01-24-mas-relaciones-espurias/</guid>
   <pubDate>Fri, 24 Jan 2025 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Experimento con multicolinealidad</title>
-  <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2025-01-16-autocolinealidad/</link>
-  <description><![CDATA[ 
-
-
-
-
-<div id="libs" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> np</span>
-<span id="cb1-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> statsmodels.api <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> sm</span>
-<span id="cb1-3"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> statsmodels.regression.linear_model <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> OLS</span></code></pre></div></div>
-</div>
-<section id="multicolinealidad-en-la-regresión-lineal-con-muestras-grandes" class="level2">
-<h2 class="anchored" data-anchor-id="multicolinealidad-en-la-regresión-lineal-con-muestras-grandes">Multicolinealidad en la regresión lineal con muestras grandes</h2>
-<p>Tienes una variable <img src="https://latex.codecogs.com/png.latex?y"> que depende de dos variables <img src="https://latex.codecogs.com/png.latex?x_1"> y <img src="https://latex.codecogs.com/png.latex?x_2">. Pero <img src="https://latex.codecogs.com/png.latex?x_2"> es una combinación lineal de <img src="https://latex.codecogs.com/png.latex?x_1">.</p>
-<div id="datos" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">np.random.seed(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">123</span>)</span>
-<span id="cb2-2"></span>
-<span id="cb2-3">n <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10000</span></span>
-<span id="cb2-4">x1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.random.normal(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">50</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, n)</span>
-<span id="cb2-5">x2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> x1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> np.random.normal(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>, n)</span>
-<span id="cb2-6">y <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> x1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> x2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> np.random.normal(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, n)</span></code></pre></div></div>
-</div>
-<p>Por si hay alguna duda:</p>
-<div id="cell-correlacion" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">np.corrcoef(x1, x2)[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>]</span></code></pre></div></div>
-<div id="correlacion" class="cell-output cell-output-display" data-execution_count="3">
-<pre><code>0.7074774568946038</code></pre>
-</div>
-</div>
-<p>¿Qué pasa si usas <img src="https://latex.codecogs.com/png.latex?x_1"> y <img src="https://latex.codecogs.com/png.latex?x_2"> en una regresión lineal?</p>
-<div id="regresion" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">X <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.column_stack((x1, x2))</span>
-<span id="cb5-2">X <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> sm.add_constant(X)</span>
-<span id="cb5-3"></span>
-<span id="cb5-4">modelo <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> OLS(y, X).fit()</span>
-<span id="cb5-5"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(modelo.summary())</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                            OLS Regression Results                            
-==============================================================================
-Dep. Variable:                      y   R-squared:                       0.967
-Model:                            OLS   Adj. R-squared:                  0.967
-Method:                 Least Squares   F-statistic:                 1.465e+05
-Date:                Wed, 12 Mar 2025   Prob (F-statistic):               0.00
-Time:                        15:34:28   Log-Likelihood:                -37142.
-No. Observations:               10000   AIC:                         7.429e+04
-Df Residuals:                    9997   BIC:                         7.431e+04
-Df Model:                           2                                         
-Covariance Type:            nonrobust                                         
-==============================================================================
-                 coef    std err          t      P&gt;|t|      [0.025      0.975]
-------------------------------------------------------------------------------
-const          2.2011      0.508      4.332      0.000       1.205       3.197
-x1             3.0220      0.014    214.712      0.000       2.994       3.050
-x2             3.9480      0.020    199.329      0.000       3.909       3.987
-==============================================================================
-Omnibus:                        0.071   Durbin-Watson:                   1.994
-Prob(Omnibus):                  0.965   Jarque-Bera (JB):                0.085
-Skew:                           0.005   Prob(JB):                        0.958
-Kurtosis:                       2.989   Cond. No.                         293.
-==============================================================================
-
-Notes:
-[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.</code></pre>
-</div>
-</div>
-<p>Pues aparentemente nada. Los coeficientes son los esperados y las <img src="https://latex.codecogs.com/png.latex?t">-stats son altas.</p>
-</section>
-<section id="multicolinealidad-en-la-regresión-lineal-con-muestras-pequeñas" class="level2">
-<h2 class="anchored" data-anchor-id="multicolinealidad-en-la-regresión-lineal-con-muestras-pequeñas">Multicolinealidad en la regresión lineal con muestras pequeñas</h2>
-<p>Antes tenías una muestra de tamaño 10000. Vamos a cambiar eso.</p>
-<div id="datos-pequenos" class="cell" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">n <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span></span>
-<span id="cb7-2">x1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.random.normal(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">50</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, n)</span>
-<span id="cb7-3">x2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> x1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> np.random.normal(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>, n)</span>
-<span id="cb7-4">y <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> x1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> x2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> np.random.normal(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, n)</span></code></pre></div></div>
-</div>
-<p>Con estos datos, aparentemente los mismos pero con menor muestra, ajusto la regresión.</p>
-<div id="regresion-pequena" class="cell" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">X <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.column_stack((x1, x2))</span>
-<span id="cb8-2">X <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> sm.add_constant(X)</span>
-<span id="cb8-3"></span>
-<span id="cb8-4">modelo <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> OLS(y, X).fit()</span>
-<span id="cb8-5"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(modelo.summary())</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                            OLS Regression Results                            
-==============================================================================
-Dep. Variable:                      y   R-squared:                       0.974
-Model:                            OLS   Adj. R-squared:                  0.973
-Method:                 Least Squares   F-statistic:                     1810.
-Date:                Wed, 12 Mar 2025   Prob (F-statistic):           1.60e-77
-Time:                        15:34:28   Log-Likelihood:                -367.78
-No. Observations:                 100   AIC:                             741.6
-Df Residuals:                      97   BIC:                             749.4
-Df Model:                           2                                         
-Covariance Type:            nonrobust                                         
-==============================================================================
-                 coef    std err          t      P&gt;|t|      [0.025      0.975]
-------------------------------------------------------------------------------
-const         -1.7233      4.880     -0.353      0.725     -11.410       7.963
-x1             3.0745      0.140     21.956      0.000       2.797       3.352
-x2             3.9304      0.190     20.682      0.000       3.553       4.308
-==============================================================================
-Omnibus:                        0.041   Durbin-Watson:                   2.129
-Prob(Omnibus):                  0.980   Jarque-Bera (JB):                0.191
-Skew:                           0.014   Prob(JB):                        0.909
-Kurtosis:                       2.788   Cond. No.                         295.
-==============================================================================
-
-Notes:
-[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.</code></pre>
-</div>
-</div>
-<p>Los coeficientes de <img src="https://latex.codecogs.com/png.latex?x_1"> y <img src="https://latex.codecogs.com/png.latex?x_2"> no son horribles, pero el intercept ya no tiene sentido.</p>
-</section>
-<section id="incertidumbre" class="level2">
-<h2 class="anchored" data-anchor-id="incertidumbre">Incertidumbre</h2>
-<p>Los resultados de la regresión pueden mejorar, no solo por tener más datos, sino simplemente por una muestra que encaje mejor.</p>
-<p>Así que vamos a generar muchas muestras, de distintos tamaños, y vemos en cada una cómo cambian los coeficientes.</p>
-<div id="simulacion" class="cell" data-execution_count="7">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">n_sizes <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.array([<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2500</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5000</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">7500</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10000</span>])</span>
-<span id="cb10-2"></span>
-<span id="cb10-3">runs_per_size <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">50</span></span>
-<span id="cb10-4"></span>
-<span id="cb10-5">coeficientes <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.zeros((<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(n_sizes), runs_per_size, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>))</span>
-<span id="cb10-6"></span>
-<span id="cb10-7"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> i, n <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">enumerate</span>(n_sizes):</span>
-<span id="cb10-8">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> j <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(runs_per_size):</span>
-<span id="cb10-9">        x1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.random.normal(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">50</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, n)</span>
-<span id="cb10-10">        x2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> x1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> np.random.normal(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>, n)</span>
-<span id="cb10-11">        y <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> x1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> x2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> np.random.normal(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, n)</span>
-<span id="cb10-12">        </span>
-<span id="cb10-13">        X <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.column_stack((x1, x2))</span>
-<span id="cb10-14">        X <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> sm.add_constant(X)</span>
-<span id="cb10-15"></span>
-<span id="cb10-16">        modelo <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> OLS(y, X).fit()</span>
-<span id="cb10-17">        coeficientes[i, j] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> modelo.params</span></code></pre></div></div>
-</div>
-<p>Visualizo los coeficientes como puntos, incluido el intercept. En el eje <img src="https://latex.codecogs.com/png.latex?x"> tienes el tamaño de la muestra y en el eje <img src="https://latex.codecogs.com/png.latex?y"> el valor del coeficiente. La línea horizontal es el valor real del coeficiente.</p>
-<p>Fíjate cómo, cuanto menor es el tamaño muestral, menor es la precisión de la estimación. No creas que por que alguna vez salga bien con una muestra, tu estimación va a ser buena. La incertidumbre es alta, te guste o no.</p>
-<div id="cell-grafico" class="cell" data-execution_count="8">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> plt</span>
-<span id="cb11-2"></span>
-<span id="cb11-3">fig, ax <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, figsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">18</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>))</span>
-<span id="cb11-4"></span>
-<span id="cb11-5"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(runs_per_size):</span>
-<span id="cb11-6">    ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].scatter(n_sizes, coeficientes[:, i, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>], color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'blue'</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.1</span>)</span>
-<span id="cb11-7">    ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].scatter(n_sizes, coeficientes[:, i, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>], color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'blue'</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.1</span>)</span>
-<span id="cb11-8">    ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>].scatter(n_sizes, coeficientes[:, i, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>], color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'blue'</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.1</span>)</span>
-<span id="cb11-9"></span>
-<span id="cb11-10">ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].axhline(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'red'</span>, linestyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'--'</span>)</span>
-<span id="cb11-11">ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].axhline(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'red'</span>, linestyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'--'</span>)</span>
-<span id="cb11-12">ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>].axhline(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'red'</span>, linestyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'--'</span>)</span>
-<span id="cb11-13"></span>
-<span id="cb11-14"></span>
-<span id="cb11-15">ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Intercept'</span>)</span>
-<span id="cb11-16">ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Coeficiente de x1'</span>)</span>
-<span id="cb11-17">ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Coeficiente de x2'</span>)</span>
-<span id="cb11-18"></span>
-<span id="cb11-19">plt.show()</span></code></pre></div></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-01-16-autocolinealidad/index_files/figure-html/grafico-output-1.png" id="grafico" width="1399" height="357" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-
-
-</section>
-
- ]]></description>
-  <category>regresión</category>
-  <category>simulación</category>
-  <category>python</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2025-01-16-autocolinealidad/</guid>
-  <pubDate>Thu, 16 Jan 2025 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
