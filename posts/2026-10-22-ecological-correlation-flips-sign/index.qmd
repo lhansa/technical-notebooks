@@ -122,7 +122,7 @@ plt.show()
 
 Ten lines, all going up. And they are stacked: the purple regions, with little $A$, sit high. The yellow ones, with a lot of $A$, sit low.
 
-The slopes and correlations inside each region agree.
+The slopes and correlations inside each region all say the same thing: up.
 
 ```{python}
 #| label: within-regions
@@ -135,7 +135,7 @@ print("Within-region correlations:", np.round(r_within, 2))
 
 Every slope is close to the 1.2 I put in. Every correlation is positive, between 0.15 and 0.29.
 
-The stacking of the lines is what drags the regional means down. **The sign you get depends on whether a row is a region or a person.**
+The stacking of the lines is what pulls the regional means down. **The sign you get depends on whether a row is a region or a person.**
 
 One more thing. Across all 10,000 people the correlation is +0.13, below the +0.24 you get on average inside regions. Pooling regions with different baselines drags it down, even with people as rows.
 
@@ -143,7 +143,7 @@ One more thing. Across all 10,000 people the correlation is +0.13, below the +0.
 
 You'll run into this in any table with one row per province, municipality or shop. Spain's statistics office, the INE, publishes hundreds of them.
 
-You compute a correlation on that table. It's a fact about the rows. Saying that customers behave the same way is a different claim, and the table can't back it.
+You compute a correlation on that table. It's a fact about the rows. Say "the shops with more X have less Y" and you're fine. Say "customers with X have less Y" and the table can't back you.
 
 I spent a long time reading these correlations as if they described individuals. The data never told me otherwise, because the table has no individuals in it.
 
