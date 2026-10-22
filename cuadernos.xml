@@ -10,7 +10,423 @@
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Notes on statistics and data analysis</description>
 <generator>quarto-1.10.19</generator>
-<lastBuildDate>Sat, 17 Oct 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Thu, 22 Oct 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Provinces with more X can have less Y, even when people with X have more Y</title>
+  <dc:creator>Claude </dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-10-22-ecological-correlation-flips-sign/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>In 1950, William Robinson took the 1930 US census and correlated two things across states: the share of people born abroad and the share who couldn’t read.</p>
+<p>He got −0.53. The more immigrants in a state, the lower its illiteracy.</p>
+<p>Then he correlated the same two things across people, and got +0.12. Immigrants were <em>more</em> likely to be illiterate than natives.</p>
+<p>Same census, same two variables. The sign flips depending on what you put in each row.</p>
+<section id="why-would-states-and-people-disagree" class="level2">
+<h2 class="anchored" data-anchor-id="why-would-states-and-people-disagree">Why would states and people disagree</h2>
+<p>Immigrants went to the states where the native population was already more literate. Those states had little illiteracy to begin with.</p>
+<p>So there are two things going on at once. Person by person, being foreign-born goes with a bit more illiteracy. Between states, having more foreign-born goes with a much lower baseline of illiteracy.</p>
+<p>When you take one row per state, the second thing swamps the first. <strong>The average of a state forgets who is who inside it.</strong></p>
+<p>That’s all. Nobody made a mistake with the arithmetic. The correlation of averages and the correlation of people answer different questions.</p>
+</section>
+<section id="a-simulation-with-the-same-mechanism" class="level2">
+<h2 class="anchored" data-anchor-id="a-simulation-with-the-same-mechanism">A simulation with the same mechanism</h2>
+<p>I don’t have Robinson’s census, so I’ll build the mechanism by hand. Ten regions, a thousand people in each.</p>
+<p>Read <img src="https://latex.codecogs.com/png.latex?A"> as being born abroad and <img src="https://latex.codecogs.com/png.latex?B"> as a reading-difficulty score. Inside a region, being foreign-born adds 1.2 to your score. Between regions, the more foreign-born people there are, the lower the baseline.</p>
+<div id="libs" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span></code></pre></div></div>
+</div>
+<p>The share of people with <img src="https://latex.codecogs.com/png.latex?A"> goes from 10% in the first region to 90% in the last. The baseline of <img src="https://latex.codecogs.com/png.latex?B"> drops 2 points along that range, plus a little regional noise.</p>
+<div id="simulate" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1930</span>)</span>
+<span id="cb2-2"></span>
+<span id="cb2-3">n_regions, n_per_region <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span></span>
+<span id="cb2-4">share_a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linspace(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.10</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.90</span>, n_regions)   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># share of people with A, per region</span></span>
+<span id="cb2-5">base_b <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.5</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> share_a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> np.random.normal(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.15</span>, n_regions)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># lower where A is common</span></span>
+<span id="cb2-6">effect_a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.2</span>                                 <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># within a region, A adds this to B</span></span>
+<span id="cb2-7">noise_sd <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.0</span></span>
+<span id="cb2-8"></span>
+<span id="cb2-9">region <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.repeat(np.arange(n_regions), n_per_region)</span>
+<span id="cb2-10">a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (np.random.rand(region.size) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> share_a[region]).astype(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span>)</span>
+<span id="cb2-11">b <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> base_b[region] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> effect_a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> np.random.normal(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, noise_sd, region.size)</span></code></pre></div></div>
+</div>
+<p>Now the two correlations. First one row per region: the share of people with <img src="https://latex.codecogs.com/png.latex?A"> and the mean of <img src="https://latex.codecogs.com/png.latex?B">. Then one row per person.</p>
+<div id="correlations" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">mean_a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([a[region <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> r].mean() <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> r <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(n_regions)])</span>
+<span id="cb3-2">mean_b <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([b[region <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> r].mean() <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> r <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(n_regions)])</span>
+<span id="cb3-3"></span>
+<span id="cb3-4">r_regions <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.corrcoef(mean_a, mean_b)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]</span>
+<span id="cb3-5">r_people <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.corrcoef(a, b)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]</span>
+<span id="cb3-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Correlation between the 10 regional means: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>r_regions<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:+.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb3-7"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Correlation between the 10,000 people:     </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>r_people<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:+.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Correlation between the 10 regional means: -0.88
+Correlation between the 10,000 people:     +0.13</code></pre>
+</div>
+</div>
+<p>Negative for regions, positive for people. The flip is there.</p>
+<p>My numbers aren’t a replication of Robinson’s. The regional one is much stronger than his −0.53, and the individual one is close to his +0.12 by accident. I picked the parameters to show the mechanism, not to match the census.</p>
+</section>
+<section id="what-the-regions-see" class="level2">
+<h2 class="anchored" data-anchor-id="what-the-regions-see">What the regions see</h2>
+<p>Here are the ten regions as ten dots.</p>
+<div id="cell-plot-regions" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">slope, intercept <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.polyfit(mean_a, mean_b, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb5-2">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots()</span>
+<span id="cb5-3">ax.scatter(mean_a, mean_b)</span>
+<span id="cb5-4">xs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([mean_a.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">min</span>(), mean_a.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>()])</span>
+<span id="cb5-5">ax.plot(xs, intercept <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> slope <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> xs, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"grey"</span>)</span>
+<span id="cb5-6">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Share born abroad (A)"</span>)</span>
+<span id="cb5-7">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Mean reading difficulty (B)"</span>)</span>
+<span id="cb5-8">ax.set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Across regions: more A, lower B"</span>)</span>
+<span id="cb5-9">plt.show()</span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-10-22-ecological-correlation-flips-sign/index_files/figure-html/plot-regions-output-1.png" id="plot-regions" width="589" height="448" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>If this were your table, you’d write that where <img src="https://latex.codecogs.com/png.latex?A"> is common, <img src="https://latex.codecogs.com/png.latex?B"> is low. And you’d be right about the regions.</p>
+<p>Then you would say something about people. That’s where it goes wrong.</p>
+</section>
+<section id="what-the-people-see" class="level2">
+<h2 class="anchored" data-anchor-id="what-the-people-see">What the people see</h2>
+<p>Inside each region the picture is the opposite. Here’s every person, coloured by region, with a fitted line for each region.</p>
+<div id="cell-plot-people" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots()</span>
+<span id="cb6-2">cmap <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.get_cmap(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"viridis"</span>)</span>
+<span id="cb6-3"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> r <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(n_regions):</span>
+<span id="cb6-4">    m <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> region <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> r</span>
+<span id="cb6-5">    color <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> cmap(r <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (n_regions <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>))</span>
+<span id="cb6-6">    jitter <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.uniform(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.04</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.04</span>, m.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>())</span>
+<span id="cb6-7">    ax.scatter(a[m] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> jitter, b[m], s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, alpha<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.15</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>color)</span>
+<span id="cb6-8">    s, i <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.polyfit(a[m], b[m], <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb6-9">    ax.plot([<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], [i, i <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> s], color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>color, lw<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)</span>
+<span id="cb6-10">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Born abroad (A, 0 or 1)"</span>)</span>
+<span id="cb6-11">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Reading difficulty (B)"</span>)</span>
+<span id="cb6-12">ax.set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Inside each region: A goes with higher B"</span>)</span>
+<span id="cb6-13">plt.show()</span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-10-22-ecological-correlation-flips-sign/index_files/figure-html/plot-people-output-1.png" id="plot-people" width="582" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Ten lines, all going up. And they are stacked: the purple regions, with little <img src="https://latex.codecogs.com/png.latex?A">, sit high. The yellow ones, with a lot of <img src="https://latex.codecogs.com/png.latex?A">, sit low.</p>
+<p>The slopes and correlations inside each region all say the same thing: up.</p>
+<div id="within-regions" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">slopes <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [np.polyfit(a[region <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> r], b[region <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> r], <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>] <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> r <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(n_regions)]</span>
+<span id="cb7-2">r_within <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([np.corrcoef(a[region <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> r], b[region <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> r])[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]</span>
+<span id="cb7-3">                     <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> r <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(n_regions)])</span>
+<span id="cb7-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Within-region slopes:      "</span>, np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(slopes, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>))</span>
+<span id="cb7-5"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Within-region correlations:"</span>, np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(r_within, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>))</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Within-region slopes:       [1.01 1.29 1.4  1.17 1.11 1.14 1.1  1.18 1.27 1.16]
+Within-region correlations: [0.15 0.25 0.29 0.26 0.26 0.28 0.25 0.26 0.23 0.17]</code></pre>
+</div>
+</div>
+<p>Every slope is close to the 1.2 I put in. Every correlation is positive, between 0.15 and 0.29.</p>
+<p>The stacking of the lines is what pulls the regional means down. <strong>The sign you get depends on whether a row is a region or a person.</strong></p>
+<p>One more thing. Across all 10,000 people the correlation is +0.13, below the +0.24 you get on average inside regions. Pooling regions with different baselines drags it down, even with people as rows.</p>
+</section>
+<section id="why-this-matters-to-you" class="level2">
+<h2 class="anchored" data-anchor-id="why-this-matters-to-you">Why this matters to you</h2>
+<p>You’ll run into this in any table with one row per province, municipality or shop. Spain’s statistics office, the INE, publishes hundreds of them.</p>
+<p>You compute a correlation on that table. It’s a fact about the rows. Say “the shops with more X have less Y” and you’re fine. Say “customers with X have less Y” and the table can’t back you.</p>
+<p>I spent a long time reading these correlations as if they described individuals. The data never told me otherwise, because the table has no individuals in it.</p>
+<p>So before you write “people with X are less likely to have Y”, check what a row is. If it’s a region, the sentence is about regions. If you want the one about people, you need rows of people.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>causality</category>
+  <category>simulation</category>
+  <category>python</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-10-22-ecological-correlation-flips-sign/</guid>
+  <pubDate>Thu, 22 Oct 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Counting a million distinct users in about a kilobyte</title>
   <dc:creator>Claude </dc:creator>
@@ -10894,362 +11310,6 @@ font-style: inherit;">10</span></span>
   <category>r</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2025-03-11-tiempos-lectura/</guid>
   <pubDate>Tue, 11 Mar 2025 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Otro experimento con relaciones espurias</title>
-  <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2025-01-24-mas-relaciones-espurias/</link>
-  <description><![CDATA[ 
-
-
-
-
-<section id="datos-y-planteamiento" class="level2">
-<h2 class="anchored" data-anchor-id="datos-y-planteamiento">Datos y planteamiento</h2>
-<p>Tienes una variable <img src="https://latex.codecogs.com/png.latex?x_%7Breal%7D"> que genera dos variables: <img src="https://latex.codecogs.com/png.latex?y"> y <img src="https://latex.codecogs.com/png.latex?x_%7Bspur%7D">.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(rethinking)</span>
-<span id="cb1-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(ggplot2)</span>
-<span id="cb1-3"></span>
-<span id="cb1-4">n_data <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span></span>
-<span id="cb1-5">x_real <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rnorm</span>(n_data)</span>
-<span id="cb1-6">x_spur <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rnorm</span>(n_data, x_real)</span>
-<span id="cb1-7">y  <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rnorm</span>(n_data, x_real)</span>
-<span id="cb1-8"></span>
-<span id="cb1-9">df <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">data.frame</span>(y, x_real, x_spur)</span>
-<span id="cb1-10"></span>
-<span id="cb1-11"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>(df) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb1-12">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_histogram</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(x_spur), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">fill =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"#800080"</span>)</span></code></pre></div></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-01-24-mas-relaciones-espurias/index_files/figure-html/libs-and-data-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Como la relación entre <img src="https://latex.codecogs.com/png.latex?x_%7Breal%7D"> y <img src="https://latex.codecogs.com/png.latex?x_%7Bspur%7D"> es alta, <img src="https://latex.codecogs.com/png.latex?x_%7Bspur%7D"> parece tener una relación con <img src="https://latex.codecogs.com/png.latex?y">.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>(df) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb2-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(x_spur, y)) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb2-3">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_smooth</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(x_spur, y), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">method =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"lm"</span>)</span></code></pre></div></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-01-24-mas-relaciones-espurias/index_files/figure-html/plot-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Pero <img src="https://latex.codecogs.com/png.latex?y"> por definición depende únicamente de <img src="https://latex.codecogs.com/png.latex?x_%7Breal%7D">, por lo que la relación entre <img src="https://latex.codecogs.com/png.latex?x_%7Bspur%7D"> y <img src="https://latex.codecogs.com/png.latex?y"> es espuria.</p>
-</section>
-<section id="regresiones" class="level2">
-<h2 class="anchored" data-anchor-id="regresiones">Regresiones</h2>
-<p>La regresión que se ajusta según la definición sería:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">fit_real <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">quap</span>(</span>
-<span id="cb3-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">alist</span>(</span>
-<span id="cb3-3">    y <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>(mu, sigma), </span>
-<span id="cb3-4">    mu <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> a <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> b <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> x_real, </span>
-<span id="cb3-5">    a <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.2</span>), </span>
-<span id="cb3-6">    b <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>),</span>
-<span id="cb3-7">    sigma <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dexp</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb3-8">  ), </span>
-<span id="cb3-9">  <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> df</span>
-<span id="cb3-10">)</span>
-<span id="cb3-11"></span>
-<span id="cb3-12"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">precis</span>(fit_real)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>           mean         sd        5.5%     94.5%
-a     0.1200136 0.08733753 -0.01956863 0.2595958
-b     1.0571869 0.09017250  0.91307384 1.2013000
-sigma 0.9596754 0.06750045  0.85179669 1.0675542</code></pre>
-</div>
-</div>
-<p>Si intentas ajustar una regresión que incluya a la variable espuria, el modelo te la rechazará.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">fit <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">quap</span>(</span>
-<span id="cb5-2">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">alist</span>(</span>
-<span id="cb5-3">        y <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>(mu, sigma), </span>
-<span id="cb5-4">        mu <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> a <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> b_spur <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> x_spur <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> b_real <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> x_real, </span>
-<span id="cb5-5">        a <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.2</span>),</span>
-<span id="cb5-6">        b_spur <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>),</span>
-<span id="cb5-7">        b_real <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>),</span>
-<span id="cb5-8">        sigma <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dexp</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb5-9">    ), </span>
-<span id="cb5-10">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> df</span>
-<span id="cb5-11">)</span>
-<span id="cb5-12"></span>
-<span id="cb5-13"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">precis</span>(fit)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>              mean         sd        5.5%     94.5%
-a       0.11982176 0.08719034 -0.01952525 0.2591688
-b_spur -0.03306708 0.09448089 -0.18406579 0.1179316
-b_real  1.09219751 0.13449093  0.87725503 1.3071400
-sigma   0.95766044 0.06749719  0.84978689 1.0655340</code></pre>
-</div>
-</div>
-<p>Si no quieres hacerlo bayesiano:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">fit_lm <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lm</span>(y <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> x_spur <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> x_real, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> df)</span>
-<span id="cb7-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summary</span>(fit_lm)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-lm(formula = y ~ x_spur + x_real, data = df)
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--2.26639 -0.58538 -0.03526  0.66746  2.29240 
-
-Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  0.14138    0.09862   1.434    0.155    
-x_spur      -0.07976    0.09989  -0.798    0.427    
-x_real       1.17575    0.14336   8.201    1e-12 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.9749 on 97 degrees of freedom
-Multiple R-squared:  0.5856,    Adjusted R-squared:  0.577 
-F-statistic: 68.53 on 2 and 97 DF,  p-value: &lt; 2.2e-16</code></pre>
-</div>
-</div>
-<p>Otra opción sería que sí usaras la variable espuria pero no la real:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1">fit_spur <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">quap</span>(</span>
-<span id="cb9-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">alist</span>(</span>
-<span id="cb9-3">    y <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>(mu, sigma), </span>
-<span id="cb9-4">    mu <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> a <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> b <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> x_spur, </span>
-<span id="cb9-5">    a <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.2</span>),</span>
-<span id="cb9-6">    b <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>),</span>
-<span id="cb9-7">    sigma <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dexp</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb9-8">  ), </span>
-<span id="cb9-9">  <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> df</span>
-<span id="cb9-10">)</span>
-<span id="cb9-11"></span>
-<span id="cb9-12"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">precis</span>(fit_spur)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>           mean         sd        5.5%     94.5%
-a     0.1670335 0.10619925 -0.00269343 0.3367604
-b     0.5325380 0.08162221  0.40208999 0.6629861
-sigma 1.2435069 0.08730279  1.10398016 1.3830336</code></pre>
-</div>
-</div>
-
-
-</section>
-
- ]]></description>
-  <category>causalidad</category>
-  <category>regresión</category>
-  <category>r</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2025-01-24-mas-relaciones-espurias/</guid>
-  <pubDate>Fri, 24 Jan 2025 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
