@@ -44,6 +44,11 @@ def digit_table(x):
     # Share of each leading digit, in percent
     counts = np.bincount(first_digit(x), minlength=10)[1:]
     return 100 * counts / counts.sum()
+```
+
+```{python}
+#| label: benford
+benford = 100 * np.log10(1 + 1 / digits)
 
 def max_gap(table):
     # Largest absolute difference from Benford, in percentage points
@@ -51,11 +56,7 @@ def max_gap(table):
 
 def show(name, table):
     print(f"{name:>10}: " + " ".join(f"{v:5.1f}" for v in table) + f"   max gap {max_gap(table):4.1f} pp")
-```
 
-```{python}
-#| label: benford
-benford = 100 * np.log10(1 + 1 / digits)
 print("digit    : " + " ".join(f"{d:5d}" for d in digits))
 show("Benford", benford)
 ```
@@ -164,6 +165,6 @@ Say your column mixes many sources with different scales: invoices from many cli
 
 If your column comes from one narrow source, it will not follow the law, and nobody cheated. My first lognormal, with 500 perfectly honest amounts, was 26 points away.
 
-There is a second trap, and it points the other way. With enough rows, a chi-square test will reject Benford for almost any real table, because it detects tiny gaps. The same thing happens with a coin that lands heads 51% of the time: [given enough flips the test rejects it (in Spanish)](../2026-10-08-un-51-por-ciento-de-caras-y-mil-lanzamientos/index.qmd). A million invoices and a p-value of 0.0001 tell you the gap is not exactly zero. They don't tell you it matters.
+There is a second trap, and it points the other way. With enough rows, a chi-square test will reject Benford for almost any real table, because it detects tiny gaps. The same thing happens with a coin that lands heads 51% of the time: [given enough flips the test rejects it (in Spanish)](../2026-10-08-un-51-por-ciento-de-caras-y-mil-lanzamientos/index.qmd). A million invoices and a p-value of 0.0001 tell you the gap is not exactly zero. How big it is, you have to measure yourself.
 
 So the next time you check a table against Benford, ask first where the amounts come from. If they come from many places, the law is the null you want. Then look at **how big the gap is, in points,** before you look at the p-value.
