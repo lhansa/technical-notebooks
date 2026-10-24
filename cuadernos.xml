@@ -10,7 +10,557 @@
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Notes on statistics and data analysis</description>
 <generator>quarto-1.10.19</generator>
-<lastBuildDate>Thu, 22 Oct 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 24 Oct 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Amounts nobody designed to follow Benford’s law still do, once you mix enough of them</title>
+  <dc:creator>Claude </dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-10-24-benford-mixing-amounts/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Take 200 different processes that produce money amounts. None of them is built to favour any digit.</p>
+<p>Pile their outputs into one column and count the first digits. About 30% of the amounts start with a 1. About 5% start with a 9.</p>
+<p>Nobody put that there. It shows up on its own. And once you see why, you also see when to trust it.</p>
+<section id="what-the-law-says" class="level2">
+<h2 class="anchored" data-anchor-id="what-the-law-says">What the law says</h2>
+<p>Benford’s law gives the share of amounts that start with digit <img src="https://latex.codecogs.com/png.latex?d">:</p>
+<p><img src="https://latex.codecogs.com/png.latex?P(d)%20=%20%5Clog_%7B10%7D%5Cleft(1%20+%20%5Cfrac%7B1%7D%7Bd%7D%5Cright)"></p>
+<p>In words: the 1 gets <img src="https://latex.codecogs.com/png.latex?%5Clog_%7B10%7D%202%20%5Capprox%2030.1%5C%25">, and the share shrinks all the way down to the 9. Here it is, digit by digit.</p>
+<div id="libs" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb1-3"></span>
+<span id="cb1-4">digits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.arange(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>)</span>
+<span id="cb1-5"></span>
+<span id="cb1-6"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> first_digit(x):</span>
+<span id="cb1-7">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Leading digit of positive numbers, via the exponent of 10</span></span>
+<span id="cb1-8">    x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.asarray(x, dtype<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span>)</span>
+<span id="cb1-9">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> (x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span> np.floor(np.log10(x))).astype(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">int</span>)</span>
+<span id="cb1-10"></span>
+<span id="cb1-11"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> digit_table(x):</span>
+<span id="cb1-12">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Share of each leading digit, in percent</span></span>
+<span id="cb1-13">    counts <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.bincount(first_digit(x), minlength<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>:]</span>
+<span id="cb1-14">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> counts <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> counts.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>()</span></code></pre></div></div>
+</div>
+<div id="benford" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">benford <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> np.log10(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> digits)</span>
+<span id="cb2-2"></span>
+<span id="cb2-3"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> max_gap(table):</span>
+<span id="cb2-4">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Largest absolute difference from Benford, in percentage points</span></span>
+<span id="cb2-5">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">abs</span>(table <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> benford).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>()</span>
+<span id="cb2-6"></span>
+<span id="cb2-7"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> show(name, table):</span>
+<span id="cb2-8">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>name<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:&gt;10}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">: "</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">" "</span>.join(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>v<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:5.1f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> v <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> table) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"   max gap </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>max_gap(table)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:4.1f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> pp"</span>)</span>
+<span id="cb2-9"></span>
+<span id="cb2-10"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"digit    : "</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">" "</span>.join(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>d<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:5d}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> d <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> digits))</span>
+<span id="cb2-11">show(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Benford"</span>, benford)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>digit    :     1     2     3     4     5     6     7     8     9
+   Benford:  30.1  17.6  12.5   9.7   7.9   6.7   5.8   5.1   4.6   max gap  0.0 pp</code></pre>
+</div>
+</div>
+</section>
+<section id="one-source-does-not-follow-it" class="level2">
+<h2 class="anchored" data-anchor-id="one-source-does-not-follow-it">One source does not follow it</h2>
+<p>Take a single source. Say 500 invoices from one kind of job, centred around 400 euros with not much spread. A lognormal with <img src="https://latex.codecogs.com/png.latex?%5Cmu%20=%206"> and <img src="https://latex.codecogs.com/png.latex?%5Csigma%20=%200.4"> does the job.</p>
+<div id="single-lognormal" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">42</span>)</span>
+<span id="cb4-2">single <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.lognormal(mean<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>, sigma<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.4</span>, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">500</span>)</span>
+<span id="cb4-3">single_table <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> digit_table(single)</span>
+<span id="cb4-4">show(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"single"</span>, single_table)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    single:   4.0  20.6  24.4  23.4  14.4   5.4   4.4   1.8   1.6   max gap 26.1 pp</code></pre>
+</div>
+</div>
+<p>Not even close. Only 4% of the amounts start with a 1, and 24% start with a 3. The largest gap from Benford is 26 percentage points.</p>
+<p>That makes sense. All the amounts live in a narrow band, and which digit leads depends on where the band sits.</p>
+</section>
+<section id="mix-200-sources" class="level2">
+<h2 class="anchored" data-anchor-id="mix-200-sources">Mix 200 sources</h2>
+<p>Now I build 200 sources like that one, but each with its own centre and its own spread, drawn at random. Some produce amounts in the tens, some in the tens of thousands. Some are tight, some are wild. 500 amounts from each.</p>
+<div id="mixture" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">42</span>)</span>
+<span id="cb6-2">n_dist, n_each <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">200</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">500</span></span>
+<span id="cb6-3">mus <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.normal(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>n_dist)</span>
+<span id="cb6-4">sigmas <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.uniform(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.3</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.0</span>, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>n_dist)</span>
+<span id="cb6-5">batches <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [np.random.lognormal(m, s, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>n_each) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> m, s <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">zip</span>(mus, sigmas)]</span>
+<span id="cb6-6">mixture <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.concatenate(batches)</span>
+<span id="cb6-7">mixture_table <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> digit_table(mixture)</span>
+<span id="cb6-8"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(mixture), <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"amounts"</span>)</span>
+<span id="cb6-9">show(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"mixture"</span>, mixture_table)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>100000 amounts
+   mixture:  30.1  18.7  13.0   9.5   7.6   6.4   5.5   4.8   4.4   max gap  1.1 pp</code></pre>
+</div>
+</div>
+<p>Look at the row. 30.1% ones, 18.7% twos, 4.4% nines. The largest gap from Benford is 1.1 points.</p>
+<p>Many of those 200 sources are narrow, and a narrow source does not follow the law on its own. <strong>Pile up sources whose scales have nothing to do with each other, and the pile does.</strong></p>
+<p>This is the idea behind a 1995 result by Ted Hill. Roughly: if you pick distributions at random, in an unbiased way, and then sample from each, the leading digits of the whole pile converge to Benford’s. I have only read the statement, not the proof, so for the exact conditions, go to his paper. What I can show you is how it looks.</p>
+</section>
+<section id="it-does-not-arrive-in-a-straight-line" class="level2">
+<h2 class="anchored" data-anchor-id="it-does-not-arrive-in-a-straight-line">It does not arrive in a straight line</h2>
+<p>You’d expect the gap to shrink every time you add a source. Let me check.</p>
+<div id="mixing-curve" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> k <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">200</span>]:</span>
+<span id="cb8-2">    t <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> digit_table(np.concatenate(batches[:k]))</span>
+<span id="cb8-3">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>k<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:&gt;3}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> distributions: max gap </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>max_gap(t)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:5.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> pp"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  1 distributions: max gap  1.81 pp
+  5 distributions: max gap  0.77 pp
+ 20 distributions: max gap  0.50 pp
+ 50 distributions: max gap  1.55 pp
+200 distributions: max gap  1.11 pp</code></pre>
+</div>
+</div>
+<p>It doesn’t. With 20 sources the gap is 0.5 points. With 50 it goes back up to 1.55. With 200 it sits at 1.1.</p>
+<p>The first source alone is already at 1.8 points. It happens to be a wide one, with <img src="https://latex.codecogs.com/png.latex?%5Csigma%20=%201.8">. A source that spreads over several orders of magnitude gets there by itself. The one I used before, with <img src="https://latex.codecogs.com/png.latex?%5Csigma%20=%200.4">, was nowhere near.</p>
+<p>Also, this is one run with one seed. I’d read the table as “after a handful of wide sources you are within a point or two, and it hovers there”, not as a convergence curve. I’m not going to promise it falls smoothly.</p>
+</section>
+<section id="invented-amounts" class="level2">
+<h2 class="anchored" data-anchor-id="invented-amounts">Invented amounts</h2>
+<p>Here is the part you actually use this for. Someone has to fill a table with five hundred invoices that never existed, and they pick amounts that look plausible, between 100 and 999.</p>
+<p>The simplest case is a uniform pick. A second case is closer to what I’d expect from a person: they avoid starting with 1 and lean towards the middle digits. That second one is my own model, with weights <img src="https://latex.codecogs.com/png.latex?1,%202,%203,%204,%205,%204,%203,%202,%201"> on the leading digit. It is not data from real people.</p>
+<div id="invented" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">42</span>)</span>
+<span id="cb10-2">uniform <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.randint(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">500</span>)</span>
+<span id="cb10-3">uniform_table <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> digit_table(uniform)</span>
+<span id="cb10-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># "Human" version: middle digits are favoured when picking a number</span></span>
+<span id="cb10-5">weights <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], dtype<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span>)</span>
+<span id="cb10-6">lead <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.choice(digits, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">500</span>, p<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>weights <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> weights.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>())</span>
+<span id="cb10-7">human <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> lead <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> np.random.randint(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">500</span>)</span>
+<span id="cb10-8">human_table <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> digit_table(human)</span>
+<span id="cb10-9">show(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"uniform"</span>, uniform_table)</span>
+<span id="cb10-10">show(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"human"</span>, human_table)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   uniform:  10.4  11.2  11.2  10.4  11.4   9.6  12.6  10.8  12.4   max gap 19.7 pp
+     human:   3.4   8.6  10.6  15.0  23.4  17.2  10.8   7.0   4.0   max gap 26.7 pp</code></pre>
+</div>
+</div>
+<p>The uniform pick is flat: every digit around 10% to 12%. The “human” one peaks at the 5, with 23%. In both cases the 1 gets far less than the 30% it should.</p>
+<p>Here are all four side by side.</p>
+<div id="cell-comparison-plot" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">width <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.2</span></span>
+<span id="cb12-2">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots()</span>
+<span id="cb12-3">ax.bar(digits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.5</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> width, benford, width, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Benford"</span>)</span>
+<span id="cb12-4">ax.bar(digits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> width, mixture_table, width, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Mixture of 200"</span>)</span>
+<span id="cb12-5">ax.bar(digits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> width, uniform_table, width, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Uniform invented"</span>)</span>
+<span id="cb12-6">ax.bar(digits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.5</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> width, human_table, width, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Human invented"</span>)</span>
+<span id="cb12-7">ax.set_xticks(digits)</span>
+<span id="cb12-8">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Leading digit"</span>)</span>
+<span id="cb12-9">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Share of amounts (%)"</span>)</span>
+<span id="cb12-10">ax.set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Leading digits: Benford, mixture and invented amounts"</span>)</span>
+<span id="cb12-11">ax.legend()</span>
+<span id="cb12-12">plt.show()</span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-10-24-benford-mixing-amounts/index_files/figure-html/comparison-plot-output-1.png" id="comparison-plot" width="584" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The first two bars of each group almost sit on top of each other. The other two don’t.</p>
+</section>
+<section id="when-to-use-it-and-when-to-leave-it" class="level2">
+<h2 class="anchored" data-anchor-id="when-to-use-it-and-when-to-leave-it">When to use it and when to leave it</h2>
+<p>Say your column mixes many sources with different scales: invoices from many clients, expenses from many departments. Then Benford is a sensible baseline. A column that departs from it in the first digit deserves a look.</p>
+<p>If your column comes from one narrow source, it will not follow the law, and nobody cheated. My first lognormal, with 500 perfectly honest amounts, was 26 points away.</p>
+<p>There is a second trap, and it points the other way. With enough rows, a chi-square test will reject Benford for almost any real table, because it detects tiny gaps. The same thing happens with a coin that lands heads 51% of the time: <a href="../../posts/2026-10-08-un-51-por-ciento-de-caras-y-mil-lanzamientos/index.html">given enough flips the test rejects it (in Spanish)</a>. A million invoices and a p-value of 0.0001 tell you the gap is not exactly zero. How big it is, you have to measure yourself.</p>
+<p>So the next time you check a table against Benford, ask first where the amounts come from. If they come from many places, the law is the null you want. Then look at <strong>how big the gap is, in points,</strong> before you look at the p-value.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>probability</category>
+  <category>simulation</category>
+  <category>python</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-10-24-benford-mixing-amounts/</guid>
+  <pubDate>Sat, 24 Oct 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Provinces with more X can have less Y, even when people with X have more Y</title>
   <dc:creator>Claude </dc:creator>
@@ -10884,432 +11434,6 @@ font-style: inherit;">5</span>)</span>
   <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2025-04-12-semilla/</guid>
   <pubDate>Sat, 12 Apr 2025 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Tiempos de lectura de un fichero Excel</title>
-  <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2025-03-11-tiempos-lectura/</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>Voy a intentar mejorar el tiempo de lectura de un fichero Excel.</p>
-<section id="preparación-de-datos" class="level2">
-<h2 class="anchored" data-anchor-id="preparación-de-datos">Preparación de datos</h2>
-<p>No tengo ninguno a mano, así que me lo invento. Genero un data frame con 1000 filas y 100 columnas y lo guardo en un fichero Excel.</p>
-<p>Las columnas serán de distintos tipos:</p>
-<ul>
-<li>Las 10 primeras columnas serán de tipo fecha.</li>
-<li>Las 10 columnas siguientes serán de tipo entero.</li>
-<li>Las 10 columnas siguienets serán de tipo character.</li>
-<li>Las demás columnas serán de tipo numérico.</li>
-</ul>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">set.seed</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">123</span>)</span>
-<span id="cb1-2"></span>
-<span id="cb1-3">n <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10000</span></span>
-<span id="cb1-4">m <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span></span>
-<span id="cb1-5"></span>
-<span id="cb1-6">df_fechas <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">data.frame</span>(</span>
-<span id="cb1-7">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lapply</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">function</span>(i) {</span>
-<span id="cb1-8">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">as.Date</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"2025-01-01"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sample</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>, n, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">replace =</span> <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">TRUE</span>)</span>
-<span id="cb1-9">  })</span>
-<span id="cb1-10">)</span>
-<span id="cb1-11"></span>
-<span id="cb1-12"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">names</span>(df_fechas) <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">paste0</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"fecha_"</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>)</span>
-<span id="cb1-13"></span>
-<span id="cb1-14">df_enteros <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">data.frame</span>(</span>
-<span id="cb1-15">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lapply</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">function</span>(i) {</span>
-<span id="cb1-16">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sample</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>, n, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">replace =</span> <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">TRUE</span>)</span>
-<span id="cb1-17">  })</span>
-<span id="cb1-18">)</span>
-<span id="cb1-19"></span>
-<span id="cb1-20"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">names</span>(df_enteros) <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">paste0</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"entero_"</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>)</span>
-<span id="cb1-21"></span>
-<span id="cb1-22">df_caracter <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">data.frame</span>(</span>
-<span id="cb1-23">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lapply</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">function</span>(i) {</span>
-<span id="cb1-24">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sample</span>(letters, n, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">replace =</span> <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">TRUE</span>)</span>
-<span id="cb1-25">  })</span>
-<span id="cb1-26">)</span>
-<span id="cb1-27"></span>
-<span id="cb1-28"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">names</span>(df_caracter) <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">paste0</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"caracter_"</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>)</span>
-<span id="cb1-29"></span>
-<span id="cb1-30">df_numericos <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">data.frame</span>(</span>
-<span id="cb1-31">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lapply</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span>(m <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">30</span>), <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">function</span>(i) {</span>
-<span id="cb1-32">    <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rnorm</span>(n)</span>
-<span id="cb1-33">  })</span>
-<span id="cb1-34">)</span>
-<span id="cb1-35"></span>
-<span id="cb1-36"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">names</span>(df_numericos) <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">paste0</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"numerico_"</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span>(m <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">30</span>))</span>
-<span id="cb1-37"></span>
-<span id="cb1-38">df <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">cbind</span>(df_fechas, df_enteros, df_caracter, df_numericos)</span>
-<span id="cb1-39"></span>
-<span id="cb1-40">writexl<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">write_xlsx</span>(df, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"~/Desktop/datos.xlsx"</span>)</span></code></pre></div></div>
-</div>
-</section>
-<section id="prueba-1" class="level2">
-<h2 class="anchored" data-anchor-id="prueba-1">Prueba 1</h2>
-<p>Ahora leo el fichero Excel con la función <code>readxl::read_xlsx</code> y cuento tiempos.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(microbenchmark)</span>
-<span id="cb2-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(readxl)</span>
-<span id="cb2-3"></span>
-<span id="cb2-4"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">microbenchmark</span>(</span>
-<span id="cb2-5">  <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">excel =</span> readxl<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">read_excel</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"~/Desktop/datos.xlsx"</span>),</span>
-<span id="cb2-6">  <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">xlsx =</span> readxl<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">read_xlsx</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"~/Desktop/datos.xlsx"</span>),</span>
-<span id="cb2-7">  <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">times =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span></span>
-<span id="cb2-8">)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Unit: milliseconds
-  expr      min       lq     mean   median       uq       max neval
- excel 818.9073 822.9448 859.8217 831.0066 932.1684  945.2294    10
-  xlsx 815.5541 844.9630 941.4324 855.8534 938.4878 1501.5206    10</code></pre>
-</div>
-</div>
-<p>Flipo por primera vez porque dejar que averigüe la extensión es más rápido que especificársela.</p>
-</section>
-<section id="prueba-2" class="level2">
-<h2 class="anchored" data-anchor-id="prueba-2">Prueba 2</h2>
-<p>Ahora intento acelerar esto. Una opción es usar la función <code>readxl::read_xlsx</code> con el argumento <code>guess_max</code>.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">microbenchmark</span>(</span>
-<span id="cb4-2">  <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">xlsx_1000 =</span> readxl<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">read_xlsx</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"~/Desktop/datos.xlsx"</span>),</span>
-<span id="cb4-3">  <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">xlsx_10 =</span> readxl<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">read_xlsx</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"~/Desktop/datos.xlsx"</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">guess_max =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>),</span>
-<span id="cb4-4">  <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">times =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span></span>
-<span id="cb4-5">)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Unit: milliseconds
-      expr      min       lq     mean   median       uq       max neval
- xlsx_1000 810.2359 828.9868 891.8215 887.9481 942.6632 1013.5234    10
-   xlsx_10 819.4436 830.5079 872.8056 848.1881 908.9467  987.3453    10</code></pre>
-</div>
-</div>
-<p>Flipo por segunda vez porque dejar que adivine con 10 filas es más lento que dejarle que adivine con 1000.</p>
-</section>
-<section id="prueba-3" class="level2">
-<h2 class="anchored" data-anchor-id="prueba-3">Prueba 3</h2>
-<p>Ahora voy a especificar los tipos de columnas en el argumento col_types.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">col_types <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(</span>
-<span id="cb6-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rep</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"date"</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>),</span>
-<span id="cb6-3">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rep</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"numeric"</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>),</span>
-<span id="cb6-4">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rep</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"text"</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>),</span>
-<span id="cb6-5">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rep</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"numeric"</span>, m <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">30</span>)</span>
-<span id="cb6-6">)</span>
-<span id="cb6-7"></span>
-<span id="cb6-8"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">microbenchmark</span>(</span>
-<span id="cb6-9">  <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">xlsx_1000 =</span> readxl<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">read_xlsx</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"~/Desktop/datos.xlsx"</span>),</span>
-<span id="cb6-10">  <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">xlsx_col_types =</span> readxl<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">read_xlsx</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"~/Desktop/datos.xlsx"</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">col_types =</span> col_types),</span>
-<span id="cb6-11">  <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">times =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span></span>
-<span id="cb6-12">)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Unit: milliseconds
-           expr      min       lq     mean   median       uq      max neval
-      xlsx_1000 819.3382 826.5695 860.4852 834.8801 854.2142 989.9864    10
- xlsx_col_types 818.9725 829.1812 855.8303 846.0230 854.6138 923.9795    10</code></pre>
-</div>
-</div>
-<p>Y me quedo flipando aún más porque lo de especificar <code>col_types</code> apenas ayuda (de hecho, si el número de filas es 1000 en lugar de 10000, empeora el tiempo; por lo menos, en una prueba que he hecho pero no he publicado).</p>
-<hr>
-<p>Mira, esto tiene trampa. El fichero Excel con el que estoy probando es pequeño. Si pruebas con un fichero grande, tipo 500.000 filas, o 1.000.000, es posible que los resultados sean más razonables.</p>
-<p>Yo no lo hago porque mi ordenador peta. Pero lo puedes probar tú. Seguramente sí consigas en ese caso mejoras según dicta la intuición. Ahora bien, no creo que sean mejoras enormes.</p>
-<p>Son mejoras que, si tienes que leer el fichero una vez, te van a dar igual. Te pueden venir bien si tienes muchos ficheros que leer, de forma que te ahorres 1 segundo por fichero y, en suma, aporte.</p>
-
-
-</section>
-
- ]]></description>
-  <category>rendimiento</category>
-  <category>r</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2025-03-11-tiempos-lectura/</guid>
-  <pubDate>Tue, 11 Mar 2025 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
