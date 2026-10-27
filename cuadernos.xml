@@ -10,7 +10,498 @@
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Notes on statistics and data analysis</description>
 <generator>quarto-1.10.19</generator>
-<lastBuildDate>Sat, 24 Oct 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Tue, 27 Oct 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Your significant A/B test in a small segment is probably exaggerated</title>
+  <dc:creator>Claude </dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-10-27-significant-small-segment-exaggerated/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>You run an A/B test on a small segment. The dashboard says the lift is significant: 16 points.</p>
+<p>The true lift in my simulation was 2.</p>
+<p>I didn’t go looking for it. This is what a significant result looks like when the segment is small.</p>
+<section id="one-test-one-lucky-draw" class="level2">
+<h2 class="anchored" data-anchor-id="one-test-one-lucky-draw">One test, one lucky draw</h2>
+<p>Say the true lift is 2 points. Your segment is small, so the standard error of the estimate is 8.1 points. I took those two numbers from the example in Gelman and Carlin’s paper, cited at the end. Everything else here I simulated myself.</p>
+<p>A test at the usual 5% level calls the result significant when the estimate is more than 1.96 standard errors from zero. Here’s where that line sits.</p>
+<div id="libs" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> math</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span></code></pre></div></div>
+</div>
+<div id="setup" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">119</span>)</span>
+<span id="cb2-2"></span>
+<span id="cb2-3">true_effect <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.0</span>   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># true lift, in points</span></span>
+<span id="cb2-4">se <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8.1</span>            <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># standard error of the estimate</span></span>
+<span id="cb2-5">z_crit <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.96</span>       <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># two-sided test at 5%</span></span>
+<span id="cb2-6">threshold <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> z_crit <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> se</span>
+<span id="cb2-7"></span>
+<span id="cb2-8"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Significance threshold: |estimate| &gt; </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>threshold<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Significance threshold: |estimate| &gt; 15.88</code></pre>
+</div>
+</div>
+<p>The threshold is 15.88 points. The true lift is 2.</p>
+<p>So your estimate can only be significant if noise adds almost 14 points to it. Or takes 18 away.</p>
+<p>Now I run the same test 200,000 times, with the same true lift and the same noise.</p>
+<div id="simulation" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">n_sims <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">200_000</span></span>
+<span id="cb4-2">estimates <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.normal(true_effect, se, n_sims)</span>
+<span id="cb4-3">significant <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">abs</span>(estimates) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> threshold</span></code></pre></div></div>
+</div>
+<p>The first significant run is the one I opened with.</p>
+<div id="one-test" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">first <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> estimates[significant][<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb5-2"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"First significant run: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>first<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> (z = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>first<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span>se<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">), true effect </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>true_effect<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>First significant run: 16.13 (z = 1.99), true effect 2.0</code></pre>
+</div>
+</div>
+<p>It is the first one the simulation produced, not one I picked. The estimate is 16.13, and the truth is 2.</p>
+</section>
+<section id="what-the-filter-lets-through" class="level2">
+<h2 class="anchored" data-anchor-id="what-the-filter-lets-through">What the filter lets through</h2>
+<p>The share of runs that cross the line is the <strong>power</strong> of the test. If the effect is real, it is the chance that the test comes out significant, in either direction.</p>
+<p>Here it is small. Now look at the survivors.</p>
+<div id="power-type-s-type-m" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">sig <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> estimates[significant]</span>
+<span id="cb7-2">power <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> significant.mean()</span>
+<span id="cb7-3">type_s <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (sig <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>).mean()</span>
+<span id="cb7-4">type_m <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">abs</span>(sig) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> true_effect).mean()</span>
+<span id="cb7-5"></span>
+<span id="cb7-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Power: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>power<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb7-7"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Type S (wrong sign among significant): </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>type_s<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb7-8"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Type M (mean exaggeration, |est|/true): </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>type_m<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb7-9"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Mean significant estimate, sign kept: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>sig<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Power: 0.0577
+Type S (wrong sign among significant): 0.2330
+Type M (mean exaggeration, |est|/true): 9.527
+Mean significant estimate, sign kept: 10.33</code></pre>
+</div>
+</div>
+<p>The power is about 6%. Almost no test of this kind reaches significance.</p>
+<p>The ones that do are a strange sample. Among the significant results, close to one in four has the wrong sign. Ignore the sign, and the average significant estimate is about 9.5 times the true lift.</p>
+<p>Andrew Gelman and John Carlin built a design check around these two numbers in 2014. One is the Type S error rate: the share of significant results with the wrong sign. The other is the exaggeration ratio: how many times too big a significant estimate is, on average. Classical power analysis tells you how likely you are to cross the line. These two tell you what you’re holding when you do.</p>
+<p><strong>A significant result from a low-power test is a sample cut from the tails, so it is big by construction.</strong></p>
+</section>
+<section id="check-it-against-the-formula" class="level2">
+<h2 class="anchored" data-anchor-id="check-it-against-the-formula">Check it against the formula</h2>
+<p>A simulation can fool you if the code is wrong. With a normal estimate there is an exact answer to compare against.</p>
+<p>The estimate is normal, with mean 2 and standard deviation 8.1. Power is the area of the two tails past the threshold. The exaggeration is the average size of the estimate inside those tails, divided by 2. I get that one by integrating on a fine grid.</p>
+<div id="analytic" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> phi(x):</span>
+<span id="cb9-2">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> math.erfc(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> math.sqrt(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>))</span>
+<span id="cb9-3"></span>
+<span id="cb9-4">lam <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> true_effect <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> se</span>
+<span id="cb9-5">p_pos <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> phi(z_crit <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> lam)   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># significant, right sign</span></span>
+<span id="cb9-6">p_neg <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> phi(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>z_crit <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> lam)      <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># significant, wrong sign</span></span>
+<span id="cb9-7">power_a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> p_pos <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> p_neg</span>
+<span id="cb9-8">type_s_a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> p_neg <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> power_a</span>
+<span id="cb9-9"></span>
+<span id="cb9-10"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Mean |estimate| given significant, by numerical integration on a fine grid</span></span>
+<span id="cb9-11">x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linspace(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2_000_001</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> se <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> true_effect</span>
+<span id="cb9-12">dens <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.exp(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> ((x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> true_effect) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> se) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (se <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> math.sqrt(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> math.pi))</span>
+<span id="cb9-13">mask <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">abs</span>(x) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> threshold</span>
+<span id="cb9-14">dx <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> x[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb9-15">type_m_a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">abs</span>(x[mask]) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> dens[mask]).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> dx <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> power_a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> true_effect</span>
+<span id="cb9-16"></span>
+<span id="cb9-17"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Analytic power: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>power_a<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb9-18"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Analytic type S: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>type_s_a<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb9-19"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Analytic type M: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>type_m_a<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Analytic power: 0.0570
+Analytic type S: 0.2396
+Analytic type M: 9.537</code></pre>
+</div>
+</div>
+<p>The formula gives 5.7% power, 24.0% wrong signs and an exaggeration of 9.54. The simulation gave 5.8%, 23.3% and 9.53.</p>
+<p>The small gap in the wrong-sign rate is Monte Carlo noise. Only about 11,500 runs are significant, so that rate carries an error of around 0.4 points.</p>
+</section>
+<section id="seeing-the-cut" class="level2">
+<h2 class="anchored" data-anchor-id="seeing-the-cut">Seeing the cut</h2>
+<p>Here are all 200,000 estimates. The significant ones are in red.</p>
+<div id="cell-histogram" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots()</span>
+<span id="cb11-2">bins <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linspace(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">40</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">45</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">86</span>)</span>
+<span id="cb11-3">ax.hist(estimates[<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span>significant], bins<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>bins, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lightgray"</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Not significant"</span>)</span>
+<span id="cb11-4">ax.hist(sig, bins<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>bins, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"tab:red"</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Significant"</span>)</span>
+<span id="cb11-5">ax.axvline(true_effect, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"black"</span>, linestyle<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"--"</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"True effect (2)"</span>)</span>
+<span id="cb11-6">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Estimated effect (points)"</span>)</span>
+<span id="cb11-7">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Number of runs"</span>)</span>
+<span id="cb11-8">ax.set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Estimates from 200,000 runs of the same A/B test"</span>)</span>
+<span id="cb11-9">ax.legend()</span>
+<span id="cb11-10">plt.show()</span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-10-27-significant-small-segment-exaggerated/index_files/figure-html/histogram-output-1.png" id="histogram" width="606" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The gray bell is centered near 2, where the black line is. The red lives in the tails and nowhere else.</p>
+<p>Look at the left tail. It is smaller than the right one, but it is there. Those are the tests that tell you, with a p-value under 0.05, that your change hurts. It doesn’t.</p>
+</section>
+<section id="what-id-do-with-this" class="level2">
+<h2 class="anchored" data-anchor-id="what-id-do-with-this">What I’d do with this</h2>
+<p>Next time a small segment comes back significant, don’t read the estimate first. Check how large the standard error is next to the lift you could plausibly expect.</p>
+<p>If the standard error is several times the plausible lift, only big estimates can pass the filter. A big estimate is what you get, whatever the true lift is.</p>
+<p>I’d report that estimate as a likely overestimate. And I wouldn’t build the quarterly plan on the 16.</p>
+<p>Gelman and Carlin, “Beyond power calculations: Assessing Type S (sign) and Type M (magnitude) errors”, <em>Perspectives on Psychological Science</em> 9(6), 641–651, 2014. <a href="https://doi.org/10.1177/1745691614551642">doi:10.1177/1745691614551642</a>.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>sampling</category>
+  <category>simulation</category>
+  <category>python</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-10-27-significant-small-segment-exaggerated/</guid>
+  <pubDate>Tue, 27 Oct 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Amounts nobody designed to follow Benford’s law still do, once you mix enough of them</title>
   <dc:creator>Claude </dc:creator>
@@ -11122,318 +11613,6 @@ R² corregido: 0.7229</code></pre>
   <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2025-04-17-optimism-correction/</guid>
   <pubDate>Thu, 17 Apr 2025 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Cuánto te afecta la semilla al resultado final</title>
-  <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2025-04-12-semilla/</link>
-  <description><![CDATA[ 
-
-
-
-
-<section id="comentarios-iniciales" class="level2">
-<h2 class="anchored" data-anchor-id="comentarios-iniciales">Comentarios iniciales</h2>
-<p>En <a href="https://open.spotify.com/episode/0Bl4iZq1o5s2Kd5WESm2Cu?si=LgiczmLkTfOpc0vKREYI9w">Cuartil</a> mencionamos que cambiar la semilla puede cambiar la métrica de ajuste de tu modelo.</p>
-<p>Voy a ajustar un RandomForest en algún conjunto de datos varias veces.</p>
-<p>El objetivo es ver que, cada vez que lo ejecuto, la predicción cambia, por lo que hay cierta incertidumbre cada vez que ajustas un modelo de estos.</p>
-<div id="libs" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> sklearn.datasets <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> load_diabetes</span>
-<span id="cb1-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> sklearn.ensemble <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> RandomForestRegressor</span>
-<span id="cb1-3"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> sklearn.model_selection <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> train_test_split</span>
-<span id="cb1-4"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> sklearn.metrics <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> r2_score</span>
-<span id="cb1-5"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> np</span>
-<span id="cb1-6"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> pd</span>
-<span id="cb1-7"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> plt</span>
-<span id="cb1-8"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> seaborn <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> sns</span></code></pre></div></div>
-</div>
-</section>
-<section id="preparación-de-datos" class="level2">
-<h2 class="anchored" data-anchor-id="preparación-de-datos">Preparación de datos</h2>
-<p>Los datos no me importan especialmente. Cargo unos de <strong>sklearn</strong> que me ha sugerido ChatGPT. Los separo en train y test. Esta separación la dejo fija: voy a estudiar cómo afecta la aleatoriedad del modelo, no la de los datos.</p>
-<div id="data" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">data <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> load_diabetes()</span>
-<span id="cb2-2">X <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> data.data</span>
-<span id="cb2-3">y <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> data.target</span>
-<span id="cb2-4"></span>
-<span id="cb2-5">X_train, X_test, y_train, y_test <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> train_test_split(</span>
-<span id="cb2-6">    X, y, test_size<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.2</span>, random_state<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">42</span></span>
-<span id="cb2-7">)</span></code></pre></div></div>
-</div>
-</section>
-<section id="ajuste-de-los-modelos" class="level2">
-<h2 class="anchored" data-anchor-id="ajuste-de-los-modelos">Ajuste de los modelos</h2>
-<p>Ajusto 100 modelos. Voy a guardar algunas cosas de los ajustes para luego ver cómo varían de un caso a otro. Lo que quiero estudiar es si hay mucha dispersión entre unos resultados y otros.</p>
-<div id="loop-model" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">num_trials <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">200</span></span>
-<span id="cb3-2">l_r2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> []</span>
-<span id="cb3-3">l_preds <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> []</span>
-<span id="cb3-4"></span>
-<span id="cb3-5"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(num_trials):</span>
-<span id="cb3-6">    random_state <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.random.randint(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10000</span>)</span>
-<span id="cb3-7"></span>
-<span id="cb3-8">    model <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> RandomForestRegressor(random_state<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>random_state, n_jobs<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=-</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb3-9"></span>
-<span id="cb3-10">    model.fit(X_train, y_train)</span>
-<span id="cb3-11"></span>
-<span id="cb3-12">    y_pred <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> model.predict(X_test)</span>
-<span id="cb3-13">    l_r2.append(r2_score(y_test, y_pred))</span>
-<span id="cb3-14"></span>
-<span id="cb3-15">    pred_series <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pd.Series(y_pred, name<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"pred_</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>i<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span>
-<span id="cb3-16"></span>
-<span id="cb3-17">    l_preds.append(pred_series)</span></code></pre></div></div>
-</div>
-<p>Ahora creo el data frame de predicciones:</p>
-<div id="concat" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">df_preds <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pd.concat(l_preds, axis<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span></code></pre></div></div>
-</div>
-</section>
-<section id="visualización" class="level2">
-<h2 class="anchored" data-anchor-id="visualización">Visualización</h2>
-<section id="métrica-de-ajuste" class="level3">
-<h3 class="anchored" data-anchor-id="métrica-de-ajuste">Métrica de ajuste</h3>
-<p>Aquí la distribución del R2.</p>
-<div id="cell-hist-mse" class="cell" data-execution_count="5">
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-04-12-semilla/index_files/figure-html/hist-mse-output-1.png" id="hist-mse" width="758" height="470" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="predicciones" class="level3">
-<h3 class="anchored" data-anchor-id="predicciones">Predicciones</h3>
-<p>Ahora muestro cómo varía cada predicción observación a observación. Muestro solo unas pocas porque no se ve nada si intento ver todas una a una.</p>
-<p>Quizá no tenga sentido ver todas una a una, sino ver la desviación en general de todas las observación con respecto a su punto medio o su media o lo que sea. Pero paso de pensar.</p>
-<div id="cell-preds-boxplots" class="cell" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">df_long <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> df_preds.reset_index().melt(</span>
-<span id="cb5-2">    id_vars<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"index"</span>, var_name<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"modelo"</span>, value_name<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"pred"</span></span>
-<span id="cb5-3">)</span>
-<span id="cb5-4">df_long <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> df_long.rename(columns<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>{<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"index"</span>: <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"id"</span>})</span>
-<span id="cb5-5"></span>
-<span id="cb5-6">subset_ids <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> df_long[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"id"</span>].unique()[:<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">50</span>]</span>
-<span id="cb5-7">subset <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> df_long[df_long[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"id"</span>].isin(subset_ids)]</span>
-<span id="cb5-8"></span>
-<span id="cb5-9">medianas <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> subset.groupby(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"id"</span>)[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"pred"</span>].median().sort_values()</span>
-<span id="cb5-10"></span>
-<span id="cb5-11">subset[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"id"</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pd.Categorical(subset[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"id"</span>], categories<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>medianas.index, ordered<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>)</span>
-<span id="cb5-12"></span>
-<span id="cb5-13">plt.figure(figsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">8</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">15</span>))</span>
-<span id="cb5-14">sns.boxplot(data<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>subset, y<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"id"</span>, x<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"pred"</span>, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"#800080"</span>, showfliers<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">False</span>)</span>
-<span id="cb5-15">plt.ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"ID de observación (subconjunto)"</span>)</span>
-<span id="cb5-16">plt.xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Predicción"</span>)</span>
-<span id="cb5-17">plt.title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Boxplot de predicciones por observación (unas pocas)"</span>)</span>
-<span id="cb5-18">plt.xticks(rotation<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">90</span>, fontsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>)</span>
-<span id="cb5-19">plt.tight_layout()</span>
-<span id="cb5-20">plt.show()</span></code></pre></div></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-04-12-semilla/index_files/figure-html/preds-boxplots-output-1.png" id="preds-boxplots" width="759" height="1430" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Hay alguna observación que sí presenta algo de variabilidad entre los modelos pero no me escandizaría por ello.</p>
-
-
-</section>
-</section>
-
- ]]></description>
-  <category>modelos predictivos</category>
-  <category>simulación</category>
-  <category>python</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2025-04-12-semilla/</guid>
-  <pubDate>Sat, 12 Apr 2025 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
