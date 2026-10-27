@@ -91,7 +91,7 @@ The power is about 6%. Almost no test of this kind reaches significance.
 
 The ones that do are a strange sample. Among the significant results, close to one in four has the wrong sign. Ignore the sign, and the average significant estimate is about 9.5 times the true lift.
 
-Andrew Gelman and John Carlin built a design check around these two numbers in 2014. One is the Type S error rate, the share of significant results with the wrong sign. The other is the exaggeration ratio, the expected size of a Type M error. Their point is that classical power analysis only asks whether you will cross the line. It does not ask what you will be holding when you do.
+Andrew Gelman and John Carlin built a design check around these two numbers in 2014. One is the Type S error rate: the share of significant results with the wrong sign. The other is the exaggeration ratio: how many times too big a significant estimate is, on average. Classical power analysis tells you how likely you are to cross the line. These two tell you what you're holding when you do.
 
 **A significant result from a low-power test is a sample cut from the tails, so it is big by construction.**
 
@@ -154,7 +154,7 @@ Look at the left tail. It is smaller than the right one, but it is there. Those 
 
 Next time a small segment comes back significant, don't read the estimate first. Check how large the standard error is next to the lift you could plausibly expect.
 
-If the standard error is several times the plausible lift, a significant result tells you less than it seems to. It says the estimate is big. It says little about the lift being big.
+If the standard error is several times the plausible lift, only big estimates can pass the filter. A big estimate is what you get, whatever the true lift is.
 
 I'd report that estimate as a likely overestimate. And I wouldn't build the quarterly plan on the 16.
 
