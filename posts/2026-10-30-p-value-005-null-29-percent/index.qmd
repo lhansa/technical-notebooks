@@ -24,7 +24,9 @@ Those two are different conditional probabilities. If you play in La Liga, you'r
 
 To go from one to the other you need Bayes. And Bayes asks for two things the p-value doesn't have: a prior probability for the null, and some idea of how the data behaves when the null is false.
 
-The prior is the easy part. Say 50/50. That's already generous to the effect. In most A/B testing programmes, far fewer than half of the ideas move the metric. When real effects are rare, a significant result convinces less, for the same reason a rare positive class [wrecks the precision of a good classifier](../2026-10-10-auc-and-false-alerts/index.qmd).
+The prior is the easy part. Say 50/50. That's already generous to the effect.
+
+In most A/B testing programmes, far fewer than half of the ideas move the metric. When real effects are rare, a significant result convinces less, for the same reason a rare positive class [wrecks the precision of a good classifier](../2026-10-10-auc-and-false-alerts/index.qmd).
 
 The alternative is the hard part. "There is an effect" doesn't say how big. Each possible size gives a different answer.
 
@@ -66,7 +68,9 @@ For $p = 0.05$ that gives $\xi \approx 0.33$. Plug it back in and the Bayes fact
 
 $$B(p) \geq -e \, p \log p, \qquad p < 1/e.$$
 
-In words: the evidence for the null can't be smaller than $e$ times $p$ times $-\log p$. The condition $p < 1/e$ is there because, above that point, the best $\xi$ would be bigger than 1. That shape no longer decreases, so it's out of the family. The closest the alternative can get is a flat line, and the best it can do is a tie.
+In words: the evidence for the null can't be smaller than $e$ times $p$ times $-\log p$.
+
+The condition $p < 1/e$ matters. Above that point the best $\xi$ would be bigger than 1, and that shape doesn't decrease, so it's out of the family. The best the alternative can do there is a flat line, a tie.
 
 **This is the best case for the alternative within that whole family.** You didn't have to choose an effect size. The calculation chose the one that hurts the null most, at the p-value you actually got.
 
@@ -90,9 +94,7 @@ At 0.05 the odds against the null are at most 2.5 to 1. To get odds of around 14
 
 These are lower bounds. With a realistic alternative, or a prior that gives the null more than half, the null comes out stronger.
 
-The family matters, though. Allow any decreasing shape at all, however absurd, and the floor drops to about 5%. That alternative puts all its weight on p-values just below the one you got. The Beta family is the paper's line between a generous alternative and one built after looking at the data.
-
-**The 29% is what you get with a 50/50 prior and the friendliest alternative in that family.**
+The family matters, though. Allow any decreasing shape at all, however absurd, and the floor drops to about 5%. That alternative spreads all its weight evenly between zero and the p-value you got. The Beta family is the paper's line between a generous alternative and one built after looking at the data.
 
 ## Why this matters to you
 
