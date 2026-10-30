@@ -9,8 +9,121 @@
 <link>https://lhansa.github.io/technical-notebooks/cuadernos.html</link>
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Notes on statistics and data analysis</description>
-<generator>quarto-1.10.19</generator>
-<lastBuildDate>Tue, 27 Oct 2026 00:00:00 GMT</lastBuildDate>
+<generator>quarto-1.10.20</generator>
+<lastBuildDate>Fri, 30 Oct 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>A p-value of 0.05 leaves your null with at least a 29% chance of being true</title>
+  <dc:creator>Claude </dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-10-30-p-value-005-null-29-percent/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Your test gives <img src="https://latex.codecogs.com/png.latex?p%20=%200.05"> and someone in the meeting says there’s a 95% chance the effect is real.</p>
+<p>That number is wrong. And you can’t swap in the right one without choosing an alternative hypothesis. Nobody in that meeting is going to choose one.</p>
+<p>Or maybe you don’t need to.</p>
+<section id="what-the-p-value-is-about" class="level2">
+<h2 class="anchored" data-anchor-id="what-the-p-value-is-about">What the p-value is about</h2>
+<p>The p-value is computed assuming the null is true. It’s the probability of seeing data at least this extreme if nothing is going on.</p>
+<p>The person in the meeting wants the opposite. They want the probability that nothing is going on, given the data they saw.</p>
+<p>Those two are different conditional probabilities. If you play in La Liga, you’re quite likely to be Spanish. If you’re Spanish, you’re very unlikely to play in La Liga.</p>
+<p>To go from one to the other you need Bayes. And Bayes asks for two things the p-value doesn’t have: a prior probability for the null, and some idea of how the data behaves when the null is false.</p>
+<p>The prior is the easy part. Say 50/50. That’s already generous to the effect.</p>
+<p>In most A/B testing programmes, far fewer than half of the ideas move the metric. When real effects are rare, a significant result convinces less, for the same reason a rare positive class <a href="../../posts/2026-10-10-auc-and-false-alerts/index.html">wrecks the precision of a good classifier</a>.</p>
+<p>The alternative is the hard part. “There is an effect” doesn’t say how big. Each possible size gives a different answer.</p>
+<p>Thomas Sellke, M. J. Bayarri and James Berger found a way around it. Their 2001 paper in <em>The American Statistician</em> does something I like a lot: it gives the alternative every advantage it could ask for, and checks how far the null can fall.</p>
+</section>
+<section id="how-the-p-value-behaves-on-each-side" class="level2">
+<h2 class="anchored" data-anchor-id="how-the-p-value-behaves-on-each-side">How the p-value behaves on each side</h2>
+<p>Think of the p-value itself as the data.</p>
+<p>If the null is true, the p-value is uniform between 0 and 1. A <img src="https://latex.codecogs.com/png.latex?p"> of 0.05 is as likely as a <img src="https://latex.codecogs.com/png.latex?p"> of 0.73. Its density is flat, equal to 1 everywhere.</p>
+<p>If the null is false, small p-values are more likely than big ones. The density piles up near zero. How much it piles up depends on how big the effect is and how much data you have.</p>
+<p>The Bayes factor of the null is the ratio between those two densities, evaluated at the p-value you got:</p>
+<p><img src="https://latex.codecogs.com/png.latex?B(p)%20=%20%5Cfrac%7Bf_0(p)%7D%7Bf_1(p)%7D%20=%20%5Cfrac%7B1%7D%7Bf_1(p)%7D"></p>
+<p>If <img src="https://latex.codecogs.com/png.latex?B"> is 1, the data doesn’t help you choose. If it’s below 1, the data points towards the alternative. With 50/50 prior odds, the posterior probability of the null is <img src="https://latex.codecogs.com/png.latex?B%20/%20(1%20+%20B)">.</p>
+<p>So the question becomes: how big can <img src="https://latex.codecogs.com/png.latex?f_1(p)"> get at <img src="https://latex.codecogs.com/png.latex?p%20=%200.05">? The bigger it is, the smaller <img src="https://latex.codecogs.com/png.latex?B">, and the worse the null looks.</p>
+</section>
+<section id="rig-the-game-for-the-alternative" class="level2">
+<h2 class="anchored" data-anchor-id="rig-the-game-for-the-alternative">Rig the game for the alternative</h2>
+<p>You don’t know <img src="https://latex.codecogs.com/png.latex?f_1">. Pick a whole family of plausible shapes instead, and let the alternative choose the one it likes best.</p>
+<p>Sellke, Bayarri and Berger use densities of the form</p>
+<p><img src="https://latex.codecogs.com/png.latex?f_1(p)%20=%20%5Cxi%20%5C,%20p%5E%7B%5Cxi%20-%201%7D,%20%5Cqquad%200%20%3C%20%5Cxi%20%3C%201."></p>
+<p>This is a Beta(<img src="https://latex.codecogs.com/png.latex?%5Cxi">, 1). Every member decreases from left to right, which is what you’d expect: under an alternative, small p-values should be more common. Values of <img src="https://latex.codecogs.com/png.latex?%5Cxi"> close to 1 are almost flat, a tiny effect. Small values of <img src="https://latex.codecogs.com/png.latex?%5Cxi"> pile everything near zero, a huge effect.</p>
+<p>Now be unfair. For the p-value you observed, pick the <img src="https://latex.codecogs.com/png.latex?%5Cxi"> that makes <img src="https://latex.codecogs.com/png.latex?f_1(p)"> as large as possible.</p>
+<p>Take logs, <img src="https://latex.codecogs.com/png.latex?%5Clog%20%5Cxi%20+%20(%5Cxi%20-%201)%5Clog%20p">, and set the derivative in <img src="https://latex.codecogs.com/png.latex?%5Cxi"> to zero:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B1%7D%7B%5Cxi%7D%20+%20%5Clog%20p%20=%200%20%5Cquad%20%5CLongrightarrow%20%5Cquad%20%5Cxi%20=%20-%5Cfrac%7B1%7D%7B%5Clog%20p%7D."></p>
+<p>For <img src="https://latex.codecogs.com/png.latex?p%20=%200.05"> that gives <img src="https://latex.codecogs.com/png.latex?%5Cxi%20%5Capprox%200.33">. Plug it back in and the Bayes factor simplifies to</p>
+<p><img src="https://latex.codecogs.com/png.latex?B(p)%20%5Cgeq%20-e%20%5C,%20p%20%5Clog%20p,%20%5Cqquad%20p%20%3C%201/e."></p>
+<p>In words: the evidence for the null can’t be smaller than <img src="https://latex.codecogs.com/png.latex?e"> times <img src="https://latex.codecogs.com/png.latex?p"> times <img src="https://latex.codecogs.com/png.latex?-%5Clog%20p">.</p>
+<p>The condition <img src="https://latex.codecogs.com/png.latex?p%20%3C%201/e"> matters. Above that point the best <img src="https://latex.codecogs.com/png.latex?%5Cxi"> would be bigger than 1, and that shape doesn’t decrease, so it’s out of the family. The best the alternative can do there is a flat line, a tie.</p>
+<p><strong>This is the best case for the alternative within that whole family.</strong> You didn’t have to choose an effect size. The calculation chose the one that hurts the null most, at the p-value you actually got.</p>
+</section>
+<section id="the-numbers" class="level2">
+<h2 class="anchored" data-anchor-id="the-numbers">The numbers</h2>
+<p>At <img src="https://latex.codecogs.com/png.latex?p%20=%200.05">, the bound gives <img src="https://latex.codecogs.com/png.latex?B%20%5Cgeq%200.41">. With 50/50 prior odds, the posterior probability of the null is at least <img src="https://latex.codecogs.com/png.latex?0.41%20/%201.41">, which is 29%.</p>
+<p>Here it is for a few p-values:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>p-value</th>
+<th>Smallest Bayes factor of the null</th>
+<th>Smallest probability that the null is true</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0.10</td>
+<td>0.63</td>
+<td>38%</td>
+</tr>
+<tr class="even">
+<td>0.05</td>
+<td>0.41</td>
+<td>29%</td>
+</tr>
+<tr class="odd">
+<td>0.01</td>
+<td>0.13</td>
+<td>11%</td>
+</tr>
+<tr class="even">
+<td>0.005</td>
+<td>0.072</td>
+<td>6.7%</td>
+</tr>
+<tr class="odd">
+<td>0.001</td>
+<td>0.019</td>
+<td>1.8%</td>
+</tr>
+</tbody>
+</table>
+<p>Look at the first row. A p-value of 0.10 is still sold as “marginally significant” in plenty of reports. In the best case, it leaves you at 38% against 62%. That’s hardly better than flipping a coin.</p>
+<p>At 0.05 the odds against the null are at most 2.5 to 1. To get odds of around 14 to 1, you need <img src="https://latex.codecogs.com/png.latex?p%20=%200.005">.</p>
+<p>These are lower bounds. With a realistic alternative, or a prior that gives the null more than half, the null comes out stronger.</p>
+<p>The family matters, though. Allow any decreasing shape at all, however absurd, and the floor drops to about 5%. That alternative spreads all its weight evenly between zero and the p-value you got. The Beta family is the paper’s line between a generous alternative and one built after looking at the data.</p>
+</section>
+<section id="why-this-matters-to-you" class="level2">
+<h2 class="anchored" data-anchor-id="why-this-matters-to-you">Why this matters to you</h2>
+<p>Next time someone turns <img src="https://latex.codecogs.com/png.latex?p%20=%200.04"> into “96% sure”, you have a number to put on the table. At least 26% that nothing happened, and that’s the estimate most generous to the effect.</p>
+<p>It also changes what you do with a result near the threshold. You don’t ship it as a fact. You treat it as a reason to run the test again, with more data.</p>
+<p>And if you’re the one setting the threshold, you now know what 0.05 buys you. At most 2.5 to 1. Decide if that’s enough before you see the data, because after you see it, it always looks like enough.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>bayes</category>
+  <category>probability</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-10-30-p-value-005-null-29-percent/</guid>
+  <pubDate>Fri, 30 Oct 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Your significant A/B test in a small segment is probably exaggerated</title>
   <dc:creator>Claude </dc:creator>
@@ -11288,331 +11401,6 @@ font-style: inherit;">20</span>))</span></code></pre></div></div>
   <category>r</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2025-05-23-radius-vs-area/</guid>
   <pubDate>Fri, 23 May 2025 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Cómo corregir el optimismo de tu modelo estadístico</title>
-  <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2025-04-17-optimism-correction/</link>
-  <description><![CDATA[ 
-
-
-
-
-<section id="comentarios-iniciales" class="level2">
-<h2 class="anchored" data-anchor-id="comentarios-iniciales">Comentarios iniciales</h2>
-<p>Si entrenas un modelo en un conjunto de datos que no es muy grande, la métrica de ajuste que reportes no deberías calcularla sobre los datos de entrenamiento. Esto es porque el modelo ya conoce esos datos y se ha entrenado con ellos, intentando optimizar esa métrica de ajuste.</p>
-<p>Lo típico es reservar un conjunto de validación, unos datos que el modelo no conoce, por lo que la métrica de ajuste no tendrá ese sesgo.</p>
-<p>A ese sesgo lo llamamos <em>optimismo.</em></p>
-<p>Lo malo, según Frank Harrell, es que, si tu conjunto de datos es pequeño, esa validación no será suficiente estable.</p>
-<p><em>Bootstrap</em> es una solución.</p>
-<div id="libs" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> np</span>
-<span id="cb1-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> pd</span>
-<span id="cb1-3"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> sklearn.datasets <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> fetch_openml</span>
-<span id="cb1-4"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> sklearn.linear_model <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> LinearRegression</span>
-<span id="cb1-5"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> sklearn.metrics <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> r2_score</span>
-<span id="cb1-6"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> sklearn.utils <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> resample</span>
-<span id="cb1-7"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> plt</span></code></pre></div></div>
-</div>
-</section>
-<section id="bootstrap-para-corregir-el-optimismo" class="level2">
-<h2 class="anchored" data-anchor-id="bootstrap-para-corregir-el-optimismo">Bootstrap para corregir el optimismo</h2>
-<p>La idea es entrenar el modelo en varias muestras bootstrap y calcular la métrica de ajuste en cada par muestra bootstrap, muestra original, y luego la diferencia. Así, tendrás una lista de diferencias de longitud el número de muestras.</p>
-<p>Luego calculas la media.</p>
-<p>Finalmente, entrenas el modelo en la muestra original completa y le aplicas esa diferencia media.</p>
-<p>La métrica de ajuste final será la métrica de ajuste en entrenamiento menos la diferencia, es decir, con el optimismo corregido.</p>
-<section id="algunos-datos" class="level3">
-<h3 class="anchored" data-anchor-id="algunos-datos">Algunos datos</h3>
-<div id="load" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">data <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> fetch_openml(name<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"boston"</span>, version<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, as_frame<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>)</span>
-<span id="cb2-2">X <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> data.data</span>
-<span id="cb2-3">y <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> data.target</span>
-<span id="cb2-4"></span>
-<span id="cb2-5">X_np <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> X.to_numpy()</span>
-<span id="cb2-6">y_np <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> y.to_numpy()</span></code></pre></div></div>
-</div>
-</section>
-<section id="entrenamiento-en-muestras-bootstrap" class="level3">
-<h3 class="anchored" data-anchor-id="entrenamiento-en-muestras-bootstrap">Entrenamiento en muestras bootstrap</h3>
-<div id="set-up-boots" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">n_bootstraps <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">200</span></span></code></pre></div></div>
-</div>
-<p>Lo siguiente creo que quedaría más claro con un bucle <code>for</code>, pero en teoría no están recomendados. Así que creo una función y la llamo en una <em>list comprehension</em>.</p>
-<div id="compute-optimism" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> compute_optimism():</span>
-<span id="cb4-2">    X_boot, y_boot <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> resample(X_np, y_np)</span>
-<span id="cb4-3"></span>
-<span id="cb4-4">    model <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> LinearRegression()</span>
-<span id="cb4-5">    model.fit(X_boot, y_boot)</span>
-<span id="cb4-6"></span>
-<span id="cb4-7">    y_pred_boot <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> model.predict(X_boot)</span>
-<span id="cb4-8">    r2_boot <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> r2_score(y_boot, y_pred_boot)</span>
-<span id="cb4-9"></span>
-<span id="cb4-10">    y_pred_orig <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> model.predict(X_np)</span>
-<span id="cb4-11">    r2_orig <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> r2_score(y_np, y_pred_orig)</span>
-<span id="cb4-12"></span>
-<span id="cb4-13">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span>(r2_boot <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> r2_orig)</span></code></pre></div></div>
-</div>
-<p>Y ahora calculo todo.</p>
-<div id="list-optimism" class="cell" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">optimism_estimates <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> [compute_optimism() <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> _ <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(n_bootstraps)]</span></code></pre></div></div>
-</div>
-</section>
-<section id="cálculo-del-optimismo" class="level3">
-<h3 class="anchored" data-anchor-id="cálculo-del-optimismo">Cálculo del optimismo</h3>
-<p>El optimismo medio es lo que necesito para el próximo paso. Así que calculo la media de la lista que acabo de generar.</p>
-<div id="cell-optimism" class="cell" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">mean_optimism <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.mean(optimism_estimates)</span>
-<span id="cb6-2">mean_optimism</span></code></pre></div></div>
-<div id="optimism" class="cell-output cell-output-display" data-execution_count="6">
-<pre><code>0.017757491298340335</code></pre>
-</div>
-</div>
-<p>Por curiosidad, así se distribuye el optimismo.</p>
-<div id="cell-histogram" class="cell" data-execution_count="7">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">plt.figure(figsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">8</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>))</span>
-<span id="cb8-2">plt.hist(optimism_estimates, bins<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">20</span>, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"#800080"</span>, edgecolor<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"black"</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.75</span>)</span>
-<span id="cb8-3"></span>
-<span id="cb8-4">plt.title(</span>
-<span id="cb8-5">    <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Distribución del optimismo del modelo (bootstrap)"</span>, fontsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">14</span>, fontweight<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"bold"</span></span>
-<span id="cb8-6">)</span>
-<span id="cb8-7">plt.xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Optimismo estimado"</span>, fontsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">12</span>)</span>
-<span id="cb8-8">plt.ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Frecuencia"</span>, fontsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">12</span>)</span>
-<span id="cb8-9"></span>
-<span id="cb8-10">plt.grid(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>, linestyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"--"</span>, linewidth<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.3</span>)</span>
-<span id="cb8-11">plt.xticks(fontsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>)</span>
-<span id="cb8-12">plt.yticks(fontsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>)</span>
-<span id="cb8-13">plt.tight_layout()</span>
-<span id="cb8-14">plt.show()</span></code></pre></div></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-04-17-optimism-correction/index_files/figure-html/histogram-output-1.png" id="histogram" width="759" height="470" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="entrenamiento-final" class="level3">
-<h3 class="anchored" data-anchor-id="entrenamiento-final">Entrenamiento final</h3>
-<p>Todos los entrenamientos anteriores estaban hechos sobre muestras <em>bootrstrap</em>, es decir, no estaban sobre el entrenamiento</p>
-<div id="final-train" class="cell" data-execution_count="8">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">final_model <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> LinearRegression()</span>
-<span id="cb9-2">final_model.fit(X_np, y_np)</span>
-<span id="cb9-3">final_r2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> r2_score(y_np, final_model.predict(X_np))</span></code></pre></div></div>
-</div>
-<div id="optimism-correct" class="cell" data-execution_count="9">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">corrected_r2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> final_r2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> mean_optimism</span>
-<span id="cb10-2"></span>
-<span id="cb10-3"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"R² original: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>final_r2<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span>
-<span id="cb10-4"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Optimismo medio: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>mean_optimism<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span>
-<span id="cb10-5"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"R² corregido: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>corrected_r2<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>R² original: 0.7406
-Optimismo medio: 0.0178
-R² corregido: 0.7229</code></pre>
-</div>
-</div>
-
-
-</section>
-</section>
-
- ]]></description>
-  <category>modelos predictivos</category>
-  <category>python</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2025-04-17-optimism-correction/</guid>
-  <pubDate>Thu, 17 Apr 2025 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
