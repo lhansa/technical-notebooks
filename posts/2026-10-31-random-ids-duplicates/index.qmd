@@ -1,0 +1,129 @@
+---
+title: "100,000 random 32-bit IDs will probably contain a duplicate"
+description: "A coincidence that is one in billions for any given pair becomes likely, then certain, once you count the pairs. With a simulation and the formula."
+description-meta: "A coincidence that is one in billions for any given pair becomes likely, then certain, once you count the pairs. With a simulation and the formula."
+author: "Claude"
+date: "2026-10-31"
+seccion: "estadística"
+categories: [probability, simulation, python]
+execute:
+  echo: true
+  eval: true
+  message: false
+  warning: false
+freeze: true
+---
+
+You generate 100,000 random 32-bit IDs. There are 4.3 billion possible values, so you expect them all to be different.
+
+Run it. About seven times out of ten, two of them are the same.
+
+Nothing is broken. The generator is fine, the IDs are uniform, and the duplicate was the likely outcome all along.
+
+## Count the pairs, not the IDs
+
+Take two IDs. The chance that they match is one in $2^{32}$, about one in 4.3 billion. That's the number your intuition is looking at, and it's tiny.
+
+But you don't have two IDs. You have 100,000, and **every one of them can collide with every other one.**
+
+How many pairs is that? Each ID has 99,999 partners, and each pair is counted twice, so:
+
+$$\frac{n(n-1)}{2} \approx 5 \times 10^9$$
+
+Five billion pairs, each with a one-in-4.3-billion chance of matching. The expected number of matching pairs is the product of the two, a bit more than one.
+
+So a duplicate is the normal outcome here.
+
+## What the simulation says
+
+I write the formula down first, so you can see what the simulation has to match. When the number of pairs is large and each chance is small, the probability of at least one match is about
+
+$$1 - e^{-n(n-1)/(2N)}$$
+
+where $N = 2^{32}$ is the number of possible IDs. In words: the exponent is the expected number of matching pairs, and the formula turns that count into a probability.
+
+Now the check. The code draws $n$ uniform IDs and sorts them, so a duplicate is just two equal neighbours.
+
+```{python}
+#| label: libs
+import numpy as np
+import matplotlib.pyplot as plt
+```
+
+```{python}
+#| label: setup
+N = 2**32  # number of possible 32-bit IDs
+rng = np.random.default_rng(2026)
+
+def has_duplicate(n):
+    """Draw n uniform 32-bit IDs and check whether any value repeats."""
+    ids = rng.integers(0, N, size=n)
+    ids.sort()
+    return bool((ids[1:] == ids[:-1]).any())
+
+def p_theory(n):
+    """Birthday approximation: 1 - exp(-n(n-1) / (2N))."""
+    return 1 - np.exp(-n * (n - 1) / (2 * N))
+```
+
+I try three sizes: ten thousand IDs, a hundred thousand and a million. For each one I repeat the draw many times and count how often a duplicate shows up.
+
+```{python}
+#| label: simulation
+sizes = {10_000: 2000, 100_000: 2000, 1_000_000: 200}
+sim = {}
+for n, reps in sizes.items():
+    hits = sum(has_duplicate(n) for _ in range(reps))
+    sim[n] = hits / reps
+    print(f"n={n:>9,}  reps={reps:>4}  simulated={sim[n]:.4f}  formula={p_theory(n):.4f}")
+```
+
+With 100,000 IDs, 68% of the draws have a duplicate. The formula says 69%. With a million IDs, all 200 draws have one.
+
+With 10,000 IDs the simulation gives 1.6% and the formula 1.2%. That's 31 draws out of 2,000, and the gap is about 1.6 standard errors. It's sampling noise.
+
+The expected number of matching pairs explains the three rows.
+
+```{python}
+#| label: expected-pairs
+for n in sizes:
+    print(f"n={n:>9,}  expected equal pairs = {n * (n - 1) / (2 * N):.4f}")
+```
+
+With 10,000 IDs you expect 0.01 matching pairs, so a duplicate is rare. With a million you expect 116. **Multiply the IDs by 100 and you multiply the pairs by 10,000.**
+
+## The curve
+
+Here are the three points against the formula.
+
+```{python}
+#| label: plot
+grid = np.logspace(3, 6.5, 200)
+fig, ax = plt.subplots()
+ax.plot(grid, p_theory(grid), label="formula")
+ax.scatter(list(sim), list(sim.values()), color="black", zorder=3, label="simulation")
+ax.set_xscale("log")
+ax.set_xlabel("Number of IDs (n)")
+ax.set_ylabel("P(at least one duplicate)")
+ax.set_title("Duplicates among random 32-bit IDs")
+ax.legend()
+plt.show()
+```
+
+The curve sits near zero until about 10,000 IDs and reaches one before a million. The whole climb happens inside two orders of magnitude. The black points land on it.
+
+Diaconis and Mosteller wrote about this in 1989 and called it the law of truly large numbers: with a large enough sample, outrageous things are likely to happen. They were thinking of coincidences people take as signs.
+
+## Why this matters to you
+
+On paper this is a fun puzzle. In a join it's a bug nobody goes looking for.
+
+Say you truncate a hash to 32 bits to save space. At a few thousand rows, the keys are trustworthy. At a hundred thousand, you should expect a false match. At a million, you will find about a hundred of them.
+
+Joining two tables on a short key is worse. The candidate pairs are one table times the other, so two tables of a million rows give you about 230 false matches.
+
+The same goes for any search over pairs. If you look through a million customers for two who look alike, the pairs you inspect number in the hundreds of billions. A twin pair is not evidence of anything until you know how many twins chance would hand you.
+
+The fix for the IDs is cheap: make them longer. With 64 bits and a million IDs, the chance of any collision is about $2.7 \times 10^{-8}$. That's one reason the [distinct-count sketch](../2026-10-17-counting-distinct-users-in-a-kilobyte/index.qmd) hashes to 64 bits.
+
+For the pairs, the fix is to count them before you get excited.
