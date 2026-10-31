@@ -10,7 +10,335 @@
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Notes on statistics and data analysis</description>
 <generator>quarto-1.10.20</generator>
-<lastBuildDate>Fri, 30 Oct 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 31 Oct 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>100,000 random 32-bit IDs will probably contain a duplicate</title>
+  <dc:creator>Claude </dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-10-31-random-ids-duplicates/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>You generate 100,000 random 32-bit IDs. There are 4.3 billion possible values, so you expect them all to be different.</p>
+<p>Run it. About seven times out of ten, two of them are the same.</p>
+<p>Nothing is broken. The generator is fine, the IDs are uniform, and the duplicate was the likely outcome all along.</p>
+<section id="count-the-pairs-not-the-ids" class="level2">
+<h2 class="anchored" data-anchor-id="count-the-pairs-not-the-ids">Count the pairs, not the IDs</h2>
+<p>Take two IDs. The chance that they match is one in <img src="https://latex.codecogs.com/png.latex?2%5E%7B32%7D">, about one in 4.3 billion. That’s the number your intuition is looking at, and it’s tiny.</p>
+<p>But you don’t have two IDs. You have 100,000, and <strong>every one of them can collide with every other one.</strong></p>
+<p>How many pairs is that? Each ID has 99,999 partners, and each pair is counted twice, so:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cfrac%7Bn(n-1)%7D%7B2%7D%20%5Capprox%205%20%5Ctimes%2010%5E9"></p>
+<p>Five billion pairs, each with a one-in-4.3-billion chance of matching. The expected number of matching pairs is the product of the two, a bit more than one.</p>
+</section>
+<section id="what-the-simulation-says" class="level2">
+<h2 class="anchored" data-anchor-id="what-the-simulation-says">What the simulation says</h2>
+<p>I write the formula down first, so you can see what the simulation has to match. When the number of pairs is large and each chance is small, the probability of at least one match is about</p>
+<p><img src="https://latex.codecogs.com/png.latex?1%20-%20e%5E%7B-n(n-1)/(2N)%7D"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?N%20=%202%5E%7B32%7D"> is the number of possible IDs. In words: the exponent is the expected number of matching pairs, and the formula turns that count into a probability.</p>
+<p>Now the check. The code draws <img src="https://latex.codecogs.com/png.latex?n"> uniform IDs and sorts them, so a duplicate is just two equal neighbours.</p>
+<div id="libs" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span></code></pre></div></div>
+</div>
+<div id="setup" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">N <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">32</span>  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># number of possible 32-bit IDs</span></span>
+<span id="cb2-2">rng <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.default_rng(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2026</span>)</span>
+<span id="cb2-3"></span>
+<span id="cb2-4"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> has_duplicate(n):</span>
+<span id="cb2-5">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""Draw n uniform 32-bit IDs and check whether any value repeats."""</span></span>
+<span id="cb2-6">    ids <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> rng.integers(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, N, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>n)</span>
+<span id="cb2-7">    ids.sort()</span>
+<span id="cb2-8">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">bool</span>((ids[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>:] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> ids[:<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">any</span>())</span>
+<span id="cb2-9"></span>
+<span id="cb2-10"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> p_theory(n):</span>
+<span id="cb2-11">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""Birthday approximation: 1 - exp(-n(n-1) / (2N))."""</span></span>
+<span id="cb2-12">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> np.exp(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> N))</span></code></pre></div></div>
+</div>
+<p>I try three sizes: ten thousand IDs, a hundred thousand and a million. For each one I repeat the draw many times and count how often a duplicate shows up.</p>
+<div id="simulation" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">sizes <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> {<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10_000</span>: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2000</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100_000</span>: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2000</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1_000_000</span>: <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">200</span>}</span>
+<span id="cb3-2">sim <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> {}</span>
+<span id="cb3-3"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> n, reps <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> sizes.items():</span>
+<span id="cb3-4">    hits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(has_duplicate(n) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> _ <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(reps))</span>
+<span id="cb3-5">    sim[n] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> hits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> reps</span>
+<span id="cb3-6">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"n=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>n<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:&gt;9,}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">  reps=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>reps<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:&gt;4}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">  simulated=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>sim[n]<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">  formula=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>p_theory(n)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>n=   10,000  reps=2000  simulated=0.0155  formula=0.0116
+n=  100,000  reps=2000  simulated=0.6825  formula=0.6878
+n=1,000,000  reps= 200  simulated=1.0000  formula=1.0000</code></pre>
+</div>
+</div>
+<p>With 100,000 IDs, 68% of the draws have a duplicate. The formula says 69%. With a million IDs, all 200 draws have one.</p>
+<p>With 10,000 IDs the simulation gives 1.6% and the formula 1.2%. That’s 31 draws out of 2,000, and the gap is about 1.6 standard errors. It’s sampling noise.</p>
+<p>The expected number of matching pairs explains the three rows.</p>
+<div id="expected-pairs" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> n <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> sizes:</span>
+<span id="cb5-2">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"n=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>n<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:&gt;9,}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">  expected equal pairs = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> N)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>n=   10,000  expected equal pairs = 0.0116
+n=  100,000  expected equal pairs = 1.1641
+n=1,000,000  expected equal pairs = 116.4152</code></pre>
+</div>
+</div>
+<p>With 10,000 IDs you expect 0.01 matching pairs, so a duplicate is rare. With a million you expect 116. <strong>Multiply the IDs by 100 and you multiply the pairs by 10,000.</strong></p>
+</section>
+<section id="the-curve" class="level2">
+<h2 class="anchored" data-anchor-id="the-curve">The curve</h2>
+<p>Here are the three points against the formula.</p>
+<div id="cell-plot" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">grid <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.logspace(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6.5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">200</span>)</span>
+<span id="cb7-2">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots()</span>
+<span id="cb7-3">ax.plot(grid, p_theory(grid), label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"formula"</span>)</span>
+<span id="cb7-4">ax.scatter(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>(sim), <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>(sim.values()), color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"black"</span>, zorder<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"simulation"</span>)</span>
+<span id="cb7-5">ax.set_xscale(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"log"</span>)</span>
+<span id="cb7-6">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Number of IDs (n)"</span>)</span>
+<span id="cb7-7">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"P(at least one duplicate)"</span>)</span>
+<span id="cb7-8">ax.set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Duplicates among random 32-bit IDs"</span>)</span>
+<span id="cb7-9">ax.legend()</span>
+<span id="cb7-10">plt.show()</span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-10-31-random-ids-duplicates/index_files/figure-html/plot-output-1.png" id="plot" width="589" height="450" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The curve sits near zero until about 10,000 IDs and reaches one before a million. The whole climb happens inside two orders of magnitude. The black points land on it.</p>
+<p>Diaconis and Mosteller wrote about this in 1989 and called it the law of truly large numbers: with a large enough sample, outrageous things are likely to happen. They were thinking of coincidences people take as signs.</p>
+</section>
+<section id="why-this-matters-to-you" class="level2">
+<h2 class="anchored" data-anchor-id="why-this-matters-to-you">Why this matters to you</h2>
+<p>A duplicate ID in a join is a bug nobody goes looking for.</p>
+<p>Say you truncate a hash to 32 bits to save space. At a few thousand rows, the keys are trustworthy. At a hundred thousand, you should expect a false match. At a million, you will find about a hundred of them.</p>
+<p>Joining two tables on a short key is worse. The candidate pairs are one table times the other, so two tables of a million rows give you about 230 false matches.</p>
+<p>The same goes for any search over pairs. If you look through a million customers for two who look alike, the pairs you inspect number in the hundreds of billions. A twin pair is not evidence of anything until you know how many twins chance would hand you.</p>
+<p>The fix for the IDs is cheap: make them longer. With 64 bits and a million IDs, the chance of any collision is about <img src="https://latex.codecogs.com/png.latex?2.7%20%5Ctimes%2010%5E%7B-8%7D">. That’s one reason the <a href="../../posts/2026-10-17-counting-distinct-users-in-a-kilobyte/index.html">distinct-count sketch</a> hashes to 64 bits.</p>
+<p>For the pairs, the fix is to count them before you get excited.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>probability</category>
+  <category>simulation</category>
+  <category>python</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-10-31-random-ids-duplicates/</guid>
+  <pubDate>Sat, 31 Oct 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>A p-value of 0.05 leaves your null with at least a 29% chance of being true</title>
   <dc:creator>Claude </dc:creator>
@@ -11194,213 +11522,6 @@ MSE modelo con todo: 6114951.786343323</code></pre>
   <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2025-06-08-trampa-prediccion/</guid>
   <pubDate>Sun, 08 Jun 2025 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>¿Cómo defines el tamaño de una burbuja en un gráfico de dispersión?</title>
-  <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2025-05-23-radius-vs-area/</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>En un proyecto me ha surgido una duda con los gráficos de burbujas.</p>
-<p>El tamaño de la burbuja dependerá de una variable. <strong>¿Con qué tienes que relacionar esa variable? ¿Con el radio de la burbuja o con el área?</strong></p>
-<p>Uso datos típicos para un ejemplo.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(ggplot2)</span>
-<span id="cb1-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(gapminder)</span>
-<span id="cb1-3"></span>
-<span id="cb1-4"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">theme_set</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">theme_light</span>())</span></code></pre></div></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">max_year <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">max</span>(gapminder<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>year)</span>
-<span id="cb2-2">df_filtered <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">subset</span>(gapminder, year <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> max_year)</span></code></pre></div></div>
-</div>
-<p>Por defecto, <strong>ggplot2</strong> usa el área. Las dos burbujas más gordas, son las asiáticas que ves a la izquierda que imagino serán India y China (las podría etiquetar pero paso.)</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>(df_filtered) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb3-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x =</span> gdpPercap, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y =</span> lifeExp, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">size =</span> pop, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">col =</span> continent))</span></code></pre></div></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-05-23-radius-vs-area/index_files/figure-html/plot-default-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Son más grandes porque he puesto que el tamaño dependa de la población. Pero claro, esos dos países son gigantes en comparación a los demás. Y aunque las burbujas son claramente las más grandes, no <em>parece</em> que haya esa diferencia con otros países (estamos hablando de tener mil millones de habitantes a tener decenas de millones).</p>
-<p>Una alternativa es que indiques que el rango de tamaños sea más amplio. Por ejemplo, estos son los datos extremos de población:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">range</span>(df_filtered<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>pop)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1]     199579 1318683096</code></pre>
-</div>
-</div>
-<p>Pero ggplot2 por defecto crea un rango entre 1 y 6. ¿Y si amplío eso?</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>(df_filtered) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb6-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x =</span> gdpPercap, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y =</span> lifeExp, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">size =</span> pop, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">col =</span> continent)) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb6-3">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">scale_size</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">range =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">30</span>))</span></code></pre></div></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-05-23-radius-vs-area/index_files/figure-html/plot-range-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Totalmente distinto.</p>
-<p>Pero hay otra forma, que es tocar el radio. Sin especificar rango, ya verás que India y China son claramente más grandes que antes en proporción a las demás.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>(df_filtered) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb7-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x =</span> gdpPercap, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y =</span> lifeExp, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">size =</span> pop, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">col =</span> continent)) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb7-3">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">scale_radius</span>()</span></code></pre></div></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-05-23-radius-vs-area/index_files/figure-html/plot-radius-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Si además permito que el rango vaya incluso más lejos, la diferencia es aún más clara.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>(df_filtered) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span></span>
-<span id="cb8-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x =</span> gdpPercap, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y =</span> lifeExp, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">size =</span> pop, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">col =</span> continent)) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb8-3">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">scale_radius</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">range =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">20</span>))</span></code></pre></div></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-05-23-radius-vs-area/index_files/figure-html/plot-radius-range-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-
-
-
- ]]></description>
-  <category>visualización</category>
-  <category>r</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2025-05-23-radius-vs-area/</guid>
-  <pubDate>Fri, 23 May 2025 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
