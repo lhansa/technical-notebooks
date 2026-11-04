@@ -9,7 +9,7 @@
 <link>https://lhansa.github.io/technical-notebooks/cuadernos.html</link>
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Notes on statistics and data analysis</description>
-<generator>quarto-1.10.20</generator>
+<generator>quarto-1.11.9</generator>
 <lastBuildDate>Sat, 31 Oct 2026 00:00:00 GMT</lastBuildDate>
 <item>
   <title>100,000 random 32-bit IDs will probably contain a duplicate</title>
