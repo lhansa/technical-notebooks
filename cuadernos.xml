@@ -10,7 +10,731 @@
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Notes on statistics and data analysis</description>
 <generator>quarto-1.11.9</generator>
-<lastBuildDate>Sat, 31 Oct 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Thu, 05 Nov 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>To see every one of 50 provinces in a random sample, you need about 225 draws, not 50</title>
+  <dc:creator>Claude </dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-11-05-coupon-collector-50-provinces/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>You draw 50 provinces at random from a list of 50. You’d expect to have seen every one.</p>
+<p>You’ve seen about 32.</p>
+<p>Nothing is wrong with the draw. Each province had the same chance every time. The surprise is in how the last few arrive.</p>
+<section id="why-50-draws-is-not-enough" class="level2">
+<h2 class="anchored" data-anchor-id="why-50-draws-is-not-enough">Why 50 draws is not enough</h2>
+<p>Draw with replacement, so a province can come up twice. After 50 draws, a given province has been missed with probability <img src="https://latex.codecogs.com/png.latex?(49/50)%5E%7B50%7D">, about 0.36.</p>
+<p>Multiply by 50 provinces and you get the expected number of missing ones. The expected number you’ve seen is</p>
+<p><img src="https://latex.codecogs.com/png.latex?50%5Cleft(1%20-%20%5Cleft(%5Ctfrac%7B49%7D%7B50%7D%5Cright)%5E%7B50%7D%5Cright)%20%5Capprox%2031.8"></p>
+<p>In words: every province has a 36% chance of not showing up, and there are 50 of them. A third of your list is missing, and that’s what normally happens.</p>
+<p>I’d rather check that before going on. The code repeats the 50 draws ten thousand times and counts the distinct provinces each time.</p>
+<div id="libs" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb1-3"></span>
+<span id="cb1-4">rng <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.default_rng(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2026</span>)</span>
+<span id="cb1-5">n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>          <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># number of provinces</span></span>
+<span id="cb1-6">reps <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10_000</span>   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># repetitions of each experiment</span></span></code></pre></div></div>
+</div>
+<div id="fixed-50-draws" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> distinct_in_n_draws(rng, n):</span>
+<span id="cb2-2">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""Draw n provinces with replacement and count the distinct ones."""</span></span>
+<span id="cb2-3">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(np.unique(rng.integers(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, n, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>n)))</span>
+<span id="cb2-4"></span>
+<span id="cb2-5">distinct <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([distinct_in_n_draws(rng, n) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> _ <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(reps)])</span>
+<span id="cb2-6">expected <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> n) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span> n)</span>
+<span id="cb2-7"></span>
+<span id="cb2-8"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"simulated mean distinct = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>distinct<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, formula = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>expected<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb2-9"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"all 50 seen: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>(distinct <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> n)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> of </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>reps<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>simulated mean distinct = 31.78, formula = 31.79
+all 50 seen: 0 of 10000</code></pre>
+</div>
+</div>
+<p>The simulation says 31.78 and the formula says 31.79. In ten thousand tries, not once did the 50 draws cover the 50 provinces.</p>
+<p>That’s no surprise once you write it down. The chance is <img src="https://latex.codecogs.com/png.latex?50!/50%5E%7B50%7D">, about <img src="https://latex.codecogs.com/png.latex?3%20%5Ctimes%2010%5E%7B-21%7D">. You will not see it.</p>
+</section>
+<section id="how-long-until-the-last-one" class="level2">
+<h2 class="anchored" data-anchor-id="how-long-until-the-last-one">How long until the last one</h2>
+<p>Now the question you actually had. How many draws until every province has appeared at least once?</p>
+<p>Think of it in stages. At the start, any draw is new. When you hold <img src="https://latex.codecogs.com/png.latex?k"> provinces, a new one arrives with probability <img src="https://latex.codecogs.com/png.latex?(50-k)/50">, so you wait on average <img src="https://latex.codecogs.com/png.latex?50/(50-k)"> draws for it.</p>
+<p>When only one province is missing, you wait 50 draws for that single one. The last stage alone costs as much as the whole first attempt.</p>
+<p>Add the stages up and the total is</p>
+<p><img src="https://latex.codecogs.com/png.latex?50%20%5Ccdot%20H_%7B50%7D,%20%5Cqquad%20H_%7B50%7D%20=%201%20+%20%5Ctfrac12%20+%20%5Ctfrac13%20+%20%5Cdots%20+%20%5Ctfrac1%7B50%7D"></p>
+<p><img src="https://latex.codecogs.com/png.latex?H_%7B50%7D"> is the harmonic number, and it grows like <img src="https://latex.codecogs.com/png.latex?%5Cln%2050"> plus a constant of 0.58. For <img src="https://latex.codecogs.com/png.latex?n"> provinces the wait is about <img src="https://latex.codecogs.com/png.latex?n(%5Cln%20n%20+%200.58)">, and that’s why you need many more draws than provinces. The code computes the exact value and its standard deviation.</p>
+<div id="theory" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">k <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.arange(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb4-2">mean_theory <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> k)</span>
+<span id="cb4-3">sd_theory <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.sqrt(n<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> k<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> mean_theory)</span>
+<span id="cb4-4"></span>
+<span id="cb4-5"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"H_50 = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span>k)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb4-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"mean = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>mean_theory<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, sd = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>sd_theory<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>H_50 = 4.4992
+mean = 224.96, sd = 61.95</code></pre>
+</div>
+</div>
+<p>The mean is 224.96. The standard deviation is 61.95, so the wait is far from fixed. Now the simulation.</p>
+<div id="wait-simulation" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> draws_until_complete(rng, n, max_draws<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3000</span>):</span>
+<span id="cb6-2">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""Number of draws until every one of the n provinces has appeared."""</span></span>
+<span id="cb6-3">    draws <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> rng.integers(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, n, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>max_draws)</span>
+<span id="cb6-4">    _, first_seen <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.unique(draws, return_index<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="cb6-5">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">assert</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(first_seen) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> n  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># missing one in 3000 draws has probability ~1e-25</span></span>
+<span id="cb6-6">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> first_seen.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span></span>
+<span id="cb6-7"></span>
+<span id="cb6-8">waits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([draws_until_complete(rng, n) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> _ <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(reps)])</span>
+<span id="cb6-9"></span>
+<span id="cb6-10"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"mean = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>waits<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, sd = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>waits<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>std(ddof<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb6-11"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"median = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>median(waits)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.0f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, p95 = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>percentile(waits, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">95</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.0f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, max = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>waits<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>mean = 225.10, sd = 62.82
+median = 214, p95 = 344, max = 611</code></pre>
+</div>
+</div>
+<p>Mean 225.10, standard deviation 62.82. Theory and simulation agree.</p>
+<p>Look at the other numbers. The median is 214 and the 95th percentile is 344. The longest run in the ten thousand needed 611 draws.</p>
+<div id="cell-wait-histogram" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots()</span>
+<span id="cb8-2">ax.hist(waits, bins<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lightgray"</span>, edgecolor<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"white"</span>)</span>
+<span id="cb8-3">ax.axvline(waits.mean(), color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"black"</span>, linestyle<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"--"</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"mean = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>waits<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.0f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb8-4">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Draws needed to see all 50 provinces"</span>)</span>
+<span id="cb8-5">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Number of repetitions"</span>)</span>
+<span id="cb8-6">ax.set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Waiting time to see every province"</span>)</span>
+<span id="cb8-7">ax.legend()</span>
+<span id="cb8-8">plt.show()</span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-11-05-coupon-collector-50-provinces/index_files/figure-html/wait-histogram-output-1.png" id="wait-histogram" width="593" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The histogram leans to the right. Most runs finish before the mean, and a few take much longer. <strong>Half your runs need more than 214 draws, and one in twenty needs more than 344.</strong> Plan for 225 and you’ll come up short almost half the time. Plan for 344 and you’re covered nineteen times out of twenty.</p>
+</section>
+<section id="when-one-province-is-rare" class="level2">
+<h2 class="anchored" data-anchor-id="when-one-province-is-rare">When one province is rare</h2>
+<p>So far all 50 provinces were equally likely. Real lists aren’t like that.</p>
+<p>Change one thing. One province has 0.2% of the population, and the other 49 share the remaining 99.8% equally. You sample in proportion to population.</p>
+<div id="unequal-simulation" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">p_rare <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.002</span></span>
+<span id="cb9-2">p <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.full(n, (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> p_rare) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>))   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 49 provinces share 99.8% equally</span></span>
+<span id="cb9-3">p[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> p_rare                            <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># one rare province</span></span>
+<span id="cb9-4">cdf <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.cumsum(p)</span>
+<span id="cb9-5">cdf[<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.0</span></span>
+<span id="cb9-6"></span>
+<span id="cb9-7"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> wait_unequal(rng, cdf, max_draws<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12_000</span>):</span>
+<span id="cb9-8">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""Draws until every province appears, with unequal probabilities."""</span></span>
+<span id="cb9-9">    draws <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.searchsorted(cdf, rng.random(max_draws))</span>
+<span id="cb9-10">    _, first_seen <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.unique(draws, return_index<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="cb9-11">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">assert</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(first_seen) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(cdf)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># rare province missing in 12,000 draws: ~e^-24</span></span>
+<span id="cb9-12">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> first_seen.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span></span>
+<span id="cb9-13"></span>
+<span id="cb9-14">waits_u <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([wait_unequal(rng, cdf) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> _ <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(reps)])</span>
+<span id="cb9-15"></span>
+<span id="cb9-16"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"mean = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>waits_u<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.1f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, sd = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>waits_u<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>std(ddof<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.1f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb9-17"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"p95 = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>percentile(waits_u, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">95</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.0f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>mean = 545.9, sd = 465.4
+p95 = 1473</code></pre>
+</div>
+</div>
+<p>The mean goes from 225 to about 546. The standard deviation goes from 62 to 465. The 95th percentile is 1,473 draws.</p>
+<p>One province, with a share you’d round to nothing, multiplies the wait by 2.4.</p>
+<p>I don’t trust a simulation alone for a number like that, so here is the exact value. By inclusion–exclusion, the expected wait is a sum over every subset of provinces. The exact fractions avoid rounding errors in an alternating sum.</p>
+<div id="unequal-exact" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> fractions <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> Fraction</span>
+<span id="cb11-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> math <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> comb</span>
+<span id="cb11-3"></span>
+<span id="cb11-4">q, r <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Fraction(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">998</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">49</span>, Fraction(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># common and rare probabilities</span></span>
+<span id="cb11-5">exact <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Fraction(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb11-6"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> j <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>):                  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># j common provinces in the subset</span></span>
+<span id="cb11-7">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> has_rare <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>):</span>
+<span id="cb11-8">        size <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> j <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> has_rare</span>
+<span id="cb11-9">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> size:</span>
+<span id="cb11-10">            exact <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+=</span> (<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span> (size <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> comb(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">49</span>, j) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (j <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> q <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> has_rare <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> r)</span>
+<span id="cb11-11"></span>
+<span id="cb11-12"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"exact mean = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">float</span>(exact)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb11-13"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"rare province alone = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> p_rare<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.0f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> draws"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>exact mean = 544.41
+rare province alone = 500 draws</code></pre>
+</div>
+</div>
+<p>The exact mean is 544.41. The simulation gave 545.9, with a standard error of 4.7, so they match.</p>
+<p>The rare province alone takes 500 draws on average, because you see it once every 500 draws. That’s 92% of the total. The other 49 are usually done long before.</p>
+<p>Don’t add 500 and 225 to get the total. The two waits run at the same time, so the total is only a bit more than the larger one.</p>
+</section>
+<section id="why-this-matters-to-you" class="level2">
+<h2 class="anchored" data-anchor-id="why-this-matters-to-you">Why this matters to you</h2>
+<p>You sample customers, stores or provinces, and you need every group to show up at least once. <strong>For <img src="https://latex.codecogs.com/png.latex?n"> equal groups, that takes about <img src="https://latex.codecogs.com/png.latex?n(%5Cln%20n%20+%200.58)"> draws.</strong> And the tail goes well beyond that.</p>
+<p>If the groups are uneven, the rarest one decides. Take its share <img src="https://latex.codecogs.com/png.latex?p">, and expect <img src="https://latex.codecogs.com/png.latex?1/p"> draws for that group alone. For a group at 0.2%, that’s 500, whatever the other 49 do.</p>
+<p>The <a href="../../posts/2026-10-31-random-ids-duplicates/index.html">duplicate IDs</a> post asked the opposite question: how long until the first repeat. This one asked how long until the last new one.</p>
+<p>You can avoid the wait. If every group must appear, sample each group on purpose (stratified sampling) and give up on pure chance. It’s cheaper than drawing 546 to catch one rare province.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>probability</category>
+  <category>sampling</category>
+  <category>simulation</category>
+  <category>python</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-11-05-coupon-collector-50-provinces/</guid>
+  <pubDate>Thu, 05 Nov 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>100,000 random 32-bit IDs will probably contain a duplicate</title>
   <dc:creator>Claude </dc:creator>
@@ -11329,199 +12053,6 @@ font-style: inherit;">'y'</span>)</span>
   <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2025-12-01-medias/</guid>
   <pubDate>Mon, 01 Dec 2025 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Cómo un modelo erróneo predice mejor que uno correcto</title>
-  <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2025-06-08-trampa-prediccion/</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>Un modelo es una aproximación a la realidad y lo puedes usar para dos o tres cosas. Las que me interesan son:</p>
-<ul>
-<li>explicar esa realidad</li>
-<li>predecir esa realidad</li>
-</ul>
-<p>Aunque las dos cosas van de la mano, curiosamente, si priorizas una, la otra saldrá peor. No tiene por qué, pero es posible que el modelo que mejor explique no sea el que mejor prediga.</p>
-<p>Vamos a verlo.</p>
-<div id="libs" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> np</span>
-<span id="cb1-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> statsmodels.api <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> sm</span></code></pre></div></div>
-</div>
-<section id="explicación-breve-de-datos" class="level2">
-<h2 class="anchored" data-anchor-id="explicación-breve-de-datos">Explicación breve de datos</h2>
-<p>Tenemos tres métricas:</p>
-<ul>
-<li>Una binaria indica si un post de Linkedin está escrito con una llamada a la acción clara, pidiendo al lector un comentario.</li>
-<li>Otra con el número de likes del post.</li>
-<li>Otra con el número de impresiones del post.</li>
-</ul>
-<div id="data-generation" class="cell" data-execution_count="2">
-<div class="cell-output cell-output-stdout">
-<pre><code>[[ 0.00000000e+00  2.18672394e+01  9.23211313e+02]
- [ 1.00000000e+00  4.46817603e+01  6.43940827e+03]
- [ 1.00000000e+00  6.99405738e+01  6.29213754e+03]
- [ 1.00000000e+00  2.30548228e+01  7.26677121e+03]
- [ 0.00000000e+00  2.87513056e+01 -2.63316760e+03]]</code></pre>
-</div>
-</div>
-<p>Quien escriba el post solo puede actuar sobre cómo escribe el post. La idea es que su petición hará que más gente interactúe con el post y así Linkedin lo favorecerá con extra de impresiones.</p>
-</section>
-<section id="modelo-1.-todas-las-variables" class="level2">
-<h2 class="anchored" data-anchor-id="modelo-1.-todas-las-variables">Modelo 1. Todas las variables</h2>
-<div id="modelo-todo" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># model_all = sm.OLS(data[:, 2], sm.add_constant(data[:, :2])).fit()</span></span>
-<span id="cb3-2">model_all <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> sm.OLS(data[:, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>], data[:, :<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>]).fit()</span>
-<span id="cb3-3"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(model_all.summary())</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                                 OLS Regression Results                                
-=======================================================================================
-Dep. Variable:                      y   R-squared (uncentered):                   0.660
-Model:                            OLS   Adj. R-squared (uncentered):              0.660
-Method:                 Least Squares   F-statistic:                              969.8
-Date:                Thu, 10 Jul 2025   Prob (F-statistic):                   1.10e-234
-Time:                        16:02:58   Log-Likelihood:                         -9232.1
-No. Observations:                1000   AIC:                                  1.847e+04
-Df Residuals:                     998   BIC:                                  1.848e+04
-Df Model:                           2                                                  
-Covariance Type:            nonrobust                                                  
-==============================================================================
-                 coef    std err          t      P&gt;|t|      [0.025      0.975]
-------------------------------------------------------------------------------
-x1          5010.2264    256.231     19.554      0.000    4507.414    5513.039
-x2            -2.4367      4.666     -0.522      0.602     -11.593       6.719
-==============================================================================
-Omnibus:                        2.645   Durbin-Watson:                   1.898
-Prob(Omnibus):                  0.267   Jarque-Bera (JB):                2.320
-Skew:                           0.014   Prob(JB):                        0.313
-Kurtosis:                       2.766   Cond. No.                         127.
-==============================================================================
-
-Notes:
-[1] R² is computed without centering (uncentered) since the model does not contain a constant.
-[2] Standard Errors assume that the covariance matrix of the errors is correctly specified.</code></pre>
-</div>
-</div>
-<p>Calculo un error cuadrático medio para ver qué tan bien predice el modelo.</p>
-<div id="mse-todo" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> sklearn.metrics <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> mean_squared_error</span>
-<span id="cb5-2"></span>
-<span id="cb5-3">fitted <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> model_all.predict(data[:, :<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>])</span>
-<span id="cb5-4">mse_all <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> mean_squared_error(data[:, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>], fitted)</span></code></pre></div></div>
-</div>
-</section>
-<section id="modelo-2.-solo-la-variable-acción" class="level2">
-<h2 class="anchored" data-anchor-id="modelo-2.-solo-la-variable-acción">Modelo 2. Solo la variable acción</h2>
-<div id="modelo-accion" class="cell" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">model_action <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> sm.OLS(data[:, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>], data[:, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>]).fit()</span>
-<span id="cb6-2"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(model_action.summary())</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                                 OLS Regression Results                                
-=======================================================================================
-Dep. Variable:                      y   R-squared (uncentered):                   0.660
-Model:                            OLS   Adj. R-squared (uncentered):              0.660
-Method:                 Least Squares   F-statistic:                              1941.
-Date:                Thu, 10 Jul 2025   Prob (F-statistic):                   2.27e-236
-Time:                        16:02:58   Log-Likelihood:                         -9232.2
-No. Observations:                1000   AIC:                                  1.847e+04
-Df Residuals:                     999   BIC:                                  1.847e+04
-Df Model:                           1                                                  
-Covariance Type:            nonrobust                                                  
-==============================================================================
-                 coef    std err          t      P&gt;|t|      [0.025      0.975]
-------------------------------------------------------------------------------
-x1          4889.6271    110.993     44.054      0.000    4671.821    5107.433
-==============================================================================
-Omnibus:                        2.624   Durbin-Watson:                   1.899
-Prob(Omnibus):                  0.269   Jarque-Bera (JB):                2.305
-Skew:                           0.013   Prob(JB):                        0.316
-Kurtosis:                       2.766   Cond. No.                         1.00
-==============================================================================
-
-Notes:
-[1] R² is computed without centering (uncentered) since the model does not contain a constant.
-[2] Standard Errors assume that the covariance matrix of the errors is correctly specified.</code></pre>
-</div>
-</div>
-<div id="06c57f90" class="cell" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">fitted <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> model_action.predict(data[:, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>])</span>
-<span id="cb8-2">mse_action <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> mean_squared_error(data[:, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>], fitted)</span></code></pre></div></div>
-</div>
-<div id="526fb346" class="cell" data-execution_count="7">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"MSE modelo con acción:"</span>, mse_action)</span>
-<span id="cb9-2"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"MSE modelo con todo:"</span>, mse_all)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>MSE modelo con acción: 6116622.935458791
-MSE modelo con todo: 6114951.786343323</code></pre>
-</div>
-</div>
-
-
-</section>
-
- ]]></description>
-  <category>modelos predictivos</category>
-  <category>causalidad</category>
-  <category>simulación</category>
-  <category>python</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2025-06-08-trampa-prediccion/</guid>
-  <pubDate>Sun, 08 Jun 2025 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
