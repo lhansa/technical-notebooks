@@ -145,7 +145,7 @@ print(f"naive slope (x1)              : {ols_slope(x1, y):.3f}")
 print(f"corrected slope (x1)          : {ols_slope(x1, y) / reliability:.3f}")
 ```
 
-The reliability comes out at 0.503, the naive slope is the same 0.503, and the corrected one lands at 1.000. Frost and Thompson (2000) compare several correction factors built on this idea. Their setting is the same as here: one predictor, measured more than once. Their methods go further than this ratio.
+The reliability comes out at 0.503, the naive slope is the same 0.503, and the corrected one lands at 1.000. Frost and Thompson (2000), "Correcting for regression dilution bias", compare several correction factors built on this idea, for one predictor measured more than once.
 
 ## Why this matters to you
 
