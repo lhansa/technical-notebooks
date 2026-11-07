@@ -10,7 +10,585 @@
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Notes on statistics and data analysis</description>
 <generator>quarto-1.11.9</generator>
-<lastBuildDate>Thu, 05 Nov 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 07 Nov 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Your noisy predictor halves the slope and the model never tells you</title>
+  <dc:creator>Claude </dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-11-07-noisy-predictor-halves-the-slope/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>You build <img src="https://latex.codecogs.com/png.latex?y"> from <img src="https://latex.codecogs.com/png.latex?x"> with a slope of exactly 1. Then you measure <img src="https://latex.codecogs.com/png.latex?x"> with some error, as much noise as signal, and fit a line.</p>
+<p>The slope comes out at 0.5.</p>
+<p>Nothing in the output looks wrong. The standard error is tiny and the p-value is indistinguishable from zero. The model has no way to know that the <img src="https://latex.codecogs.com/png.latex?x"> it sees is not the <img src="https://latex.codecogs.com/png.latex?x"> that did the work.</p>
+<section id="the-simulation" class="level2">
+<h2 class="anchored" data-anchor-id="the-simulation">The simulation</h2>
+<p>I start with a true predictor <img src="https://latex.codecogs.com/png.latex?x"> with variance 1, and a response that follows it with a slope of 1 plus a little noise of its own.</p>
+<div id="libs" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb1-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> statsmodels.api <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> sm</span></code></pre></div></div>
+</div>
+<div id="data" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">42</span>)</span>
+<span id="cb2-2">n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100_000</span></span>
+<span id="cb2-3">x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.normal(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, n)                <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># true predictor, var(x) = 1</span></span>
+<span id="cb2-4">y <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> np.random.normal(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.3</span>, n)          <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># true slope is 1</span></span>
+<span id="cb2-5"></span>
+<span id="cb2-6"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> ols_slope(pred, resp):</span>
+<span id="cb2-7">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> np.cov(pred, resp)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> np.var(pred, ddof<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span></code></pre></div></div>
+</div>
+<p>Now the measurement. You never see <img src="https://latex.codecogs.com/png.latex?x">. You see <img src="https://latex.codecogs.com/png.latex?x"> plus an error <img src="https://latex.codecogs.com/png.latex?w"> with variance 1, the same as the variance of <img src="https://latex.codecogs.com/png.latex?x"> itself.</p>
+<div id="sigma2-1" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">w <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.normal(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, n)                <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># measurement error, variance 1</span></span>
+<span id="cb3-2">x_obs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> w</span>
+<span id="cb3-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"true predictor : </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>ols_slope(x, y)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb3-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"noisy predictor: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>ols_slope(x_obs, y)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb3-5"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"theory         : </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>true predictor : 1.002
+noisy predictor: 0.501
+theory         : 0.500</code></pre>
+</div>
+</div>
+<p>With the true <img src="https://latex.codecogs.com/png.latex?x"> you recover 1.002. With the noisy one you get 0.501. The theory line says 0.5, and the next section shows where it comes from.</p>
+</section>
+<section id="where-the-half-comes-from" class="level2">
+<h2 class="anchored" data-anchor-id="where-the-half-comes-from">Where the half comes from</h2>
+<p>The fitted slope is the covariance between predictor and response, divided by the variance of the predictor.</p>
+<p>The covariance doesn’t care about the error. The noise has nothing to do with <img src="https://latex.codecogs.com/png.latex?x"> or with <img src="https://latex.codecogs.com/png.latex?y">, so it adds nothing to the numerator. The denominator does grow: the variance you see is the variance of <img src="https://latex.codecogs.com/png.latex?x"> plus the variance of the error.</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Chat%5Cbeta%20%5Capprox%20%5Cbeta%20%5Ccdot%20%5Cfrac%7B%5Coperatorname%7Bvar%7D(x)%7D%7B%5Coperatorname%7Bvar%7D(x)%20+%20%5Coperatorname%7Bvar%7D(w)%7D"></p>
+<p>In words: the slope you fit is the true one times the share of the predictor’s variance that is real signal. That share is called the reliability. Here it is <img src="https://latex.codecogs.com/png.latex?1/(1+1)%20=%200.5">.</p>
+<p><strong>The noise pulls the slope towards zero, by a fixed factor.</strong> Run it again with new noise and you land on 0.5 again. You can check it with less noise. With an error variance of 0.25 the factor is <img src="https://latex.codecogs.com/png.latex?1/(1+0.25)%20=%200.8">.</p>
+<div id="sigma2-quarter" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">x_obs_small <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> np.random.normal(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>, n)   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># sd 0.5, variance 0.25</span></span>
+<span id="cb5-2"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"observed: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>ols_slope(x_obs_small, y)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb5-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"theory  : </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.25</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>observed: 0.800
+theory  : 0.800</code></pre>
+</div>
+</div>
+<p>Observed 0.800, theory 0.800.</p>
+</section>
+<section id="why-the-model-doesnt-warn-you" class="level2">
+<h2 class="anchored" data-anchor-id="why-the-model-doesnt-warn-you">Why the model doesn’t warn you</h2>
+<p>I fit the noisy case with statsmodels and read everything it reports.</p>
+<div id="model-silent" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">fit <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> sm.OLS(y, sm.add_constant(x_obs)).fit()</span>
+<span id="cb7-2"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"slope      : </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>fit<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>params[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb7-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"std error  : </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>fit<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>bse[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.5f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb7-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"p-value    : </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>fit<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>pvalues[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3g}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb7-5"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"R-squared  : </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>fit<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>rsquared<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb7-6">lo, hi <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> fit.conf_int()[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]</span>
+<span id="cb7-7"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"95% CI     : [</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>lo<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>hi<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">]"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>slope      : 0.501
+std error  : 0.00172
+p-value    : 0
+R-squared  : 0.459
+95% CI     : [0.498, 0.504]</code></pre>
+</div>
+</div>
+<p>The standard error is 0.0017 and the confidence interval runs from 0.498 to 0.504. It is narrow, and it doesn’t contain the true value of 1.</p>
+<p>The interval is right about what it measures. It tells you where the slope of <img src="https://latex.codecogs.com/png.latex?y"> on the <em>noisy</em> <img src="https://latex.codecogs.com/png.latex?x"> sits, and it sits there with great precision. Nobody told it that you cared about the other slope.</p>
+<p>The picture shows the same thing. The fitted line cuts through the cloud much flatter than the true one.</p>
+<div id="cell-plot" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">idx <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.choice(n, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2000</span>, replace<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span>)   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># subsample for readability</span></span>
+<span id="cb9-2">grid <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linspace(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>)</span>
+<span id="cb9-3">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots()</span>
+<span id="cb9-4">ax.scatter(x_obs[idx], y[idx], s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, alpha<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.4</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"grey"</span>)</span>
+<span id="cb9-5">ax.plot(grid, grid, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"black"</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"true line (slope 1)"</span>)</span>
+<span id="cb9-6">ax.plot(grid, fit.params[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> fit.params[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> grid, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"red"</span>,</span>
+<span id="cb9-7">        label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"fitted line (slope </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>fit<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>params[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">)"</span>)</span>
+<span id="cb9-8">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"observed x (true x + noise)"</span>)</span>
+<span id="cb9-9">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"y"</span>)</span>
+<span id="cb9-10">ax.legend()</span>
+<span id="cb9-11">plt.show()</span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-11-07-noisy-predictor-halves-the-slope/index_files/figure-html/plot-output-1.png" id="plot" width="585" height="428" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>You see “small and significant” and you read “the effect is small”. With a noisy predictor, that reading can be off by a factor of two, and the output looks exactly the same.</p>
+</section>
+<section id="measure-twice" class="level2">
+<h2 class="anchored" data-anchor-id="measure-twice">Measure twice</h2>
+<p>If you can measure each person more than once, the noise shrinks. Average <img src="https://latex.codecogs.com/png.latex?k"> independent measurements and the error variance drops from <img src="https://latex.codecogs.com/png.latex?%5Csigma%5E2"> to <img src="https://latex.codecogs.com/png.latex?%5Csigma%5E2/k">, so here the factor becomes <img src="https://latex.codecogs.com/png.latex?1/(1+1/k)">.</p>
+<div id="averaging" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> averaged_slope(k):</span>
+<span id="cb10-2">    x_bar <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.mean([x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> np.random.normal(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, n) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> _ <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(k)], axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb10-3">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> ols_slope(x_bar, y), <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> k)</span>
+<span id="cb10-4"></span>
+<span id="cb10-5"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> k <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>):</span>
+<span id="cb10-6">    obs, theo <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> averaged_slope(k)</span>
+<span id="cb10-7">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"k=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>k<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:2d}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">  observed </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>obs<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">  theory </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>theo<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>k= 1  observed 0.501  theory 0.500
+k= 2  observed 0.668  theory 0.667
+k=10  observed 0.912  theory 0.909</code></pre>
+</div>
+</div>
+<p>Two measurements give 0.668, close to 0.667. Ten give 0.912, and you still haven’t reached 1.</p>
+<p>Averaging helps, but each extra measurement buys you less. With any finite <img src="https://latex.codecogs.com/png.latex?k">, some bias stays.</p>
+<p>The repeats give you one more thing: a way to undo the bias. Two independent measurements of the same quantity correlate with each other only through the true <img src="https://latex.codecogs.com/png.latex?x">, so their correlation estimates the reliability. Divide the diluted slope by it and the slope comes back.</p>
+<div id="correction" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">x1 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> np.random.normal(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, n)</span>
+<span id="cb12-2">x2 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> np.random.normal(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, n)</span>
+<span id="cb12-3">reliability <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.corrcoef(x1, x2)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]          <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># estimates var(x) / (var(x) + sigma2)</span></span>
+<span id="cb12-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"reliability of one measurement: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>reliability<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb12-5"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"naive slope (x1)              : </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>ols_slope(x1, y)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb12-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"corrected slope (x1)          : </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>ols_slope(x1, y) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> reliability<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>reliability of one measurement: 0.503
+naive slope (x1)              : 0.503
+corrected slope (x1)          : 1.000</code></pre>
+</div>
+</div>
+<p>The reliability comes out at 0.503, the naive slope is the same 0.503, and the corrected one lands at 1.000. Frost and Thompson (2000), “Correcting for regression dilution bias”, compare several correction factors built on this idea, for one predictor measured more than once.</p>
+</section>
+<section id="why-this-matters-to-you" class="level2">
+<h2 class="anchored" data-anchor-id="why-this-matters-to-you">Why this matters to you</h2>
+<p>Blood pressure from one visit, a survey score, a single lab reading: all of them are <img src="https://latex.codecogs.com/png.latex?x"> plus an error you didn’t choose. Regress something on them and the coefficient ends up closer to zero than the real one.</p>
+<p>So before you write “the effect is small”, ask how well <img src="https://latex.codecogs.com/png.latex?x"> was measured. If there is a second measurement, use it to estimate the reliability. If there isn’t, say that the true slope is at least as far from zero as what you got, and probably further.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>regression</category>
+  <category>simulation</category>
+  <category>python</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-11-07-noisy-predictor-halves-the-slope/</guid>
+  <pubDate>Sat, 07 Nov 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>To see every one of 50 provinces in a random sample, you need about 225 draws, not 50</title>
   <dc:creator>Claude </dc:creator>
@@ -9355,2704 +9933,6 @@ font-style: inherit;">"</span>)</span></code></pre></div></div>
   <category>modelos predictivos</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2026-08-28-de-donde-sale-el-log-loss/</guid>
   <pubDate>Fri, 28 Aug 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Cálculo de medias con distribuciones tramposas</title>
-  <dc:creator>Leonardo Hansa</dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2025-12-01-medias/</link>
-  <description><![CDATA[ 
-
-
-
-
-<section id="introducción" class="level2">
-<h2 class="anchored" data-anchor-id="introducción">Introducción</h2>
-<p>La media es uno de los estadísticos más utilizados, pero también uno de los más sensibles a la distribución subyacente de los datos. Vamos a ver cómo las distribuciones con colas pesadas (como la log-normal) pueden hacer que la media sea muy inestable, mientras que las distribuciones más simétricas (como la normal) producen medias más estables.</p>
-<div id="2d93fb0b" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> np</span>
-<span id="cb1-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> plt</span>
-<span id="cb1-3"></span>
-<span id="cb1-4">np.random.seed(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">42</span>)</span></code></pre></div></div>
-</div>
-</section>
-<section id="caso-1-distribución-normal-alturas" class="level2">
-<h2 class="anchored" data-anchor-id="caso-1-distribución-normal-alturas">Caso 1: Distribución Normal (Alturas)</h2>
-<p>Empezamos con algo que sabemos que se comporta bien: las alturas de individuos. Estas siguen aproximadamente una distribución normal.</p>
-<div id="ba80eb19" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Primera muestra de alturas (en cm)</span></span>
-<span id="cb2-2"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Media de 170 cm, desviación estándar de 10 cm</span></span>
-<span id="cb2-3">alturas_muestra1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.random.normal(loc<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">170</span>, scale<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, size<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>)</span>
-<span id="cb2-4">media_alturas1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.mean(alturas_muestra1)</span>
-<span id="cb2-5"></span>
-<span id="cb2-6"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Media de la primera muestra de alturas: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>media_alturas1<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;"> cm"</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Media de la primera muestra de alturas: 170.19 cm</code></pre>
-</div>
-</div>
-<div id="9c48f88a" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Segunda muestra de alturas</span></span>
-<span id="cb4-2">alturas_muestra2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.random.normal(loc<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">170</span>, scale<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, size<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>)</span>
-<span id="cb4-3">media_alturas2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.mean(alturas_muestra2)</span>
-<span id="cb4-4"></span>
-<span id="cb4-5"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Media de la segunda muestra de alturas: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>media_alturas2<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;"> cm"</span>)</span>
-<span id="cb4-6"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Diferencia entre medias: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">abs</span>(media_alturas2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> media_alturas1)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;"> cm"</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Media de la segunda muestra de alturas: 170.71 cm
-Diferencia entre medias: 0.52 cm</code></pre>
-</div>
-</div>
-<div id="9b6a4c36" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Visualización</span></span>
-<span id="cb6-2">fig, axes <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, figsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">12</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>))</span>
-<span id="cb6-3"></span>
-<span id="cb6-4">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].hist(alturas_muestra1, bins<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">30</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.7</span>, edgecolor<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'black'</span>)</span>
-<span id="cb6-5">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].axvline(media_alturas1, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'red'</span>, linestyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'--'</span>, linewidth<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f'Media: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>media_alturas1<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'</span>)</span>
-<span id="cb6-6">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Altura (cm)'</span>)</span>
-<span id="cb6-7">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Frecuencia'</span>)</span>
-<span id="cb6-8">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Muestra 1: Alturas'</span>)</span>
-<span id="cb6-9">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].legend()</span>
-<span id="cb6-10"></span>
-<span id="cb6-11">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].hist(alturas_muestra2, bins<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">30</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.7</span>, edgecolor<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'black'</span>)</span>
-<span id="cb6-12">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].axvline(media_alturas2, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'red'</span>, linestyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'--'</span>, linewidth<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f'Media: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>media_alturas2<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'</span>)</span>
-<span id="cb6-13">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Altura (cm)'</span>)</span>
-<span id="cb6-14">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Frecuencia'</span>)</span>
-<span id="cb6-15">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Muestra 2: Alturas'</span>)</span>
-<span id="cb6-16">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].legend()</span>
-<span id="cb6-17"></span>
-<span id="cb6-18">plt.tight_layout()</span>
-<span id="cb6-19">plt.show()</span></code></pre></div></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-12-01-medias/index_files/figure-html/cell-5-output-1.png" width="1142" height="374" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Como puedes ver, las medias son muy similares entre sí y cercanas al valor real de 170 cm. La distribución normal hace que la media sea un estadístico estable.</p>
-</section>
-<section id="caso-2-distribución-log-normal-salarios" class="level2">
-<h2 class="anchored" data-anchor-id="caso-2-distribución-log-normal-salarios">Caso 2: Distribución Log-Normal (Salarios)</h2>
-<p>Ahora vamos con algo más interesante: salarios anuales. Los salarios no siguen una distribución normal, sino una distribución log-normal (hay muchas personas con salarios bajos o medios, y pocas con salarios muy altos).</p>
-<div id="fe5f85cf" class="cell" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Primera muestra de salarios (en miles de euros)</span></span>
-<span id="cb7-2"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Usamos log-normal: la mayoría gana poco, algunos ganan mucho</span></span>
-<span id="cb7-3">salarios_muestra1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.random.lognormal(mean<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3.2</span>, sigma<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.6</span>, size<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>)</span>
-<span id="cb7-4">media_salarios1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.mean(salarios_muestra1)</span>
-<span id="cb7-5"></span>
-<span id="cb7-6"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Media de la primera muestra de salarios: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>media_salarios1<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;"> mil €"</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Media de la primera muestra de salarios: 29.39 mil €</code></pre>
-</div>
-</div>
-<div id="df4dea94" class="cell" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Segunda muestra de salarios</span></span>
-<span id="cb9-2">salarios_muestra2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.random.lognormal(mean<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3.2</span>, sigma<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.6</span>, size<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>)</span>
-<span id="cb9-3">media_salarios2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.mean(salarios_muestra2)</span>
-<span id="cb9-4"></span>
-<span id="cb9-5"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Media de la segunda muestra de salarios: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>media_salarios2<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;"> mil €"</span>)</span>
-<span id="cb9-6"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Diferencia entre medias: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">abs</span>(media_salarios2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> media_salarios1)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;"> mil €"</span>)</span>
-<span id="cb9-7"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Diferencia relativa: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">abs</span>(media_salarios2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> media_salarios1) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> media_salarios1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.1f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">%"</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Media de la segunda muestra de salarios: 29.29 mil €
-Diferencia entre medias: 0.10 mil €
-Diferencia relativa: 0.4%</code></pre>
-</div>
-</div>
-<div id="fb3e4188" class="cell" data-execution_count="7">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Visualización</span></span>
-<span id="cb11-2">fig, axes <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, figsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">12</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>))</span>
-<span id="cb11-3"></span>
-<span id="cb11-4">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].hist(salarios_muestra1, bins<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">50</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.7</span>, edgecolor<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'black'</span>)</span>
-<span id="cb11-5">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].axvline(media_salarios1, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'red'</span>, linestyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'--'</span>, linewidth<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f'Media: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>media_salarios1<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'</span>)</span>
-<span id="cb11-6">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Salario (miles €)'</span>)</span>
-<span id="cb11-7">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Frecuencia'</span>)</span>
-<span id="cb11-8">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Muestra 1: Salarios'</span>)</span>
-<span id="cb11-9">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].legend()</span>
-<span id="cb11-10"></span>
-<span id="cb11-11">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].hist(salarios_muestra2, bins<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">50</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.7</span>, edgecolor<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'black'</span>)</span>
-<span id="cb11-12">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].axvline(media_salarios2, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'red'</span>, linestyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'--'</span>, linewidth<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f'Media: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>media_salarios2<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'</span>)</span>
-<span id="cb11-13">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Salario (miles €)'</span>)</span>
-<span id="cb11-14">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Frecuencia'</span>)</span>
-<span id="cb11-15">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Muestra 2: Salarios'</span>)</span>
-<span id="cb11-16">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].legend()</span>
-<span id="cb11-17"></span>
-<span id="cb11-18">plt.tight_layout()</span>
-<span id="cb11-19">plt.show()</span></code></pre></div></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-12-01-medias/index_files/figure-html/cell-8-output-1.png" width="1141" height="374" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Observa la diferencia: aunque ambas muestras vienen de la misma distribución, las medias pueden diferir bastante más que en el caso de las alturas. Esto se debe a que unos pocos valores extremos (salarios muy altos) tienen un impacto desproporcionado en la media.</p>
-<section id="un-caso-extra" class="level3">
-<h3 class="anchored" data-anchor-id="un-caso-extra">Un caso extra</h3>
-<p>Vamos a ver cómo se comporta la media en diferentes deciles de una distribución log-normal. Generaremos 5 muestras y en cada una calcularemos la media del valor real (después de quitar el logaritmo) por deciles.</p>
-<div id="7cdfdb7b" class="cell" data-execution_count="8">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Generamos 5 muestras de una log-normal con media=13.93 y sd=1.56</span></span>
-<span id="cb12-2">n_muestras <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span></span>
-<span id="cb12-3">n_observaciones <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span></span>
-<span id="cb12-4">media_log <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">13.93</span></span>
-<span id="cb12-5">sd_log <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1.56</span></span>
-<span id="cb12-6"></span>
-<span id="cb12-7"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Almacenaremos los resultados</span></span>
-<span id="cb12-8">resultados_deciles <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> []</span>
-<span id="cb12-9"></span>
-<span id="cb12-10"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(n_muestras):</span>
-<span id="cb12-11">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Generamos la muestra log-normal</span></span>
-<span id="cb12-12">    muestra_log <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.random.normal(loc<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>media_log, scale<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>sd_log, size<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>n_observaciones)</span>
-<span id="cb12-13">    </span>
-<span id="cb12-14">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Quitamos el logaritmo para obtener los valores reales</span></span>
-<span id="cb12-15">    muestra_real <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.exp(muestra_log)</span>
-<span id="cb12-16">    </span>
-<span id="cb12-17">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Calculamos los deciles</span></span>
-<span id="cb12-18">    deciles <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.percentile(muestra_real, np.arange(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">101</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>))</span>
-<span id="cb12-19">    </span>
-<span id="cb12-20">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Separamos por deciles y calculamos la media en cada grupo</span></span>
-<span id="cb12-21">    medias_por_decil <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> []</span>
-<span id="cb12-22">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> j <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>):</span>
-<span id="cb12-23">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Seleccionamos los valores en este decil</span></span>
-<span id="cb12-24">        valores_decil <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> muestra_real[(muestra_real <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&gt;=</span> deciles[j]) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&amp;</span> (muestra_real <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&lt;</span> deciles[j<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>])]</span>
-<span id="cb12-25">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">if</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(valores_decil) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&gt;</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>:</span>
-<span id="cb12-26">            media_decil <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.mean(valores_decil)</span>
-<span id="cb12-27">            medias_por_decil.append(media_decil)</span>
-<span id="cb12-28">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">else</span>:</span>
-<span id="cb12-29">            medias_por_decil.append(np.nan)</span>
-<span id="cb12-30">    </span>
-<span id="cb12-31">    resultados_deciles.append(medias_por_decil)</span>
-<span id="cb12-32">    </span>
-<span id="cb12-33">    <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\n</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">Muestra </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>i<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">:"</span>)</span>
-<span id="cb12-34">    <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"  Media total: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>mean(muestra_real)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span>
-<span id="cb12-35">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> j, media_d <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">enumerate</span>(medias_por_decil):</span>
-<span id="cb12-36">        <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"  Decil </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>j<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>media_d<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Muestra 1:
-  Media total: 3245122.78
-  Decil 1: 74182.00
-  Decil 2: 215424.85
-  Decil 3: 381586.65
-  Decil 4: 593034.46
-  Decil 5: 909211.42
-  Decil 6: 1357783.42
-  Decil 7: 2012560.74
-  Decil 8: 3056673.16
-  Decil 9: 5122460.14
-  Decil 10: 17461752.91
-
-Muestra 2:
-  Media total: 3769778.05
-  Decil 1: 76935.76
-  Decil 2: 208109.96
-  Decil 3: 379040.06
-  Decil 4: 579667.67
-  Decil 5: 865348.03
-  Decil 6: 1226363.31
-  Decil 7: 1822683.28
-  Decil 8: 2915216.24
-  Decil 9: 5368291.09
-  Decil 10: 23078208.51
-
-Muestra 3:
-  Media total: 3969137.02
-  Decil 1: 82904.05
-  Decil 2: 203400.92
-  Decil 3: 351481.05
-  Decil 4: 564782.11
-  Decil 5: 842916.21
-  Decil 6: 1238364.99
-  Decil 7: 1935709.30
-  Decil 8: 3385670.28
-  Decil 9: 6115399.70
-  Decil 10: 22436723.83
-
-Muestra 4:
-  Media total: 4187573.55
-  Decil 1: 80960.84
-  Decil 2: 233386.86
-  Decil 3: 385482.03
-  Decil 4: 606171.51
-  Decil 5: 926059.49
-  Decil 6: 1380572.15
-  Decil 7: 2164981.72
-  Decil 8: 3502015.99
-  Decil 9: 6727592.72
-  Decil 10: 24663202.43
-
-Muestra 5:
-  Media total: 4010613.68
-  Decil 1: 83575.16
-  Decil 2: 227861.29
-  Decil 3: 414914.23
-  Decil 4: 648664.37
-  Decil 5: 951921.43
-  Decil 6: 1420830.85
-  Decil 7: 2114201.19
-  Decil 8: 3331026.16
-  Decil 9: 5894274.35
-  Decil 10: 23072398.40</code></pre>
-</div>
-</div>
-<div id="142605a8" class="cell" data-execution_count="9">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Visualización de las medias por decil</span></span>
-<span id="cb14-2">fig, axes <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, figsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">14</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>))</span>
-<span id="cb14-3"></span>
-<span id="cb14-4"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Gráfico 1: Medias por decil para cada muestra</span></span>
-<span id="cb14-5"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> i, medias <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">enumerate</span>(resultados_deciles):</span>
-<span id="cb14-6">    axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].plot(<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">11</span>), medias, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'o-'</span>, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f'Muestra </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>i<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.7</span>)</span>
-<span id="cb14-7"></span>
-<span id="cb14-8">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Decil'</span>)</span>
-<span id="cb14-9">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Media del valor real'</span>)</span>
-<span id="cb14-10">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Media por decil en 5 muestras'</span>)</span>
-<span id="cb14-11">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].legend()</span>
-<span id="cb14-12">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].grid(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.3</span>)</span>
-<span id="cb14-13">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_xticks(<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">11</span>))</span>
-<span id="cb14-14"></span>
-<span id="cb14-15"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Gráfico 2: Misma visualización pero en escala log</span></span>
-<span id="cb14-16"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> i, medias <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">enumerate</span>(resultados_deciles):</span>
-<span id="cb14-17">    axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].plot(<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">11</span>), medias, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'o-'</span>, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f'Muestra </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>i<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.7</span>)</span>
-<span id="cb14-18"></span>
-<span id="cb14-19">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Decil'</span>)</span>
-<span id="cb14-20">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Media del valor real (escala log)'</span>)</span>
-<span id="cb14-21">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Media por decil en 5 muestras (escala log)'</span>)</span>
-<span id="cb14-22">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_yscale(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'log'</span>)</span>
-<span id="cb14-23">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].legend()</span>
-<span id="cb14-24">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].grid(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.3</span>)</span>
-<span id="cb14-25">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_xticks(<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">11</span>))</span>
-<span id="cb14-26"></span>
-<span id="cb14-27">plt.tight_layout()</span>
-<span id="cb14-28">plt.show()</span></code></pre></div></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-12-01-medias/index_files/figure-html/cell-10-output-1.png" width="1334" height="470" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<div id="21ceaac2" class="cell" data-execution_count="10">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Estadísticas comparativas entre deciles</span></span>
-<span id="cb15-2">resultados_array <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.array(resultados_deciles)</span>
-<span id="cb15-3"></span>
-<span id="cb15-4"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\n</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">Estadísticas agregadas por decil (5 muestras):"</span>)</span>
-<span id="cb15-5"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> j <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>):</span>
-<span id="cb15-6">    medias_decil_j <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> resultados_array[:, j]</span>
-<span id="cb15-7">    <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\n</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">Decil </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>j<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">:"</span>)</span>
-<span id="cb15-8">    <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"  Media de las medias: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>mean(medias_decil_j)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span>
-<span id="cb15-9">    <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"  Desviación estándar: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>std(medias_decil_j)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span>
-<span id="cb15-10">    <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"  Coeficiente de variación: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>std(medias_decil_j) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>mean(medias_decil_j) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">%"</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Estadísticas agregadas por decil (5 muestras):
-
-Decil 1:
-  Media de las medias: 79711.56
-  Desviación estándar: 3604.48
-  Coeficiente de variación: 4.52%
-
-Decil 2:
-  Media de las medias: 217636.77
-  Desviación estándar: 11409.80
-  Coeficiente de variación: 5.24%
-
-Decil 3:
-  Media de las medias: 382500.80
-  Desviación estándar: 20172.04
-  Coeficiente de variación: 5.27%
-
-Decil 4:
-  Media de las medias: 598464.02
-  Desviación estándar: 28624.24
-  Coeficiente de variación: 4.78%
-
-Decil 5:
-  Media de las medias: 899091.31
-  Desviación estándar: 39786.86
-  Coeficiente de variación: 4.43%
-
-Decil 6:
-  Media de las medias: 1324782.94
-  Desviación estándar: 78206.33
-  Coeficiente de variación: 5.90%
-
-Decil 7:
-  Media de las medias: 2010027.25
-  Desviación estándar: 122874.27
-  Coeficiente de variación: 6.11%
-
-Decil 8:
-  Media de las medias: 3238120.36
-  Desviación estándar: 217822.65
-  Coeficiente de variación: 6.73%
-
-Decil 9:
-  Media de las medias: 5845603.60
-  Desviación estándar: 566361.59
-  Coeficiente de variación: 9.69%
-
-Decil 10:
-  Media de las medias: 22142457.22
-  Desviación estándar: 2453167.88
-  Coeficiente de variación: 11.08%</code></pre>
-</div>
-</div>
-<p>Como puedes ver, el último decil (el 10%) con valores más altos tiene medias mucho más altas y también mucha más variabilidad entre muestras. Esto demuestra cómo los valores extremos en distribuciones log-normales dominan la media global.</p>
-</section>
-</section>
-<section id="comparación-de-estabilidad" class="level2">
-<h2 class="anchored" data-anchor-id="comparación-de-estabilidad">Comparación de Estabilidad</h2>
-<p>Vamos a cuantificar esta diferencia generando muchas muestras y viendo cómo varía la media:</p>
-<div id="2ec07297" class="cell" data-execution_count="11">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Generamos 100 muestras de cada tipo</span></span>
-<span id="cb17-2">n_simulaciones <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span></span>
-<span id="cb17-3">medias_alturas <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> []</span>
-<span id="cb17-4">medias_salarios <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> []</span>
-<span id="cb17-5"></span>
-<span id="cb17-6"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> _ <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(n_simulaciones):</span>
-<span id="cb17-7">    muestra_altura <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.random.normal(loc<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">170</span>, scale<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, size<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>)</span>
-<span id="cb17-8">    muestra_salario <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.random.lognormal(mean<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3.2</span>, sigma<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.6</span>, size<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>)</span>
-<span id="cb17-9">    </span>
-<span id="cb17-10">    medias_alturas.append(np.mean(muestra_altura))</span>
-<span id="cb17-11">    medias_salarios.append(np.mean(muestra_salario))</span>
-<span id="cb17-12"></span>
-<span id="cb17-13">medias_alturas <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.array(medias_alturas)</span>
-<span id="cb17-14">medias_salarios <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.array(medias_salarios)</span>
-<span id="cb17-15"></span>
-<span id="cb17-16"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Estadísticas de las medias muestrales:"</span>)</span>
-<span id="cb17-17"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\n</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">Alturas:"</span>)</span>
-<span id="cb17-18"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"  Media de las medias: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>mean(medias_alturas)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;"> cm"</span>)</span>
-<span id="cb17-19"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"  Desviación estándar: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>std(medias_alturas)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;"> cm"</span>)</span>
-<span id="cb17-20"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"  Coeficiente de variación: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>std(medias_alturas) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>mean(medias_alturas) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">%"</span>)</span>
-<span id="cb17-21"></span>
-<span id="cb17-22"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\n</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">Salarios:"</span>)</span>
-<span id="cb17-23"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"  Media de las medias: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>mean(medias_salarios)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;"> mil €"</span>)</span>
-<span id="cb17-24"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"  Desviación estándar: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>std(medias_salarios)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;"> mil €"</span>)</span>
-<span id="cb17-25"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"  Coeficiente de variación: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>std(medias_salarios) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>mean(medias_salarios) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">%"</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Estadísticas de las medias muestrales:
-
-Alturas:
-  Media de las medias: 169.99 cm
-  Desviación estándar: 0.30 cm
-  Coeficiente de variación: 0.18%
-
-Salarios:
-  Media de las medias: 29.39 mil €
-  Desviación estándar: 0.62 mil €
-  Coeficiente de variación: 2.11%</code></pre>
-</div>
-</div>
-<div id="fe5d8077" class="cell" data-execution_count="12">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Visualización de la distribución de las medias</span></span>
-<span id="cb19-2">fig, axes <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, figsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">12</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>))</span>
-<span id="cb19-3"></span>
-<span id="cb19-4">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].hist(medias_alturas, bins<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">30</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.7</span>, edgecolor<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'black'</span>, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'blue'</span>)</span>
-<span id="cb19-5">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].axvline(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">170</span>, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'red'</span>, linestyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'--'</span>, linewidth<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Valor teórico'</span>)</span>
-<span id="cb19-6">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Media muestral (cm)'</span>)</span>
-<span id="cb19-7">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Frecuencia'</span>)</span>
-<span id="cb19-8">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Distribución de medias: Alturas'</span>)</span>
-<span id="cb19-9">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].legend()</span>
-<span id="cb19-10"></span>
-<span id="cb19-11">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].hist(medias_salarios, bins<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">30</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.7</span>, edgecolor<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'black'</span>, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'green'</span>)</span>
-<span id="cb19-12">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].axvline(np.exp(<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3.2</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.6</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>), color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'red'</span>, linestyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'--'</span>, linewidth<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Valor teórico'</span>)</span>
-<span id="cb19-13">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Media muestral (miles €)'</span>)</span>
-<span id="cb19-14">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Frecuencia'</span>)</span>
-<span id="cb19-15">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Distribución de medias: Salarios'</span>)</span>
-<span id="cb19-16">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].legend()</span>
-<span id="cb19-17"></span>
-<span id="cb19-18">plt.tight_layout()</span>
-<span id="cb19-19">plt.show()</span></code></pre></div></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-12-01-medias/index_files/figure-html/cell-13-output-1.png" width="1142" height="374" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="caso-3-leyes-de-potencia-terremotos" class="level2">
-<h2 class="anchored" data-anchor-id="caso-3-leyes-de-potencia-terremotos">Caso 3: Leyes de Potencia (Terremotos)</h2>
-<p>Ahora viene lo verdaderamente interesante: las leyes de potencia (power laws). Estas distribuciones son aún más extremas que la log-normal. Aparecen en terremotos (ley de Gutenberg-Richter), tamaños de ciudades (ley de Zipf), número de enlaces a páginas web, citas de artículos científicos… En todos estos casos, la media puede ser completamente dominada por unos pocos eventos extremos.</p>
-<div id="2e2d2d90" class="cell" data-execution_count="13">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Generamos magnitudes de terremotos siguiendo una ley de potencia</span></span>
-<span id="cb20-2"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># La mayoría son pequeños, pero unos pocos son devastadores</span></span>
-<span id="cb20-3"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> generar_terremotos(n, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2.5</span>, x_min<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1.0</span>):</span>
-<span id="cb20-4">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">"""</span></span>
-<span id="cb20-5"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">    Genera valores siguiendo una ley de potencia: P(x) ~ x^(-alpha)</span></span>
-<span id="cb20-6"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">    alpha: exponente de la ley de potencia (típicamente entre 2 y 3 para terremotos)</span></span>
-<span id="cb20-7"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">    x_min: valor mínimo</span></span>
-<span id="cb20-8"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">    """</span></span>
-<span id="cb20-9">    u <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.random.uniform(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, n)</span>
-<span id="cb20-10">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> x_min <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> (<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> u) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">**</span> (<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> (alpha <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>))</span>
-<span id="cb20-11"></span>
-<span id="cb20-12"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Primera muestra de magnitudes de terremotos</span></span>
-<span id="cb20-13">terremotos_muestra1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> generar_terremotos(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2.5</span>)</span>
-<span id="cb20-14">media_terremotos1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.mean(terremotos_muestra1)</span>
-<span id="cb20-15"></span>
-<span id="cb20-16"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Media de la primera muestra de terremotos: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>media_terremotos1<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span>
-<span id="cb20-17"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Mediana: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>median(terremotos_muestra1)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span>
-<span id="cb20-18"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Máximo: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">max</span>(terremotos_muestra1)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Media de la primera muestra de terremotos: 2.61
-Mediana: 1.60
-Máximo: 51.23</code></pre>
-</div>
-</div>
-<div id="e52744a7" class="cell" data-execution_count="14">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Segunda muestra de terremotos</span></span>
-<span id="cb22-2">terremotos_muestra2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> generar_terremotos(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2.5</span>)</span>
-<span id="cb22-3">media_terremotos2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.mean(terremotos_muestra2)</span>
-<span id="cb22-4"></span>
-<span id="cb22-5"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Media de la segunda muestra de terremotos: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>media_terremotos2<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span>
-<span id="cb22-6"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Mediana: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>median(terremotos_muestra2)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span>
-<span id="cb22-7"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Máximo: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">max</span>(terremotos_muestra2)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span>
-<span id="cb22-8"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\n</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">Diferencia entre medias: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">abs</span>(media_terremotos2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> media_terremotos1)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span>
-<span id="cb22-9"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Diferencia relativa: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">abs</span>(media_terremotos2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> media_terremotos1) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> media_terremotos1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.1f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">%"</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Media de la segunda muestra de terremotos: 3.01
-Mediana: 1.62
-Máximo: 127.77
-
-Diferencia entre medias: 0.39
-Diferencia relativa: 15.0%</code></pre>
-</div>
-</div>
-<div id="760d2055" class="cell" data-execution_count="15">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Visualización en escala log-log (la firma de una ley de potencia)</span></span>
-<span id="cb24-2">fig, axes <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, figsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">14</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>))</span>
-<span id="cb24-3"></span>
-<span id="cb24-4"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Histogramas normales</span></span>
-<span id="cb24-5">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].hist(terremotos_muestra1, bins<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">50</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.7</span>, edgecolor<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'black'</span>)</span>
-<span id="cb24-6">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].axvline(media_terremotos1, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'red'</span>, linestyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'--'</span>, linewidth<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f'Media: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>media_terremotos1<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'</span>)</span>
-<span id="cb24-7">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].axvline(np.median(terremotos_muestra1), color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'blue'</span>, linestyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'--'</span>, linewidth<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f'Mediana: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>median(terremotos_muestra1)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'</span>)</span>
-<span id="cb24-8">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Magnitud'</span>)</span>
-<span id="cb24-9">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Frecuencia'</span>)</span>
-<span id="cb24-10">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Muestra 1: Terremotos (escala normal)'</span>)</span>
-<span id="cb24-11">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].legend()</span>
-<span id="cb24-12"></span>
-<span id="cb24-13">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].hist(terremotos_muestra2, bins<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">50</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.7</span>, edgecolor<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'black'</span>)</span>
-<span id="cb24-14">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].axvline(media_terremotos2, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'red'</span>, linestyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'--'</span>, linewidth<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f'Media: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>media_terremotos2<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'</span>)</span>
-<span id="cb24-15">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].axvline(np.median(terremotos_muestra2), color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'blue'</span>, linestyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'--'</span>, linewidth<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f'Mediana: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>median(terremotos_muestra2)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'</span>)</span>
-<span id="cb24-16">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Magnitud'</span>)</span>
-<span id="cb24-17">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Frecuencia'</span>)</span>
-<span id="cb24-18">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Muestra 2: Terremotos (escala normal)'</span>)</span>
-<span id="cb24-19">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].legend()</span>
-<span id="cb24-20"></span>
-<span id="cb24-21"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Gráficos log-log (revelan la ley de potencia)</span></span>
-<span id="cb24-22"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Calculamos la distribución acumulativa complementaria (CCDF)</span></span>
-<span id="cb24-23"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> plot_ccdf(ax, data, label, color):</span>
-<span id="cb24-24">    sorted_data <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.sort(data)</span>
-<span id="cb24-25">    ccdf <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> np.arange(<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(sorted_data)) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(sorted_data)</span>
-<span id="cb24-26">    ax.loglog(sorted_data, ccdf, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'o'</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>, markersize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>color, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>label)</span>
-<span id="cb24-27">    ax.set_xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Magnitud (escala log)'</span>)</span>
-<span id="cb24-28">    ax.set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'P(X ≥ x) (escala log)'</span>)</span>
-<span id="cb24-29">    ax.grid(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.3</span>)</span>
-<span id="cb24-30">    ax.legend()</span>
-<span id="cb24-31"></span>
-<span id="cb24-32">plot_ccdf(axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>], terremotos_muestra1, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Muestra 1'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'blue'</span>)</span>
-<span id="cb24-33">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Muestra 1: Escala log-log (CCDF)'</span>)</span>
-<span id="cb24-34"></span>
-<span id="cb24-35">plot_ccdf(axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>], terremotos_muestra2, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Muestra 2'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'green'</span>)</span>
-<span id="cb24-36">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Muestra 2: Escala log-log (CCDF)'</span>)</span>
-<span id="cb24-37"></span>
-<span id="cb24-38">plt.tight_layout()</span>
-<span id="cb24-39">plt.show()</span></code></pre></div></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-12-01-medias/index_files/figure-html/cell-16-output-1.png" width="1333" height="948" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Fíjate en varias cosas:</p>
-<ol type="1">
-<li><strong>La diferencia entre media y mediana es brutal</strong>: La mediana es mucho más estable que la media</li>
-<li><strong>En escala log-log se ve una línea recta</strong>: Esta es la firma característica de una ley de potencia</li>
-<li><strong>Las medias pueden diferir enormemente</strong>: Un solo evento extremo puede cambiar completamente la media</li>
-</ol>
-<div id="34a02829" class="cell" data-execution_count="16">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Comparación extrema: variabilidad de la media en leyes de potencia</span></span>
-<span id="cb25-2">n_simulaciones <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span></span>
-<span id="cb25-3">medias_terremotos <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> []</span>
-<span id="cb25-4">medianas_terremotos <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> []</span>
-<span id="cb25-5"></span>
-<span id="cb25-6"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> _ <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(n_simulaciones):</span>
-<span id="cb25-7">    muestra <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> generar_terremotos(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2.5</span>)</span>
-<span id="cb25-8">    medias_terremotos.append(np.mean(muestra))</span>
-<span id="cb25-9">    medianas_terremotos.append(np.median(muestra))</span>
-<span id="cb25-10"></span>
-<span id="cb25-11">medias_terremotos <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.array(medias_terremotos)</span>
-<span id="cb25-12">medianas_terremotos <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.array(medianas_terremotos)</span>
-<span id="cb25-13"></span>
-<span id="cb25-14"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Comparación de estadísticos en leyes de potencia:"</span>)</span>
-<span id="cb25-15"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\n</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">Medias:"</span>)</span>
-<span id="cb25-16"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"  Media de las medias: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>mean(medias_terremotos)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span>
-<span id="cb25-17"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"  Desviación estándar: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>std(medias_terremotos)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span>
-<span id="cb25-18"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"  Coeficiente de variación: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>std(medias_terremotos) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>mean(medias_terremotos) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">%"</span>)</span>
-<span id="cb25-19"></span>
-<span id="cb25-20"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\n</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">Medianas:"</span>)</span>
-<span id="cb25-21"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"  Media de las medianas: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>mean(medianas_terremotos)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span>
-<span id="cb25-22"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"  Desviación estándar: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>std(medianas_terremotos)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span>
-<span id="cb25-23"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"  Coeficiente de variación: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>std(medianas_terremotos) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> np<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>mean(medianas_terremotos) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">%"</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Comparación de estadísticos en leyes de potencia:
-
-Medias:
-  Media de las medias: 2.94
-  Desviación estándar: 0.50
-  Coeficiente de variación: 17.06%
-
-Medianas:
-  Media de las medianas: 1.59
-  Desviación estándar: 0.03
-  Coeficiente de variación: 2.19%</code></pre>
-</div>
-</div>
-<div id="1ebd71f0" class="cell" data-execution_count="17">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Visualización final comparando las tres distribuciones</span></span>
-<span id="cb27-2">fig, axes <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, figsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">16</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>))</span>
-<span id="cb27-3"></span>
-<span id="cb27-4"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Comparación de CVs</span></span>
-<span id="cb27-5">tipos <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> [<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Alturas</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\n</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">(Normal)'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Salarios</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\n</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">(Log-Normal)'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Terremotos</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\n</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">(Power Law)'</span>]</span>
-<span id="cb27-6">cv_medias <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> [</span>
-<span id="cb27-7">    np.std(medias_alturas) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> np.mean(medias_alturas) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>,</span>
-<span id="cb27-8">    np.std(medias_salarios) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> np.mean(medias_salarios) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>,</span>
-<span id="cb27-9">    np.std(medias_terremotos) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> np.mean(medias_terremotos) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span></span>
-<span id="cb27-10">]</span>
-<span id="cb27-11">cv_medianas <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> [</span>
-<span id="cb27-12">    np.std([np.median(np.random.normal(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">170</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>)) <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> _ <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>)]) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">170</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>,</span>
-<span id="cb27-13">    np.std([np.median(np.random.lognormal(<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3.2</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.6</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>)) <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> _ <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>)]) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> np.median(np.random.lognormal(<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3.2</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.6</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10000</span>)) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>,</span>
-<span id="cb27-14">    np.std(medianas_terremotos) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> np.mean(medianas_terremotos) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span></span>
-<span id="cb27-15">]</span>
-<span id="cb27-16"></span>
-<span id="cb27-17">x <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.arange(<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(tipos))</span>
-<span id="cb27-18">width <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.35</span></span>
-<span id="cb27-19"></span>
-<span id="cb27-20">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].bar(x <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> width<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, cv_medias, width, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'CV de Medias'</span>, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'red'</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.7</span>)</span>
-<span id="cb27-21">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].bar(x <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> width<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, cv_medianas, width, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'CV de Medianas'</span>, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'blue'</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.7</span>)</span>
-<span id="cb27-22">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Coeficiente de Variación (%)'</span>)</span>
-<span id="cb27-23">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Estabilidad de Medias vs Medianas'</span>)</span>
-<span id="cb27-24">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_xticks(x)</span>
-<span id="cb27-25">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_xticklabels(tipos)</span>
-<span id="cb27-26">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].legend()</span>
-<span id="cb27-27">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_yscale(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'log'</span>)</span>
-<span id="cb27-28">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].grid(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.3</span>, axis<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'y'</span>)</span>
-<span id="cb27-29"></span>
-<span id="cb27-30"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Distribución de medias para los tres casos (escalas comparables)</span></span>
-<span id="cb27-31">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].hist(medias_alturas <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> np.mean(medias_alturas), bins<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">30</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Normal'</span>, density<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>)</span>
-<span id="cb27-32">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].hist(medias_salarios <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> np.mean(medias_salarios), bins<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">30</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Log-Normal'</span>, density<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>)</span>
-<span id="cb27-33">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].hist(medias_terremotos <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> np.mean(medias_terremotos), bins<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">30</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Power Law'</span>, density<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>)</span>
-<span id="cb27-34">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Media muestral (normalizada)'</span>)</span>
-<span id="cb27-35">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Densidad'</span>)</span>
-<span id="cb27-36">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Distribución de medias (escaladas)'</span>)</span>
-<span id="cb27-37">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].legend()</span>
-<span id="cb27-38"></span>
-<span id="cb27-39"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Ratio máximo/media para mostrar la dominancia de extremos</span></span>
-<span id="cb27-40">ratios_alturas <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> [np.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">max</span>(np.random.normal(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">170</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>)) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">170</span> <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> _ <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>)]</span>
-<span id="cb27-41">ratios_salarios <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> [np.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">max</span>(np.random.lognormal(<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3.2</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.6</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>)) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> np.mean(np.random.lognormal(<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3.2</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.6</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>)) <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> _ <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>)]</span>
-<span id="cb27-42">ratios_terremotos <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> [np.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">max</span>(generar_terremotos(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>)) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> np.mean(generar_terremotos(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>)) <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> _ <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>)]</span>
-<span id="cb27-43"></span>
-<span id="cb27-44">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>].boxplot([ratios_alturas, ratios_salarios, ratios_terremotos], labels<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>tipos)</span>
-<span id="cb27-45">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>].set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Ratio Máximo/Media'</span>)</span>
-<span id="cb27-46">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Dominancia de valores extremos'</span>)</span>
-<span id="cb27-47">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>].set_yscale(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'log'</span>)</span>
-<span id="cb27-48">axes[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>].grid(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.3</span>, axis<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'y'</span>)</span>
-<span id="cb27-49"></span>
-<span id="cb27-50">plt.tight_layout()</span>
-<span id="cb27-51">plt.show()</span></code></pre></div></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2025-12-01-medias/index_files/figure-html/cell-18-output-1.png" width="1525" height="374" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="conclusión" class="level2">
-<h2 class="anchored" data-anchor-id="conclusión">Conclusión</h2>
-<p>La lección aquí es clara: no todas las distribuciones son iguales cuando se trata de calcular la media.</p>
-<p><strong>Normal (Alturas)</strong>: La media es estable y representativa. CV ~ 0.3%</p>
-<p><strong>Log-Normal (Salarios)</strong>: La media es moderadamente inestable. Los valores extremos empiezan a dominar. CV ~ 3-5%</p>
-<p><strong>Ley de Potencia (Terremotos)</strong>: La media es extremadamente inestable y puede no tener sentido. Un solo evento extremo puede dominar completamente el cálculo. CV puede ser &gt; 20%</p>
-<p>En distribuciones con colas pesadas, especialmente en leyes de potencia, la mediana es mucho más estable y representativa que la media. Por eso, cuando trabajes con datos que sospechas que siguen una ley de potencia (redes sociales, finanzas, desastres naturales, etc.), usa la mediana o piensa en transformaciones logarítmicas antes de calcular promedios.</p>
-<p>El coeficiente de variación nos lo dice todo: necesitarías muestras exponencialmente más grandes para estimar la media de una ley de potencia con la misma precisión que la media de una distribución normal.</p>
-
-
-</section>
-
- ]]></description>
-  <category>probabilidad</category>
-  <category>simulación</category>
-  <category>python</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2025-12-01-medias/</guid>
-  <pubDate>Mon, 01 Dec 2025 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
