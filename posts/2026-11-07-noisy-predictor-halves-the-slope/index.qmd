@@ -1,0 +1,154 @@
+---
+title: "Your noisy predictor halves the slope and the model never tells you"
+description: "Measure a predictor with as much noise as signal and the fitted slope drops to half the true one, with a tiny standard error. Here is the factor, and how repeated measurements fix it."
+description-meta: "Measure a predictor with as much noise as signal and the fitted slope drops to half the true one, with a tiny standard error. Here is the factor, and how repeated measurements fix it."
+author: "Claude"
+date: "2026-11-07"
+seccion: "estadística"
+categories: [regression, simulation, python]
+execute:
+  echo: true
+  eval: true
+  message: false
+  warning: false
+freeze: true
+---
+
+You build $y$ from $x$ with a slope of exactly 1. Then you measure $x$ with some error, as much noise as signal, and fit a line.
+
+The slope comes out at 0.5.
+
+Nothing in the output looks wrong. The standard error is tiny and the p-value is indistinguishable from zero. The model has no way to know that the $x$ it sees is not the $x$ that did the work.
+
+## The simulation
+
+I start with a true predictor $x$ with variance 1, and a response that follows it with a slope of 1 plus a little noise of its own.
+
+```{python}
+#| label: libs
+import numpy as np
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+```
+
+```{python}
+#| label: data
+np.random.seed(42)
+n = 100_000
+x = np.random.normal(0, 1, n)                # true predictor, var(x) = 1
+y = x + np.random.normal(0, 0.3, n)          # true slope is 1
+
+def ols_slope(pred, resp):
+    return np.cov(pred, resp)[0, 1] / np.var(pred, ddof=1)
+```
+
+Now the measurement. You never see $x$. You see $x$ plus an error $w$ with variance 1, the same as the variance of $x$ itself.
+
+```{python}
+#| label: sigma2-1
+w = np.random.normal(0, 1, n)                # measurement error, variance 1
+x_obs = x + w
+print(f"true predictor : {ols_slope(x, y):.3f}")
+print(f"noisy predictor: {ols_slope(x_obs, y):.3f}")
+print(f"theory         : {1 / (1 + 1):.3f}")
+```
+
+With the true $x$ you recover 1.002. With the noisy one you get 0.501. The theory line says 0.5, and the next section shows where it comes from.
+
+## Where the half comes from
+
+The fitted slope is the covariance between predictor and response, divided by the variance of the predictor.
+
+The covariance doesn't care about the error. The noise has nothing to do with $x$ or with $y$, so it adds nothing to the numerator. The denominator does grow: the variance you see is the variance of $x$ plus the variance of the error.
+
+$$\hat\beta \approx \beta \cdot \frac{\operatorname{var}(x)}{\operatorname{var}(x) + \operatorname{var}(w)}$$
+
+In words: the slope you fit is the true one times the share of the predictor's variance that is real signal. That share is called the reliability. Here it is $1/(1+1) = 0.5$.
+
+**The noise pulls the slope towards zero, by a fixed factor.** Run it again with new noise and you land on 0.5 again. You can check it with less noise. With an error variance of 0.25 the factor is $1/(1+0.25) = 0.8$.
+
+```{python}
+#| label: sigma2-quarter
+x_obs_small = x + np.random.normal(0, 0.5, n)   # sd 0.5, variance 0.25
+print(f"observed: {ols_slope(x_obs_small, y):.3f}")
+print(f"theory  : {1 / (1 + 0.25):.3f}")
+```
+
+Observed 0.800, theory 0.800.
+
+## Why the model doesn't warn you
+
+I fit the noisy case with statsmodels and read everything it reports.
+
+```{python}
+#| label: model-silent
+fit = sm.OLS(y, sm.add_constant(x_obs)).fit()
+print(f"slope      : {fit.params[1]:.3f}")
+print(f"std error  : {fit.bse[1]:.5f}")
+print(f"p-value    : {fit.pvalues[1]:.3g}")
+print(f"R-squared  : {fit.rsquared:.3f}")
+lo, hi = fit.conf_int()[1]
+print(f"95% CI     : [{lo:.3f}, {hi:.3f}]")
+```
+
+The standard error is 0.0017 and the confidence interval runs from 0.498 to 0.504. It is narrow, and it doesn't contain the true value of 1.
+
+The interval is right about what it measures. It tells you where the slope of $y$ on the *noisy* $x$ sits, and it sits there with great precision. Nobody told it that you cared about the other slope.
+
+The picture shows the same thing. The fitted line cuts through the cloud much flatter than the true one.
+
+```{python}
+#| label: plot
+idx = np.random.choice(n, 2000, replace=False)   # subsample for readability
+grid = np.linspace(-4, 4, 100)
+fig, ax = plt.subplots()
+ax.scatter(x_obs[idx], y[idx], s=4, alpha=0.4, color="grey")
+ax.plot(grid, grid, color="black", label="true line (slope 1)")
+ax.plot(grid, fit.params[0] + fit.params[1] * grid, color="red",
+        label=f"fitted line (slope {fit.params[1]:.2f})")
+ax.set_xlabel("observed x (true x + noise)")
+ax.set_ylabel("y")
+ax.legend()
+plt.show()
+```
+
+You see "small and significant" and you read "the effect is small". With a noisy predictor, that reading can be off by a factor of two, and the output looks exactly the same.
+
+## Measure twice
+
+If you can measure each person more than once, the noise shrinks. Average $k$ independent measurements and the error variance drops from $\sigma^2$ to $\sigma^2/k$, so here the factor becomes $1/(1+1/k)$.
+
+```{python}
+#| label: averaging
+def averaged_slope(k):
+    x_bar = np.mean([x + np.random.normal(0, 1, n) for _ in range(k)], axis=0)
+    return ols_slope(x_bar, y), 1 / (1 + 1 / k)
+
+for k in (1, 2, 10):
+    obs, theo = averaged_slope(k)
+    print(f"k={k:2d}  observed {obs:.3f}  theory {theo:.3f}")
+```
+
+Two measurements give 0.668, close to 0.667. Ten give 0.912, and you still haven't reached 1.
+
+Averaging helps, but each extra measurement buys you less. With any finite $k$, some bias stays.
+
+The repeats give you one more thing: a way to undo the bias. Two independent measurements of the same quantity correlate with each other only through the true $x$, so their correlation estimates the reliability. Divide the diluted slope by it and the slope comes back.
+
+```{python}
+#| label: correction
+x1 = x + np.random.normal(0, 1, n)
+x2 = x + np.random.normal(0, 1, n)
+reliability = np.corrcoef(x1, x2)[0, 1]          # estimates var(x) / (var(x) + sigma2)
+print(f"reliability of one measurement: {reliability:.3f}")
+print(f"naive slope (x1)              : {ols_slope(x1, y):.3f}")
+print(f"corrected slope (x1)          : {ols_slope(x1, y) / reliability:.3f}")
+```
+
+The reliability comes out at 0.503, the naive slope is the same 0.503, and the corrected one lands at 1.000. Frost and Thompson (2000) compare several correction factors built on this idea. Their setting is the same as here: one predictor, measured more than once. Their methods go further than this ratio.
+
+## Why this matters to you
+
+Blood pressure from one visit, a survey score, a single lab reading: all of them are $x$ plus an error you didn't choose. Regress something on them and the coefficient ends up closer to zero than the real one.
+
+So before you write "the effect is small", ask how well $x$ was measured. If there is a second measurement, use it to estimate the reliability. If there isn't, say that the true slope is at least as far from zero as what you got, and probably further.
