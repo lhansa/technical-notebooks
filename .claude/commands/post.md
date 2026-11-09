@@ -26,7 +26,8 @@ Lo que te pasan decide el modo:
   Antes de la fase 1 va la fase 0.
 
 En modo desatendido nadie lee lo que dices en el hilo. Lo que tenga que saber él va a GitHub: un
-comentario en un issue, el PR o un issue de aviso. **Todo lo que escribas en GitHub sale con su
+comentario en un issue o el PR. **No abres issues**: lo dice `CLAUDE.md` en **Issues de temas y
+calendario**. **Todo lo que escribas en GitHub sale con su
 cuenta**, así que cada comentario y cada cuerpo de issue que escribas termina con el pie de Claude
 Code, tal cual:
 
@@ -61,13 +62,15 @@ Encuentra el `[semana]`, en este orden:
 3. Si no, con `list_issues` por la etiqueta `semana`, el abierto cuyo título es exactamente
    `[semana] AAAA-Wxx` con la semana de hoy.
 
-Si no hay semanal, no hay nada que escribir: abre el issue de aviso del final de esta fase y para.
+Si no hay semanal, no hay nada que escribir: aviso (al final de esta fase) y para.
 
-### Si el semanal aún no tiene sub-issues
+### Si todavía no hay sub-issue para hoy
 
-Míralo con `issue_read` y `get_sub_issues`. Si tiene al menos uno, sigue al punto siguiente.
+Mira los sub-issues del semanal con `issue_read` y `get_sub_issues`. Si hay uno abierto cuya línea
+`Publicación:` lleva la fecha de hoy, sigue al punto siguiente. Con `#N`, sigue siempre.
 
-Si no tiene ninguno, él todavía no ha contestado o nadie ha recogido su elección. Recógela tú:
+Si no lo hay, puede que él no haya contestado o que nadie haya recogido su elección. En modo cierre
+pasa siempre el sábado: martes y jueves cuelgan desde el lunes, el sábado no. Recógela tú:
 
 1. Usa la skill `lunes` pasándole el número del semanal. No le pases la semana de hoy: el semanal
    ya lo tienes, y así no adivina.
@@ -84,8 +87,8 @@ Si no tiene ninguno, él todavía no ha contestado o nadie ha recogido su elecci
 3. Si `lunes` devuelve bloques, usa la skill `semana` en modo **materializar**, con el número del
    semanal y la salida de `lunes` entera, incluidas las líneas de lo que no entró.
 
-Si `semana` crea los sub-issues, sigue. Si `lunes` o `semana` paran por otra cosa, abre el issue de
-aviso con lo que dijeron y para.
+`semana` es idempotente: lo que ya existe no se duplica. Si crea el sub-issue de hoy, sigue. Si
+`lunes` o `semana` paran por otra cosa, aviso con lo que dijeron y para.
 
 ### El sub-issue de hoy
 
@@ -105,24 +108,28 @@ El tema es el cuerpo del sub-issue. Lo ha dejado `lunes` con formato fijo: `### 
   concreto, formato y sección, y solape. La ficha ya viene con la decisión de fondo tomada: el
   título, la referencia, el ejemplo y el formato son los de la ficha. El post se apoya en lo que
   dice "Qué afirma la referencia", y en nada que la referencia no diga.
+- **`Origen: issue abierto`.** Un issue del backlog, en modo cierre. El cuerpo es lo que tenía el
+  issue: un tema derivado de `hilos`, una idea suya o un sub-issue viejo que se quedó sin escribir.
+  Si trae una ficha completa, con referencia, trátalo como ficha. Si no, como tema propio. Si el
+  título o el cuerpo están en español, el post va en inglés igualmente.
 - **`Origen: tema propio`.** Trae solo su texto y la línea `Hilos:`. Sin referencia, y no la
   busques para exigirla. Es un tema crudo, como si te lo hubiera escrito aquí. Si `Hilos:` dice
   "solapa" o "cercano pero distinto", los posts que nombra son lo primero que miras en la fase 1.
 
 Guárdate el número del sub-issue: `publicar` lo necesita para `Closes #N`.
 
-### El issue de aviso
+### El aviso
 
-Cuando la fase 0 no deja escribir, y no es porque él no haya contestado, abres un issue con
-`issue_write`, sin etiqueta, con el título `[aviso] AAAA-MM-DD: <qué pasó en cuatro palabras>`.
+Cuando la fase 0 no deja escribir, y no es porque él no haya contestado, lo dejas en un comentario
+con `add_issue_comment`: en el sub-issue de hoy si lo hay, si no en el semanal. Si tampoco hay
+semanal, no escribes nada en GitHub: lo dices en tu último mensaje y paras. No abras un issue
+`[aviso]`.
 
-En el cuerpo: qué buscabas, qué encontraste, el enlace al semanal si lo hay, y qué tendría que
+El comentario empieza por `Aviso AAAA-MM-DD: <qué pasó en cuatro palabras>`. Debajo: qué buscabas, qué encontraste, el enlace al semanal si lo hay, y qué tendría que
 hacer él para que mañana salga. Tres o cuatro líneas y el pie de Claude Code.
 
-Antes de abrirlo, busca con `list_issues` uno abierto con el mismo título. Si existe, no abras otro.
-
-No le pongas `semana` ni `idea-post`: `temas` y `semana` leen esas etiquetas y un aviso no es tema
-ni semana.
+Antes de comentar, lee los comentarios del sitio: si ya hay uno de hoy que empieza igual, no lo
+repitas.
 
 ## Fase 1 — El enfoque
 
@@ -217,7 +224,7 @@ el post se sostiene sin ella.
 ## Fase 5 — Cerrar
 
 Usa la skill `publicar`. Se encarga del checklist, el render, `_freeze/`, la rama, el commit, el PR y
-los issues de los temas derivados de `hilos`.
+el tema derivado de `hilos`: un issue en modo normal, una línea en el PR en modo cierre.
 
 En modo desatendido, pásale además:
 
@@ -225,5 +232,5 @@ En modo desatendido, pásale además:
 - las fichas de `angulo` y la línea de por qué elegiste esa;
 - los "falso" de `rigor` que quedaron sin arreglar, o que no queda ninguno.
 
-Al terminar, dile en tres líneas: dónde está el PR, qué enfoque se eligió y qué temas quedaron
-abiertos como issues. En modo desatendido, añade si se mergeó y, si no, por qué.
+Al terminar, dile en tres líneas: dónde está el PR, qué enfoque se eligió y qué tema derivado quedó
+abierto como issue, si alguno. En modo desatendido, añade si se mergeó y, si no, por qué.
