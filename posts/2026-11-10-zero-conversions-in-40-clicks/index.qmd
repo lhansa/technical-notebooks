@@ -1,0 +1,79 @@
+---
+title: "Zero conversions out of 40 clicks still allows a 7% conversion rate"
+description: "A campaign with 40 clicks and no conversions looks like a 0% rate. Here's how high the real rate can still be, and the one-line rule that tells you."
+description-meta: "A campaign with 40 clicks and no conversions looks like a 0% rate. Here's how high the real rate can still be, and the one-line rule that tells you."
+author: "Claude"
+date: "2026-11-10"
+seccion: "estadística"
+categories: [probability, sampling]
+---
+
+A campaign gets 40 clicks and not a single conversion.
+
+You compute the usual interval for the conversion rate and the table says $[0, 0]$. Zero, with no margin at all.
+
+That zero looks like knowledge. The formula just had nothing to measure the spread with.
+
+## Why the usual interval gives you zero
+
+The textbook interval for a proportion is $\hat p \pm 1.96\sqrt{\hat p(1-\hat p)/n}$. It puts the estimate in the middle and adds a margin built from the standard error.
+
+With no conversions, $\hat p = 0$. The standard error is $\sqrt{0 \cdot 1 / 40} = 0$. The margin is zero too, and the interval collapses to a point.
+
+The formula assumes the data can show you how variable they are. Here they can't: 40 empty clicks can happen whether the true rate is 0% or 5%.
+
+**A zero in the numerator mostly tells you how few cases you have.**
+
+## Asking the question the other way round
+
+Forget the estimate for a moment. Ask something you can answer: if the true conversion rate were $p$, how likely would you be to see 40 clicks and no conversions?
+
+Each click fails with probability $1-p$. The clicks are independent, so the probabilities multiply:
+
+$$P(\text{0 out of 40}) = (1-p)^{40}$$
+
+Try a few values. At $p = 5\%$ that is $0.95^{40} = 12.9\%$. You'd see this outcome about one in eight times.
+
+At $p = 10\%$ it is $0.9^{40} = 1.5\%$. Now it takes some luck.
+
+So some rates make your data plausible and others make them embarrassing. Draw the line at one in twenty:
+
+$$(1-p)^{40} = 0.05 \quad\Rightarrow\quad p = 1 - 0.05^{1/40} = 7.2\%$$
+
+Any rate above that makes your 40 empty clicks something you'd see less than 5% of the time. Any rate below it, you can't rule out. **Zero conversions out of 40 clicks is compatible with a true rate of up to 7%.**
+
+## The shortcut that fits in your head
+
+That formula needs a calculator. There's a version you can do while someone is still talking.
+
+For small $p$, $(1-p)^n$ is very close to $e^{-pn}$. Set that equal to $0.05$ and take logarithms:
+
+$$e^{-pn} = 0.05 \quad\Rightarrow\quad pn = -\ln 0.05 = 2.996 \approx 3$$
+
+So $p \approx 3/n$. This is the **rule of three**: with zero events in $n$ cases, the one-sided 95% ceiling for the rate is about $3/n$. A one-in-twenty chance, counted only on the high side.
+
+For your campaign that gives $3/40 = 7.5\%$. The exact calculation said $7.2\%$. Close enough to say out loud in a meeting.
+
+The shortcut drifts as $n$ gets small. With 10 clicks it says 30% and the exact answer is 25.9%. Both are so wide that the gap misleads nobody.
+
+Hanley and Lippman-Hand (1983) wrote the rule up for medicine, where "no complications in $n$ patients" is a sentence people read as good news.
+
+## What more clicks buy you
+
+The ceiling shrinks like $1/n$. Ten times the clicks, a tenth of the ceiling.
+
+With 400 clicks and no conversions, $3/400 = 0.75\%$. Now you know something. The rate is under one in a hundred, and a campaign that converts at 5% is out of the question.
+
+Look at what it cost. Ten times the traffic to move the ceiling from 7% to under 1%. I find that number more useful than a significance test, because it tells you how much data a "no" costs.
+
+## Why this matters to you
+
+Next time you group conversions by campaign, segment or variant, some rows will have a zero on top of a small count. Don't read that row as 0%, and don't let the interval column tell you it's certain.
+
+Write $3/n$ next to it. A zero over 40 reads "at most about 7%, with 95% confidence".
+
+That makes the row comparable to the rest. A segment with 0 out of 40 and one with 3 out of 400 can't be ranked yet: the first could be better, worse or the same.
+
+## Reference
+
+Hanley, J. A., and Lippman-Hand, A. (1983). "If nothing goes wrong, is everything all right? Interpreting zero numerators". *JAMA* 249(13), 1743–1745.
