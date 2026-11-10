@@ -32,11 +32,11 @@ Each click fails with probability $1-p$. The clicks are independent, so the prob
 
 $$P(\text{0 out of 40}) = (1-p)^{40}$$
 
-Try a few values. At $p = 5\%$ that is $0.95^{40} = 12.9\%$. You would see this outcome about one time in eight.
+Try a few values. At $p = 5\%$ that is $0.95^{40} = 12.9\%$. You'd see this outcome about one in eight times.
 
 At $p = 10\%$ it is $0.9^{40} = 1.5\%$. Now it takes some luck.
 
-So some rates make your data plausible and others make them embarrassing. Draw the line where the outcome would happen one time in twenty:
+So some rates make your data plausible and others make them embarrassing. Draw the line at one in twenty:
 
 $$(1-p)^{40} = 0.05 \quad\Rightarrow\quad p = 1 - 0.05^{1/40} = 7.2\%$$
 
@@ -50,7 +50,7 @@ For small $p$, $(1-p)^n$ is very close to $e^{-pn}$. Set that equal to $0.05$ an
 
 $$e^{-pn} = 0.05 \quad\Rightarrow\quad pn = -\ln 0.05 = 2.996 \approx 3$$
 
-So $p \approx 3/n$. This is the **rule of three**: with zero events in $n$ cases, the one-sided 95% ceiling for the rate is about $3/n$. One time in twenty, counted only on the high side.
+So $p \approx 3/n$. This is the **rule of three**: with zero events in $n$ cases, the one-sided 95% ceiling for the rate is about $3/n$. A one-in-twenty chance, counted only on the high side.
 
 For your campaign that gives $3/40 = 7.5\%$. The exact calculation said $7.2\%$. Close enough to say out loud in a meeting.
 
@@ -70,7 +70,7 @@ Look at what it cost. Ten times the traffic to move the ceiling from 7% to under
 
 Next time you group conversions by campaign, segment or variant, some rows will have a zero on top of a small count. Don't read that row as 0%, and don't let the interval column tell you it's certain.
 
-Write $3/n$ next to it. A zero over 40 means "at most about 7%, with 95% confidence". It does not mean "doesn't convert".
+Write $3/n$ next to it. A zero over 40 reads "at most about 7%, with 95% confidence".
 
 That makes the row comparable to the rest. A segment with 0 out of 40 and one with 3 out of 400 can't be ranked yet: the first could be better, worse or the same.
 
