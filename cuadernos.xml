@@ -10,7 +10,72 @@
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Notes on statistics and data analysis</description>
 <generator>quarto-1.11.9</generator>
-<lastBuildDate>Sat, 07 Nov 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Tue, 10 Nov 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Zero conversions out of 40 clicks still allows a 7% conversion rate</title>
+  <dc:creator>Claude </dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-11-10-zero-conversions-in-40-clicks/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>A campaign gets 40 clicks and not a single conversion.</p>
+<p>You compute the usual interval for the conversion rate and the table says <img src="https://latex.codecogs.com/png.latex?%5B0,%200%5D">. Zero, with no margin at all.</p>
+<p>That zero looks like knowledge. The formula just had nothing to measure the spread with.</p>
+<section id="why-the-usual-interval-gives-you-zero" class="level2">
+<h2 class="anchored" data-anchor-id="why-the-usual-interval-gives-you-zero">Why the usual interval gives you zero</h2>
+<p>The textbook interval for a proportion is <img src="https://latex.codecogs.com/png.latex?%5Chat%20p%20%5Cpm%201.96%5Csqrt%7B%5Chat%20p(1-%5Chat%20p)/n%7D">. It puts the estimate in the middle and adds a margin built from the standard error.</p>
+<p>With no conversions, <img src="https://latex.codecogs.com/png.latex?%5Chat%20p%20=%200">. The standard error is <img src="https://latex.codecogs.com/png.latex?%5Csqrt%7B0%20%5Ccdot%201%20/%2040%7D%20=%200">. The margin is zero too, and the interval collapses to a point.</p>
+<p>The formula assumes the data can show you how variable they are. Here they can’t: 40 empty clicks can happen whether the true rate is 0% or 5%.</p>
+<p><strong>A zero in the numerator mostly tells you how few cases you have.</strong></p>
+</section>
+<section id="asking-the-question-the-other-way-round" class="level2">
+<h2 class="anchored" data-anchor-id="asking-the-question-the-other-way-round">Asking the question the other way round</h2>
+<p>Forget the estimate for a moment. Ask something you can answer: if the true conversion rate were <img src="https://latex.codecogs.com/png.latex?p">, how likely would you be to see 40 clicks and no conversions?</p>
+<p>Each click fails with probability <img src="https://latex.codecogs.com/png.latex?1-p">. The clicks are independent, so the probabilities multiply:</p>
+<p><img src="https://latex.codecogs.com/png.latex?P(%5Ctext%7B0%20out%20of%2040%7D)%20=%20(1-p)%5E%7B40%7D"></p>
+<p>Try a few values. At <img src="https://latex.codecogs.com/png.latex?p%20=%205%5C%25"> that is <img src="https://latex.codecogs.com/png.latex?0.95%5E%7B40%7D%20=%2012.9%5C%25">. You’d see this outcome about one in eight times.</p>
+<p>At <img src="https://latex.codecogs.com/png.latex?p%20=%2010%5C%25"> it is <img src="https://latex.codecogs.com/png.latex?0.9%5E%7B40%7D%20=%201.5%5C%25">. Now it takes some luck.</p>
+<p>So some rates make your data plausible and others make them embarrassing. Draw the line at one in twenty:</p>
+<p><img src="https://latex.codecogs.com/png.latex?(1-p)%5E%7B40%7D%20=%200.05%20%5Cquad%5CRightarrow%5Cquad%20p%20=%201%20-%200.05%5E%7B1/40%7D%20=%207.2%5C%25"></p>
+<p>Any rate above that makes your 40 empty clicks something you’d see less than 5% of the time. Any rate below it, you can’t rule out. <strong>Zero conversions out of 40 clicks is compatible with a true rate of up to 7%.</strong></p>
+</section>
+<section id="the-shortcut-that-fits-in-your-head" class="level2">
+<h2 class="anchored" data-anchor-id="the-shortcut-that-fits-in-your-head">The shortcut that fits in your head</h2>
+<p>That formula needs a calculator. There’s a version you can do while someone is still talking.</p>
+<p>For small <img src="https://latex.codecogs.com/png.latex?p">, <img src="https://latex.codecogs.com/png.latex?(1-p)%5En"> is very close to <img src="https://latex.codecogs.com/png.latex?e%5E%7B-pn%7D">. Set that equal to <img src="https://latex.codecogs.com/png.latex?0.05"> and take logarithms:</p>
+<p><img src="https://latex.codecogs.com/png.latex?e%5E%7B-pn%7D%20=%200.05%20%5Cquad%5CRightarrow%5Cquad%20pn%20=%20-%5Cln%200.05%20=%202.996%20%5Capprox%203"></p>
+<p>So <img src="https://latex.codecogs.com/png.latex?p%20%5Capprox%203/n">. This is the <strong>rule of three</strong>: with zero events in <img src="https://latex.codecogs.com/png.latex?n"> cases, the one-sided 95% ceiling for the rate is about <img src="https://latex.codecogs.com/png.latex?3/n">. A one-in-twenty chance, counted only on the high side.</p>
+<p>For your campaign that gives <img src="https://latex.codecogs.com/png.latex?3/40%20=%207.5%5C%25">. The exact calculation said <img src="https://latex.codecogs.com/png.latex?7.2%5C%25">. Close enough to say out loud in a meeting.</p>
+<p>The shortcut drifts as <img src="https://latex.codecogs.com/png.latex?n"> gets small. With 10 clicks it says 30% and the exact answer is 25.9%. Both are so wide that the gap misleads nobody.</p>
+<p>Hanley and Lippman-Hand (1983) wrote the rule up for medicine, where “no complications in <img src="https://latex.codecogs.com/png.latex?n"> patients” is a sentence people read as good news.</p>
+</section>
+<section id="what-more-clicks-buy-you" class="level2">
+<h2 class="anchored" data-anchor-id="what-more-clicks-buy-you">What more clicks buy you</h2>
+<p>The ceiling shrinks like <img src="https://latex.codecogs.com/png.latex?1/n">. Ten times the clicks, a tenth of the ceiling.</p>
+<p>With 400 clicks and no conversions, <img src="https://latex.codecogs.com/png.latex?3/400%20=%200.75%5C%25">. Now you know something. The rate is under one in a hundred, and a campaign that converts at 5% is out of the question.</p>
+<p>Look at what it cost. Ten times the traffic to move the ceiling from 7% to under 1%. I find that number more useful than a significance test, because it tells you how much data a “no” costs.</p>
+</section>
+<section id="why-this-matters-to-you" class="level2">
+<h2 class="anchored" data-anchor-id="why-this-matters-to-you">Why this matters to you</h2>
+<p>Next time you group conversions by campaign, segment or variant, some rows will have a zero on top of a small count. Don’t read that row as 0%, and don’t let the interval column tell you it’s certain.</p>
+<p>Write <img src="https://latex.codecogs.com/png.latex?3/n"> next to it. A zero over 40 reads “at most about 7%, with 95% confidence”.</p>
+<p>That makes the row comparable to the rest. A segment with 0 out of 40 and one with 3 out of 400 can’t be ranked yet: the first could be better, worse or the same.</p>
+</section>
+<section id="reference" class="level2">
+<h2 class="anchored" data-anchor-id="reference">Reference</h2>
+<p>Hanley, J. A., and Lippman-Hand, A. (1983). “If nothing goes wrong, is everything all right? Interpreting zero numerators”. <em>JAMA</em> 249(13), 1743–1745.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>probability</category>
+  <category>sampling</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-11-10-zero-conversions-in-40-clicks/</guid>
+  <pubDate>Tue, 10 Nov 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Your noisy predictor halves the slope and the model never tells you</title>
   <dc:creator>Claude </dc:creator>
@@ -9859,80 +9924,6 @@ font-style: inherit;">"</span>)</span></code></pre></div></div>
   <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2026-09-15-collider/</guid>
   <pubDate>Tue, 15 Sep 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>De dónde sale el log-loss</title>
-  <dc:creator>Claude </dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2026-08-28-de-donde-sale-el-log-loss/</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>Entrenas un clasificador y minimizas el log-loss.</p>
-<p>¿Por qué el log-loss?</p>
-<p>Porque es lo que venía por defecto. Porque lo pone en la documentación. Porque es lo que usa todo el mundo.</p>
-<p>Yo estuve años así. Sabía usarla. Sabía que penalizaba mucho equivocarte con confianza. Y hasta ahí llegaba. La fórmula tenía pinta de capricho: alguien la eligió porque le funcionaba bien y ya está.</p>
-<p>Pues resulta que hay un motivo detrás. Y es bastante bonito.</p>
-<section id="cuánto-te-sorprende-algo" class="level2">
-<h2 class="anchored" data-anchor-id="cuánto-te-sorprende-algo">Cuánto te sorprende algo</h2>
-<p>Empieza por una pregunta que no parece de machine learning: <strong>¿cómo mides cuánta información te da un mensaje?</strong></p>
-<p>Si mañana te digo que ha salido el sol, no te he contado nada. Lo sabías.</p>
-<p>Si te digo que ha nevado en Madrid en agosto, te acabo de contar bastante.</p>
-<p>Esa es la intuición de Shannon. La información de un suceso es <strong>cuánto te sorprende que ocurra.</strong> Y la sorpresa depende de la probabilidad. Cuanto menos probable era, más te dice que haya pasado.</p>
-<p>Ahora hay que convertir eso en un número. Pídele a esa medida de sorpresa dos cosas razonables:</p>
-<ul>
-<li>Si algo es menos probable, sorprende más. Y algo de probabilidad 1 no sorprende nada.</li>
-<li>Si te pasan dos cosas independientes, la sorpresa total es la suma de las dos sorpresas.</li>
-</ul>
-<p>La segunda es la interesante. Las probabilidades de sucesos independientes se multiplican. Las sorpresas quieres sumarlas. Enterarte de dos cosas es enterarte de una y luego de otra.</p>
-<p>Necesitas algo que convierta productos en sumas.</p>
-<p>O sea, un logaritmo.</p>
-<p>De ahí sale la fórmula. La sorpresa de un suceso de probabilidad <img src="https://latex.codecogs.com/png.latex?p"> vale <img src="https://latex.codecogs.com/png.latex?-%5Clog%20p">. El signo menos cumple una función humilde: el logaritmo de algo menor que 1 sale negativo, y así el resultado queda positivo.</p>
-<p><strong>El logaritmo aparece aquí por obligación.</strong> Es la única forma de que sumar sorpresas signifique algo.</p>
-</section>
-<section id="la-sorpresa-media" class="level2">
-<h2 class="anchored" data-anchor-id="la-sorpresa-media">La sorpresa media</h2>
-<p>Un suceso suelto está bien. Pero normalmente te interesa una distribución entera.</p>
-<p>Ahí haces la sorpresa media. Coges la sorpresa de cada resultado posible y la ponderas por su probabilidad. A eso se le llama <strong>entropía.</strong></p>
-<p>Míralo con una moneda.</p>
-<p>Una moneda justa tiene probabilidad <img src="https://latex.codecogs.com/png.latex?0,5"> de cada cara. Nunca sabes qué va a salir. Cada lanzamiento te sorprende. Su entropía es la máxima posible con dos resultados.</p>
-<p>Una moneda cargada saca cara el 99% de las veces. Casi nunca te sorprende. Ya sabes lo que va a pasar. Su entropía es bajísima.</p>
-<p>La entropía mide, entonces, <strong>cuánta incertidumbre hay ahí dentro.</strong></p>
-<p>Y de paso, cuánto ocupa contarlo. Imagina que tienes que enviar por mensajes el resultado de mil lanzamientos de la moneda cargada. Te basta con decir “todo caras salvo el 43 y el 792”. Con la moneda justa ese truco se te cae. Ahí no hay nada repetido a lo que agarrarse. Comprimir bien y no sorprenderse son la misma cosa mirada desde dos sitios.</p>
-</section>
-<section id="y-ahora-el-modelo" class="level2">
-<h2 class="anchored" data-anchor-id="y-ahora-el-modelo">Y ahora el modelo</h2>
-<p>Hasta aquí solo hemos hablado de una distribución, la real.</p>
-<p>Pero tú no tienes la distribución real. Tú tienes un modelo. Y tu modelo es una apuesta sobre cómo funciona el mundo.</p>
-<p>Entonces pasan dos cosas a la vez:</p>
-<ul>
-<li>La realidad reparte los sucesos con una distribución <img src="https://latex.codecogs.com/png.latex?p">, la de verdad.</li>
-<li>Tu modelo espera que se repartan con otra, <img src="https://latex.codecogs.com/png.latex?q">, la que él se cree.</li>
-</ul>
-<p>La sorpresa la mides tú, con las creencias de tu modelo. Ocurre lo que ocurre según <img src="https://latex.codecogs.com/png.latex?p">. Y cada vez que ocurre te sorprendes lo que diga <img src="https://latex.codecogs.com/png.latex?q">.</p>
-<p>Eso es la <strong>entropía cruzada</strong>: la sorpresa media que se lleva tu modelo viendo pasar la realidad.</p>
-<p><img src="https://latex.codecogs.com/png.latex?H(p,%20q)%20=%20-%5Csum_i%20p_i%20%5Clog%20q_i"></p>
-<p>Ahora escribe esa fórmula para un problema de clasificación binaria.</p>
-<p>La realidad reparte etiquetas de 0 y de 1, sin términos medios. Tu modelo responde con una probabilidad. Si la etiqueta es 1, el único término que sobrevive es <img src="https://latex.codecogs.com/png.latex?-%5Clog%20q">. Si es 0, sobrevive <img src="https://latex.codecogs.com/png.latex?-%5Clog(1-q)">. Promedias sobre todas las observaciones.</p>
-<p>Eso es el log-loss. Literalmente. <strong>El log-loss es la entropía cruzada</strong>, escrita para el caso en que las etiquetas son ceros y unos.</p>
-<p>Y de regalo te explica esa manía suya que ya conocías. El término <img src="https://latex.codecogs.com/png.latex?-%5Clog%20p"> se dispara cuando <img src="https://latex.codecogs.com/png.latex?p"> se acerca a cero. Un modelo que dice 0,99 y falla se lleva una sorpresa descomunal. La métrica se la cobra entera.</p>
-<p>Estar muy seguro y fallar <strong>es</strong> llevarse mucha sorpresa. El castigo sale de ahí, de la propia definición. Nadie lo puso a mano.</p>
-</section>
-<section id="por-qué-esto-te-importa" class="level2">
-<h2 class="anchored" data-anchor-id="por-qué-esto-te-importa">Por qué esto te importa</h2>
-<p>Entrenar un clasificador con log-loss es buscar la distribución que menos se sorprenda viendo tus datos.</p>
-<p>Dicho de otra forma: buscas el modelo con las mejores creencias. Acertar la etiqueta es otro objetivo distinto.</p>
-<p>Y por eso te puedes encontrar un modelo con muy buen accuracy y un log-loss horrible. Acierta el lado correcto de 0,5 casi siempre. Pero sus probabilidades son mentira. Al revés también pasa.</p>
-<p>Si del modelo te vas a llevar la probabilidad, esa diferencia te la comes entera.</p>
-
-
-</section>
-
- ]]></description>
-  <category>modelos predictivos</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-08-28-de-donde-sale-el-log-loss/</guid>
-  <pubDate>Fri, 28 Aug 2026 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
