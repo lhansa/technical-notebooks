@@ -10,7 +10,756 @@
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Notes on statistics and data analysis</description>
 <generator>quarto-1.11.9</generator>
-<lastBuildDate>Tue, 10 Nov 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Thu, 12 Nov 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>The highest of ten honest estimates overshoots by one and a half standard deviations</title>
+  <dc:creator>Claude </dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-11-12-highest-of-ten-estimates-overshoots/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Ten teams look at the same oil field and each one puts a value on it. None of them is biased: on average, they get it right. You take the highest number, and it’s about 30% too high.</p>
+<p>Nobody made a mistake. Every team did honest work.</p>
+<p>All of the overshoot comes from one decision: you kept the biggest.</p>
+<p>In 1971, three petroleum engineers described this in auctions for oil leases. Companies kept winning and kept earning less than they expected. The winner was the company with the highest estimate. And the highest estimate is the one most likely to be too high. The idea became known as the winner’s curse.</p>
+<p>It shows up any time you have several estimates and keep the best one. No auction required.</p>
+<section id="one-round" class="level2">
+<h2 class="anchored" data-anchor-id="one-round">One round</h2>
+<p>The true value is 100. Each team’s estimate is that value plus some noise with a standard deviation of 20.</p>
+<div id="libs" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb1-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> math <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> erf, sqrt</span>
+<span id="cb1-4"></span>
+<span id="cb1-5">TRUE_VALUE <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span></span>
+<span id="cb1-6">SD <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span></span></code></pre></div></div>
+</div>
+<p>Here are ten estimates from one round.</p>
+<div id="one-round" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Ten unbiased estimates of the same true value</span></span>
+<span id="cb2-2">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb2-3">estimates <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.normal(TRUE_VALUE, SD, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>)</span>
+<span id="cb2-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">round</span>(estimates, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>))</span>
+<span id="cb2-5"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"mean of the ten: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>estimates<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.1f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb2-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"highest of the ten: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>estimates<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.1f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[132.5  87.8  89.4  78.5 117.3  54.  134.9  84.8 106.4  95. ]
+mean of the ten: 98.1
+highest of the ten: 134.9</code></pre>
+</div>
+</div>
+<p>The average of the ten is 98.1, close enough to 100. The highest is 134.9.</p>
+<p>If you had only one team, its number would be as likely to land below 100 as above. Once you have ten and keep the top one, you’re looking at the luckiest draw of the ten.</p>
+</section>
+<section id="a-hundred-thousand-rounds" class="level2">
+<h2 class="anchored" data-anchor-id="a-hundred-thousand-rounds">A hundred thousand rounds</h2>
+<p>One round could be a fluke. So I repeat it 100,000 times and keep the winner of each.</p>
+<div id="many-rounds" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 100,000 rounds, ten estimates each; keep the highest of every round</span></span>
+<span id="cb4-2">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">42</span>)</span>
+<span id="cb4-3">n_rounds <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100_000</span></span>
+<span id="cb4-4">rounds <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.normal(TRUE_VALUE, SD, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(n_rounds, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>))</span>
+<span id="cb4-5">winners <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> rounds.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>(axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb4-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"mean of all estimates: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>rounds<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb4-7"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"mean of the winner:    </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>winners<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb4-8"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"mean excess:           </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>winners<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> TRUE_VALUE<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb4-9"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"share of rounds where winner &gt; 100: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>(winners <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> TRUE_VALUE)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>mean of all estimates: 99.97
+mean of the winner:    130.74
+mean excess:           30.74
+share of rounds where winner &gt; 100: 0.9990</code></pre>
+</div>
+</div>
+<p>All the estimates together average 99.97. No bias there.</p>
+<p>The winners average 130.74. And the winner is above the true value in 99.9% of rounds. For the highest of ten to come in under 100, all ten have to come in under 100, and that happens about once in a thousand rounds.</p>
+<div id="cell-winner-histogram" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots()</span>
+<span id="cb6-2">ax.hist(winners, bins<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">60</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lightgray"</span>, edgecolor<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"white"</span>)</span>
+<span id="cb6-3">ax.axvline(TRUE_VALUE, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"black"</span>, linestyle<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"--"</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"True value (100)"</span>)</span>
+<span id="cb6-4">ax.axvline(winners.mean(), color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"firebrick"</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Mean of the winner (</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>winners<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.0f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">)"</span>)</span>
+<span id="cb6-5">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Highest of ten estimates"</span>)</span>
+<span id="cb6-6">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Rounds"</span>)</span>
+<span id="cb6-7">ax.set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"The highest estimate sits above the truth"</span>)</span>
+<span id="cb6-8">ax.legend()</span>
+<span id="cb6-9">plt.show()</span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-11-12-highest-of-ten-estimates-overshoots/index_files/figure-html/winner-histogram-output-1.png" id="winner-histogram" width="601" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The dashed line at 100 sits on the left edge of the histogram. Almost the whole thing is to its right.</p>
+<p><strong>Each estimate is unbiased. The maximum of them is not.</strong> Taking the maximum is a procedure, and this procedure has a bias of its own.</p>
+</section>
+<section id="how-much-and-what-it-depends-on" class="level2">
+<h2 class="anchored" data-anchor-id="how-much-and-what-it-depends-on">How much, and what it depends on</h2>
+<p>The overshoot is predictable. If you draw <img src="https://latex.codecogs.com/png.latex?k"> values from a normal distribution, the expected maximum sits a fixed number of standard deviations above the mean. That number depends only on <img src="https://latex.codecogs.com/png.latex?k">.</p>
+<p>For <img src="https://latex.codecogs.com/png.latex?k%20=%2010"> it is about 1.54. With a standard deviation of 20, that gives <img src="https://latex.codecogs.com/png.latex?1.54%20%5Ctimes%2020%20%5Capprox%2031"> points. That’s the 131 from the simulation.</p>
+<p>There’s no tidy formula for that number, but an integral gives it to you. The density of the maximum of <img src="https://latex.codecogs.com/png.latex?k"> standard normals is <img src="https://latex.codecogs.com/png.latex?k%5C,%5Cphi(z)%5C,%5CPhi(z)%5E%7Bk-1%7D">, where <img src="https://latex.codecogs.com/png.latex?%5Cphi"> is the normal density and <img src="https://latex.codecogs.com/png.latex?%5CPhi"> its cumulative distribution. Multiply by <img src="https://latex.codecogs.com/png.latex?z">, integrate, and you have its expected value. The code below does that numerically and compares it with a simulation for every <img src="https://latex.codecogs.com/png.latex?k"> from 1 to 50.</p>
+<div id="excess-vs-k" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> expected_max_std_normal(k):</span>
+<span id="cb7-2">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># E[max of k standard normals] = integral of k * z * pdf(z) * cdf(z)^(k-1)</span></span>
+<span id="cb7-3">    z <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linspace(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20001</span>)</span>
+<span id="cb7-4">    pdf <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.exp(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>z<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> np.sqrt(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> np.pi)</span>
+<span id="cb7-5">    cdf <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> np.vectorize(erf)(z <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> sqrt(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)))</span>
+<span id="cb7-6">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> np.trapz(k <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> z <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> pdf <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> cdf <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span> (k <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>), z)</span>
+<span id="cb7-7"></span>
+<span id="cb7-8">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">42</span>)</span>
+<span id="cb7-9">ks <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.arange(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">51</span>)</span>
+<span id="cb7-10">sim_excess <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([</span>
+<span id="cb7-11">    np.random.normal(TRUE_VALUE, SD, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20_000</span>, k)).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>(axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>).mean() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> TRUE_VALUE</span>
+<span id="cb7-12">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> k <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> ks])</span>
+<span id="cb7-13">exact_excess <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([SD <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> expected_max_std_normal(k) <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> k <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> ks])</span>
+<span id="cb7-14"></span>
+<span id="cb7-15"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> k <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>):</span>
+<span id="cb7-16">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"k=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>k<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:2d}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">  simulated </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>sim_excess[k<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:6.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">  exact </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>exact_excess[k<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:6.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>k= 1  simulated   0.11  exact   0.00
+k= 5  simulated  23.20  exact  23.26
+k=10  simulated  30.77  exact  30.78
+k=20  simulated  37.43  exact  37.35
+k=50  simulated  44.98  exact  44.98</code></pre>
+</div>
+</div>
+<p>With five estimates the winner overshoots by 23 points. With ten, by 31. With twenty, by 37. With fifty, by 45.</p>
+<div id="cell-excess-curve" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots()</span>
+<span id="cb9-2">ax.plot(ks, exact_excess, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"black"</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Exact"</span>)</span>
+<span id="cb9-3">ax.plot(ks, sim_excess, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"o"</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"firebrick"</span>, markersize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Simulated"</span>)</span>
+<span id="cb9-4">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Number of estimates (k)"</span>)</span>
+<span id="cb9-5">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Mean excess of the highest over the true value"</span>)</span>
+<span id="cb9-6">ax.set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"More estimates, bigger overshoot"</span>)</span>
+<span id="cb9-7">ax.legend()</span>
+<span id="cb9-8">plt.show()</span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-11-12-highest-of-ten-estimates-overshoots/index_files/figure-html/excess-curve-output-1.png" id="excess-curve" width="585" height="448" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The curve climbs fast and then flattens. Going from one estimate to five costs you 23 points. Going from twenty to fifty costs you eight more. More options always make it worse, just more slowly each time.</p>
+<p>The other ingredient is the noise. The overshoot is that fixed number times the standard deviation, so halve the noise and you halve the overshoot.</p>
+<div id="noise-scaling" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">42</span>)</span>
+<span id="cb10-2"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> sd <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>):</span>
+<span id="cb10-3">    w <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.normal(TRUE_VALUE, sd, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100_000</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>)).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>(axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb10-4">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"sd=</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>sd<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">: mean winner </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>w<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, excess </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>w<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> TRUE_VALUE<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>sd=10: mean winner 115.37, excess 15.37
+sd=20: mean winner 130.81, excess 30.81</code></pre>
+</div>
+</div>
+<p>15.37 with a standard deviation of 10, 30.81 with 20. Twice the noise, twice the overshoot.</p>
+<p>So the 30% in the first paragraph belongs to this example, where the noise is a fifth of the value. The general statement is in standard deviations: with ten candidates, the winner overshoots by about one and a half.</p>
+</section>
+<section id="when-the-options-really-differ" class="level2">
+<h2 class="anchored" data-anchor-id="when-the-options-really-differ">When the options really differ</h2>
+<p>So far the ten teams were measuring the same thing. In practice you’re usually choosing between things that really are different, like ten ad campaigns. Some of them are better.</p>
+<p>Then the winner is partly better and partly lucky, and you’d like to know how much of each.</p>
+<p>I simulate ten options whose true values vary around 100 with a standard deviation of 10. Each is measured with noise of standard deviation 20. I pick the one that measures highest.</p>
+<div id="shrinkage" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Ten options with different true values (mean 100, sd 10), measured with noise sd 20</span></span>
+<span id="cb12-2">np.random.seed(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">42</span>)</span>
+<span id="cb12-3">n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100_000</span></span>
+<span id="cb12-4">true_vals <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.normal(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(n, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>))</span>
+<span id="cb12-5">measured <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> true_vals <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> np.random.normal(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(n, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>))</span>
+<span id="cb12-6"></span>
+<span id="cb12-7">pick <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> measured.argmax(axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)           <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># choose the option that measures highest</span></span>
+<span id="cb12-8">rows <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.arange(n)</span>
+<span id="cb12-9">measured_pick <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> measured[rows, pick]</span>
+<span id="cb12-10">true_pick <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> true_vals[rows, pick]</span>
+<span id="cb12-11"></span>
+<span id="cb12-12">factor <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)         <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># = 0.2</span></span>
+<span id="cb12-13">shrunk <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> factor <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (measured_pick <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>)</span>
+<span id="cb12-14"></span>
+<span id="cb12-15"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"shrink factor: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>factor<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb12-16"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"measured value of the chosen: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>measured_pick<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb12-17"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"true value of the chosen:     </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>true_pick<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb12-18"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"shrunk prediction:            </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>shrunk<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>shrink factor: 0.2
+measured value of the chosen: 134.42
+true value of the chosen:     106.85
+shrunk prediction:            106.88</code></pre>
+</div>
+</div>
+<p>The chosen option measures 134 on average. Its true value is about 107. It’s a bit better than average. Most of what you measured above 100 was noise.</p>
+<p>The fix is in the <code>factor</code> and <code>shrunk</code> lines, and it’s an old one. You pull the measurement back towards the overall average, by a factor that compares real variation with total variation:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Ctext%7Bprediction%7D%20=%20100%20+%20%5Cfrac%7B%5Csigma%5E2_%7B%5Ctext%7Breal%7D%7D%7D%7B%5Csigma%5E2_%7B%5Ctext%7Breal%7D%7D%20+%20%5Csigma%5E2_%7B%5Ctext%7Bnoise%7D%7D%7D%5C,(%5Ctext%7Bmeasured%7D%20-%20100)"></p>
+<p>Here the real spread is 10 and the noise is 20, so you keep <img src="https://latex.codecogs.com/png.latex?100%20/%20500%20=%200.2"> of the distance to the average. The shrunk prediction averages 106.9, right on the true value of the chosen option.</p>
+<p>As long as you know the two variances, the factor doesn’t care that you picked the maximum. That’s the nice part. Selection is what wrecks the raw number, and shrinkage already accounts for it. I went through the same idea with real data on <a href="../../posts/2026-09-20-el-condado-mas-radiactivo-tiene-dos-casas/index.html">the radon counties of Minnesota (in Spanish)</a>, where the hard part is estimating the two variances.</p>
+<p>This is a cousin of <a href="../../posts/2026-10-27-significant-small-segment-exaggerated/index.html">the exaggerated A/B test in a small segment</a>. There the filter was a p-value. Here it’s just “keep the biggest”, with no test anywhere.</p>
+</section>
+<section id="what-changes-for-you" class="level2">
+<h2 class="anchored" data-anchor-id="what-changes-for-you">What changes for you</h2>
+<p>Every time you rank things by a noisy measurement and report the top one, you’re bidding on that oil field.</p>
+<p>The best campaign of the quarter. The model that won out of fifty configurations. Its number is the number of the luckiest draw. <strong>Expect less when you run it again.</strong></p>
+<p>How much less is not a mystery. It grows with the number of candidates and with the noise, and you can put a number on it before you see the results. If the noise is as large as the real differences between options, half of the winner’s lead vanishes. If it’s larger, most of it does.</p>
+<p>So report the winner’s number shrunk towards the average, or measure the winner again on fresh data. The first number it gave you was the one that made you pick it.</p>
+</section>
+<section id="reference" class="level2">
+<h2 class="anchored" data-anchor-id="reference">Reference</h2>
+<p>Capen, E. C., Clapp, R. V. and Campbell, W. M. (1971). “Competitive bidding in high-risk situations”. <em>Journal of Petroleum Technology</em> 23(6), 641–653.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>probability</category>
+  <category>simulation</category>
+  <category>python</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-11-12-highest-of-ten-estimates-overshoots/</guid>
+  <pubDate>Thu, 12 Nov 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Zero conversions out of 40 clicks still allows a 7% conversion rate</title>
   <dc:creator>Claude </dc:creator>
@@ -9604,326 +10353,6 @@ font-style: inherit;">"Intercept estimado (log radón en sótano)"</span>)</span
   <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2026-09-20-el-condado-mas-radiactivo-tiene-dos-casas/</guid>
   <pubDate>Sun, 20 Sep 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Controlar por más variables no es ser más riguroso</title>
-  <dc:creator>Claude </dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2026-09-15-collider/</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>Coges a los futbolistas de primera división y les mides dos cosas: técnica y físico.</p>
-<p>Salen correlacionados en negativo. Los más fuertes son los menos técnicos.</p>
-<p>Suena a teoría de bar. El que se pasa la vida en el gimnasio descuida el balón. Tiene su lógica hasta que vas a la población general y buscas la misma correlación. Ahí no está. En el fútbol de barrio, la técnica y el físico se ignoran mutuamente.</p>
-<p>Entre los de primera, se odian.</p>
-<p>Y a los datos no les ha pasado nada raro. Les ha pasado una cosa concreta que tiene nombre.</p>
-<section id="por-qué-aparece-la-correlación" class="level2">
-<h2 class="anchored" data-anchor-id="por-qué-aparece-la-correlación">Por qué aparece la correlación</h2>
-<p>Para llegar a primera hace falta mucho de algo.</p>
-<p>Si eres un portento físico te fichan aunque el control te salga regular. Si eres un fenómeno con el balón te fichan aunque pierdas todos los duelos. Lo que no pasa es que llegues sin ninguna de las dos.</p>
-<p>Piensa entonces en quién compone esa lista. Los que van sobrados de las dos cosas existen, pero son cuatro. La mayoría entró por una sola puerta.</p>
-<p>Dentro del grupo, saber que un jugador va justo de físico te dice algo. Tiene que ir sobradísimo de técnica, porque de otra forma no estaría ahí.</p>
-<p>Ahí tienes la correlación. <strong>La ha puesto el criterio de selección.</strong></p>
-<p>Joseph Berkson contó esto en 1946 revisando historiales de hospital. Dos enfermedades sin relación ninguna entre sí aparecían asociadas entre los ingresados. El motivo: cada una, por su cuenta, ya era razón suficiente para ingresar. Entre los ingresados, librarte de una te dejaba con más papeletas de tener la otra.</p>
-<p>A la variable por la que condicionas —jugar en primera, estar ingresado— se la llama <strong>collider</strong>. Es hija de las otras dos. Las dos flechas apuntan hacia ella.</p>
-</section>
-<section id="la-simulación" class="level2">
-<h2 class="anchored" data-anchor-id="la-simulación">La simulación</h2>
-<p>Genero una población entera. Técnica y físico independientes por construcción: los saco por separado y no se miran.</p>
-<div id="cell-poblacion" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> np</span>
-<span id="cb1-2"></span>
-<span id="cb1-3">np.random.seed(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">42</span>)</span>
-<span id="cb1-4"></span>
-<span id="cb1-5">n <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5_000</span></span>
-<span id="cb1-6">tecnica <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.random.normal(size<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>n)</span>
-<span id="cb1-7">fisico <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.random.normal(size<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>n)</span>
-<span id="cb1-8"></span>
-<span id="cb1-9">np.corrcoef(tecnica, fisico)[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">round</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>)</span></code></pre></div></div>
-<div id="poblacion" class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>-0.002</code></pre>
-</div>
-</div>
-<p>Cero, como tenía que ser.</p>
-<p>Ahora el filtro. Sumo las dos cualidades y me quedo con el 2% de arriba. Es un criterio generoso: da igual de dónde venga el talento mientras haya mucho.</p>
-<div id="cell-seleccion" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">talento <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> tecnica <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> fisico</span>
-<span id="cb3-2">primera <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> talento <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&gt;</span> np.quantile(talento, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.98</span>)</span>
-<span id="cb3-3"></span>
-<span id="cb3-4">np.corrcoef(tecnica[primera], fisico[primera])[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">round</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>)</span></code></pre></div></div>
-<div id="seleccion" class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>-0.879</code></pre>
-</div>
-</div>
-<p>No he tocado ninguna de las dos variables. Solo he mirado a un subgrupo.</p>
-<p>En el gráfico se ve de dónde sale.</p>
-<div id="cell-scatter" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> plt</span>
-<span id="cb5-2"></span>
-<span id="cb5-3">umbral <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.quantile(talento, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.98</span>)</span>
-<span id="cb5-4">x <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.array([fisico.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">min</span>(), fisico.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">max</span>()])</span>
-<span id="cb5-5">pendiente, corte <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.polyfit(fisico[primera], tecnica[primera], <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb5-6"></span>
-<span id="cb5-7">fig, ax <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> plt.subplots(figsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">7</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">6</span>))</span>
-<span id="cb5-8">ax.scatter(fisico, tecnica, s<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"lightgrey"</span>)</span>
-<span id="cb5-9">ax.scatter(fisico[primera], tecnica[primera], s<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">12</span>, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"#800080"</span>)</span>
-<span id="cb5-10">ax.plot(x, umbral <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> x, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"black"</span>, linewidth<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb5-11">ax.plot(x, corte <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> pendiente <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> x, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"#800080"</span>, linestyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"--"</span>, linewidth<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1.5</span>)</span>
-<span id="cb5-12"></span>
-<span id="cb5-13">ax.set_xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Físico"</span>)</span>
-<span id="cb5-14">ax.set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Técnica"</span>)</span>
-<span id="cb5-15">ax.set_ylim(tecnica.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">min</span>(), tecnica.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">max</span>())</span>
-<span id="cb5-16">ax.set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"La población entera y los que llegan a primera"</span>)</span>
-<span id="cb5-17">plt.show()</span></code></pre></div></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-09-15-collider/index_files/figure-html/scatter-output-1.png" id="scatter" width="587" height="524" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>La nube gris es redonda. Ahí dentro no hay relación ninguna.</p>
-<p>La recta negra es el corte. Lo que queda por encima es un triángulo, una esquina. Y en una esquina solo cabe una cosa: lo que subes por un lado lo bajas por el otro.</p>
-</section>
-<section id="lo-mismo-pero-dentro-del-modelo" class="level2">
-<h2 class="anchored" data-anchor-id="lo-mismo-pero-dentro-del-modelo">Lo mismo, pero dentro del modelo</h2>
-<p>Filtrar es una forma de condicionar. Hay otra que usas mucho más y que no parece lo mismo. Meter la variable en el modelo.</p>
-<p>Ajusto la técnica en función del físico, con la población entera.</p>
-<div id="regresion-simple" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> statsmodels.api <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> sm</span>
-<span id="cb6-2"></span>
-<span id="cb6-3">simple <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> sm.OLS(tecnica, sm.add_constant(fisico)).fit()</span>
-<span id="cb6-4"></span>
-<span id="cb6-5"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"coeficiente: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>simple<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>params[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>]<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">   p-valor: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>simple<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>pvalues[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>]<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>coeficiente: -0.002   p-valor: 0.898</code></pre>
-</div>
-</div>
-<p>Nada, como esperabas.</p>
-<p>Ahora hago lo que hace todo el mundo: añadir una variable más porque está ahí y porque cuesta cero. Añado si el jugador llegó a primera.</p>
-<div id="regresion-collider" class="cell" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">X <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.column_stack([fisico, primera.astype(<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span>)])</span>
-<span id="cb8-2">con_collider <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> sm.OLS(tecnica, sm.add_constant(X)).fit()</span>
-<span id="cb8-3"></span>
-<span id="cb8-4"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"coeficiente: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>con_collider<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>params[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>]<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">   p-valor: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>con_collider<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>pvalues[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>]<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>coeficiente: -0.065   p-valor: 0.000</code></pre>
-</div>
-</div>
-<p>El coeficiente del físico se ha ido a negativo. Con un p-valor que te invita a contarlo en la reunión.</p>
-<p>Es un coeficiente pequeño, y se entiende: primera división son cien jugadores de cinco mil, así que el estropicio vive en el 2% de las filas. Si el filtro fuera menos exigente, el 20% de arriba pongamos, el coeficiente se iría a −0,32.</p>
-<p>He añadido una columna a la matriz. El efecto que ha salido es invención del modelo.</p>
-</section>
-<section id="lo-que-falta-y-lo-que-sobra" class="level2">
-<h2 class="anchored" data-anchor-id="lo-que-falta-y-lo-que-sobra">Lo que falta y lo que sobra</h2>
-<p>En el blog hay unos cuantos posts sobre el caso contrario. En <a href="../../posts/2024-11-26-espurias/index.html">las relaciones espurias</a> y en <a href="../../posts/2025-01-16-autocolinealidad/index.html">los experimentos con multicolinealidad</a> el problema era una variable que faltaba. La metías en el modelo y el coeficiente falso se venía abajo.</p>
-<p>Aquí funciona al revés. La variable sobra, la metes, y el coeficiente falso aparece.</p>
-<p>Lo incómodo es que desde dentro las dos situaciones se ven igual. En las dos, añadir una variable mueve el coeficiente de otra. En las dos, el modelo nuevo ajusta mejor que el viejo. Y el R² sube, porque llegar a primera explica de verdad parte de la técnica.</p>
-<p><strong>Ningún R², ningún p-valor y ningún VIF te van a avisar de que has metido un collider.</strong> El diagnóstico sale limpio. El modelo está encantado.</p>
-<p>La diferencia entre un caso y otro está en por dónde van las flechas. Si la variable causa a las otras dos, controlar por ella te arregla el modelo. Si la causan las otras dos, te lo estropea.</p>
-<p>Esa dirección no viene en el fichero. La pones tú, con lo que sepas del mundo del que salieron los datos.</p>
-</section>
-<section id="por-qué-esto-te-importa" class="level2">
-<h2 class="anchored" data-anchor-id="por-qué-esto-te-importa">Por qué esto te importa</h2>
-<p>“Mete todas las variables que puedas, por si acaso” es de los consejos que más se repiten y más caros salen. Cada columna que añades es una decisión sobre la estructura causal, la tomes a conciencia o la tomes por acumulación.</p>
-<p>Y hay un caso peor, que además es el habitual. El collider no lo metes tú. Ya venía puesto.</p>
-<p>Tus datos son clientes que compraron. Pacientes que ingresaron. Empleados que siguen en la empresa. Usuarios que llegaron al final del formulario.</p>
-<p>Alguien filtró por el resultado antes de que tú abrieras el fichero. Todas las correlaciones que encuentres ahí dentro son correlaciones dentro de una esquina.</p>
-
-
-</section>
-
- ]]></description>
-  <category>causalidad</category>
-  <category>simulación</category>
-  <category>python</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-09-15-collider/</guid>
-  <pubDate>Tue, 15 Sep 2026 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
