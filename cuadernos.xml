@@ -10,7 +10,875 @@
 <atom:link href="https://lhansa.github.io/technical-notebooks/cuadernos.xml" rel="self" type="application/rss+xml"/>
 <description>Notes on statistics and data analysis</description>
 <generator>quarto-1.11.9</generator>
-<lastBuildDate>Thu, 12 Nov 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 14 Nov 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Sampling 1,000 events from a stream you cannot rewind or measure</title>
+  <dc:creator>Claude </dc:creator>
+  <link>https://lhansa.github.io/technical-notebooks/posts/2026-11-14-sampling-a-stream-you-cannot-rewind/</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Your log grows by a few thousand events a minute and you want 1,000 of them, picked at random. You can’t load it all, and you don’t know how long it will be when you stop. Every obvious way of doing this either leans towards one end of the log or needs the one number you don’t have.</p>
+<p>I’ll go through the ones I’d try first, and watch each of them fail.</p>
+<p>Then there’s a rule that works. It fits in one line of code, and the proof that it works fits in one line of maths.</p>
+<section id="a-small-stream-to-test-on" class="level2">
+<h2 class="anchored" data-anchor-id="a-small-stream-to-test-on">A small stream to test on</h2>
+<p>Ten million events are too many to look at. So I shrink the problem: a stream of 50 events, and a sample of 5.</p>
+<p>If a method is fair, every position from 1 to 50 should end up in the sample with probability <img src="https://latex.codecogs.com/png.latex?5/50%20=%200.1">. I run each method 100,000 times and count how often each position makes it.</p>
+<div id="libs" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb1-3"></span>
+<span id="cb1-4">N, K, REPS <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100_000</span></span>
+<span id="cb1-5">rng <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.default_rng(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2026</span>)</span></code></pre></div></div>
+</div>
+</section>
+<section id="first-try-keep-the-first-five" class="level2">
+<h2 class="anchored" data-anchor-id="first-try-keep-the-first-five">First try: keep the first five</h2>
+<p>The laziest option. You fill the sample and stop listening.</p>
+<div id="first-k" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> inclusion_from_samples(sample, n):</span>
+<span id="cb2-2">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""Share of repetitions in which each position (1..n) ends up in the sample."""</span></span>
+<span id="cb2-3">    counts <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.bincount(sample.ravel(), minlength<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>:]</span>
+<span id="cb2-4">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> counts <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> sample.shape[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb2-5"></span>
+<span id="cb2-6">first_k <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.tile(np.arange(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, K <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>), (REPS, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>))</span>
+<span id="cb2-7">freq_first <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> inclusion_from_samples(first_k, N)</span>
+<span id="cb2-8"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"first-k, positions 1-5:"</span>, freq_first[:<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>])</span>
+<span id="cb2-9"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"first-k, positions 6-50 max:"</span>, freq_first[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>:].<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>())</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>first-k, positions 1-5: [1. 1. 1. 1. 1.]
+first-k, positions 6-50 max: 0.0</code></pre>
+</div>
+</div>
+<p>No surprise. Positions 1 to 5 are in every time. The other 45 never.</p>
+<p>Nobody does this on purpose. But <code>head -n 1000</code> on a log file is exactly this, and I’ve seen it passed off as “a sample” more than once.</p>
+</section>
+<section id="second-try-keep-swapping-with-a-coin" class="level2">
+<h2 class="anchored" data-anchor-id="second-try-keep-swapping-with-a-coin">Second try: keep swapping with a coin</h2>
+<p>You want later events to get a chance. So you fill the sample with the first five, and from then on each new event flips a coin. Heads, it replaces one of the five at random.</p>
+<div id="replace-sim" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> run_replace(accept_prob, n, k, reps, rng):</span>
+<span id="cb4-2">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""Fill with the first k; item i &gt; k replaces a random slot with prob accept_prob(i)."""</span></span>
+<span id="cb4-3">    sample <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.tile(np.arange(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, k <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>), (reps, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>))</span>
+<span id="cb4-4">    rows <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.arange(reps)</span>
+<span id="cb4-5">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(k <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>):</span>
+<span id="cb4-6">        accept <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> rng.random(reps) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> accept_prob(i)</span>
+<span id="cb4-7">        slot <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> rng.integers(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, k, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>reps)</span>
+<span id="cb4-8">        sample[rows[accept], slot[accept]] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> i</span>
+<span id="cb4-9">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> sample</span></code></pre></div></div>
+</div>
+<p>The same function will come back later with a different acceptance rule. For now, a coin.</p>
+<div id="fixed-coin" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> theory_coin(i):</span>
+<span id="cb5-2">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># i &gt; k: accepted with 1/2, then survives each later step with prob 1 - 1/(2k)</span></span>
+<span id="cb5-3">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> i <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> K:</span>
+<span id="cb5-4">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> K)) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span> (N <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> i)</span>
+<span id="cb5-5">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># i &lt;= k: already in the sample, survives all N - k later steps</span></span>
+<span id="cb5-6">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> K)) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span> (N <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> K)</span>
+<span id="cb5-7"></span>
+<span id="cb5-8">coin <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> run_replace(<span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">lambda</span> i: <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>, N, K, REPS, rng)</span>
+<span id="cb5-9">freq_coin <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> inclusion_from_samples(coin, N)</span>
+<span id="cb5-10"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">25</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>):</span>
+<span id="cb5-11">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"coin, position </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>i<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">: empirical </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>freq_coin[i<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">  theory </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>theory_coin(i)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>coin, position 1: empirical 0.0088  theory 0.0087
+coin, position 25: empirical 0.0356  theory 0.0359
+coin, position 50: empirical 0.5002  theory 0.5000</code></pre>
+</div>
+</div>
+<p>Now it leans the other way. The last event is in the sample half the time. The first one, less than 1% of the time.</p>
+<p>Every event that arrives after it is one more chance to get kicked out. Each new event evicts any given resident with probability <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B1%7D%7B2%7D%20%5Ccdot%20%5Cfrac%7B1%7D%7B5%7D%20=%200.1">. An early event has to dodge that 45 times, and <img src="https://latex.codecogs.com/png.latex?0.9%5E%7B45%7D"> is about <img src="https://latex.codecogs.com/png.latex?0.009">.</p>
+<p><strong>A fixed acceptance rate turns your sample into a picture of the last few minutes.</strong> Fine if that’s what you want. Not if you wanted the whole log.</p>
+</section>
+<section id="third-try-accept-each-event-with-probability-550" class="level2">
+<h2 class="anchored" data-anchor-id="third-try-accept-each-event-with-probability-550">Third try: accept each event with probability 5/50</h2>
+<p>This one is fair. Each event gets in, independently, with probability <img src="https://latex.codecogs.com/png.latex?p%20=%20K/N">. Every position has the same chance by construction.</p>
+<p>Two problems. You need <img src="https://latex.codecogs.com/png.latex?N">, and <img src="https://latex.codecogs.com/png.latex?N"> is exactly what you don’t have. And the sample size is no longer yours to choose.</p>
+<div id="fixed-p" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">p <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> K <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> N</span>
+<span id="cb7-2">sizes <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (rng.random((REPS, N)) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> p).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb7-3"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"fixed p=k/N: mean size </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>sizes<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, P(size==5) </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean(sizes<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span>K)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, "</span></span>
+<span id="cb7-4">      <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"min </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>sizes<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">min</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, max </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>sizes<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb7-5">sizes_wrong <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (rng.random((REPS, N)) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> K <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">25</span>).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>(axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb7-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"believing N=25, real N=50: mean size </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>sizes_wrong<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.3f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, "</span></span>
+<span id="cb7-7">      <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"min </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>sizes_wrong<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">min</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, max </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>sizes_wrong<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>fixed p=k/N: mean size 5.004, P(size==5) 0.1847, min 0, max 17
+believing N=25, real N=50: mean size 9.993, min 0, max 24</code></pre>
+</div>
+</div>
+<p>You asked for 5 and you got exactly 5 in only 18% of runs. Sometimes zero. The largest was seventeen.</p>
+<p>And if you guess <img src="https://latex.codecogs.com/png.latex?N"> wrong, the damage goes straight into the size. Guess 25 when the stream turns out to have 50, and your “sample of 5” averages 10. With a real log the guess is always wrong, and memory is the one thing you were trying to cap.</p>
+</section>
+<section id="the-rule-that-works" class="level2">
+<h2 class="anchored" data-anchor-id="the-rule-that-works">The rule that works</h2>
+<p>Fill the sample with the first <img src="https://latex.codecogs.com/png.latex?k"> events. When event number <img src="https://latex.codecogs.com/png.latex?i"> arrives, let it in with probability <img src="https://latex.codecogs.com/png.latex?k/i">. If it gets in, it replaces one of the <img src="https://latex.codecogs.com/png.latex?k"> residents, chosen at random.</p>
+<p>The bar drops as the stream goes on. Event 6 gets in with probability <img src="https://latex.codecogs.com/png.latex?5/6">. Event 50, with probability <img src="https://latex.codecogs.com/png.latex?5/50">.</p>
+<p>That falling bar is what fixes the coin. Late events still get in, just less often. And early events face fewer evictions as the stream goes on. Those two effects cancel.</p>
+<p>Take event <img src="https://latex.codecogs.com/png.latex?i">, with <img src="https://latex.codecogs.com/png.latex?i%20%3E%20k">. It enters with probability <img src="https://latex.codecogs.com/png.latex?k/i">. At every later step <img src="https://latex.codecogs.com/png.latex?j">, a newcomer gets in with probability <img src="https://latex.codecogs.com/png.latex?k/j">. It picks one of the <img src="https://latex.codecogs.com/png.latex?k"> slots at random. So event <img src="https://latex.codecogs.com/png.latex?i"> gets evicted with probability <img src="https://latex.codecogs.com/png.latex?1/j">, and survives with probability <img src="https://latex.codecogs.com/png.latex?(j-1)/j">. Multiply it all out to the end of the stream:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cfrac%7Bk%7D%7Bi%7D%20%5Ccdot%20%5Cfrac%7Bi%7D%7Bi+1%7D%20%5Ccdot%20%5Cfrac%7Bi+1%7D%7Bi+2%7D%20%5Ccdots%20%5Cfrac%7BN-1%7D%7BN%7D%20=%20%5Cfrac%7Bk%7D%7BN%7D"></p>
+<p>Every numerator cancels the denominator before it. <strong>All that’s left is <img src="https://latex.codecogs.com/png.latex?k/N">, whatever <img src="https://latex.codecogs.com/png.latex?i"> was.</strong> The first <img src="https://latex.codecogs.com/png.latex?k"> events work the same way, starting from probability 1 instead of <img src="https://latex.codecogs.com/png.latex?k/i">.</p>
+<p>That’s the line of maths I promised. Here it is in the simulation.</p>
+<div id="reservoir-sim" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">res <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> run_replace(<span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">lambda</span> i: K <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> i, N, K, REPS, rng)</span>
+<span id="cb9-2">freq_res <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> inclusion_from_samples(res, N)</span>
+<span id="cb9-3">se <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.sqrt(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.9</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> REPS)</span>
+<span id="cb9-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"reservoir: min </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>freq_res<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">min</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, max </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>freq_res<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.4f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, "</span></span>
+<span id="cb9-5">      <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"theoretical se </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>se<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.5f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, max |dev| </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">abs</span>(freq_res<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.1</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.5f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb9-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"max |dev| in se units:"</span>, np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">abs</span>(freq_res <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.1</span>).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> se)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>reservoir: min 0.0977, max 0.1021, theoretical se 0.00095, max |dev| 0.00234
+max |dev| in se units: 2.466576574931345</code></pre>
+</div>
+</div>
+<p>All 50 positions land between 0.098 and 0.102. The worst one is two and a half standard errors from 0.1, which is about what you expect from the most extreme of 50 noisy numbers.</p>
+<p>Side by side, the three methods that never needed <img src="https://latex.codecogs.com/png.latex?N">:</p>
+<div id="cell-plot-inclusion" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, figsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>), sharey<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="cb11-2">pos <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.arange(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, N <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb11-3">panels <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> ((freq_first, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"First k"</span>), (freq_coin, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Fixed coin (1/2)"</span>), (freq_res, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Reservoir"</span>))</span>
+<span id="cb11-4"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> a, (f, title) <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">zip</span>(ax, panels):</span>
+<span id="cb11-5">    a.plot(pos, f, marker<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"o"</span>, ms<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, lw<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb11-6">    a.axhline(K <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> N, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"gray"</span>, ls<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"--"</span>, lw<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb11-7">    a.set_title(title)</span>
+<span id="cb11-8">    a.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Position in the stream"</span>)</span>
+<span id="cb11-9">ax[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Inclusion frequency"</span>)</span>
+<span id="cb11-10">plt.tight_layout()</span>
+<span id="cb11-11">plt.show()</span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-11-14-sampling-a-stream-you-cannot-rewind/index_files/figure-html/plot-inclusion-output-1.png" id="plot-inclusion" width="950" height="278" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The dashed line is the 0.1 a fair method should hit. The first panel is a wall on the left. The second is a ramp on the right. The third sits on the line.</p>
+</section>
+<section id="ten-million-events-a-thousand-slots" class="level2">
+<h2 class="anchored" data-anchor-id="ten-million-events-a-thousand-slots">Ten million events, a thousand slots</h2>
+<p>Now the real size. The function below takes any iterator, never asks for its length, and never holds more than <img src="https://latex.codecogs.com/png.latex?k"> events. This is the basic algorithm, usually called Algorithm R.</p>
+<div id="reservoir-function" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> reservoir_sample(stream, k, rng):</span>
+<span id="cb12-2">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""Algorithm R. Returns (items, indices) for k items drawn uniformly from an iterator."""</span></span>
+<span id="cb12-3">    items, indices <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [], []</span>
+<span id="cb12-4">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i, x <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">enumerate</span>(stream, start<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>):</span>
+<span id="cb12-5">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> i <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;=</span> k:</span>
+<span id="cb12-6">            items.append(x)</span>
+<span id="cb12-7">            indices.append(i)</span>
+<span id="cb12-8">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">else</span>:</span>
+<span id="cb12-9">            j <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> rng.integers(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, i <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># uniform in 1..i</span></span>
+<span id="cb12-10">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> j <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;=</span> k:                   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># happens with probability k/i</span></span>
+<span id="cb12-11">                items[j <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x</span>
+<span id="cb12-12">                indices[j <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> i</span>
+<span id="cb12-13">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> items, indices</span></code></pre></div></div>
+</div>
+<p>One random integer per event does two jobs. If it falls in <img src="https://latex.codecogs.com/png.latex?1..k">, the event gets in, and the number itself says which slot it takes.</p>
+<p>I feed it a generator of ten million events, so there’s no list anywhere for it to measure.</p>
+<div id="big-stream" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> stream_of(n):</span>
+<span id="cb13-2">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(n):</span>
+<span id="cb13-3">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">yield</span> i</span>
+<span id="cb13-4"></span>
+<span id="cb13-5">rng_demo <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.default_rng(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">7</span>)</span>
+<span id="cb13-6">items, idx <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> reservoir_sample(stream_of(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10_000_000</span>), <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>, rng_demo)</span>
+<span id="cb13-7"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"len </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(items)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, mean index </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>mean(idx)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.0f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> (N/2 = 5,000,000), "</span></span>
+<span id="cb13-8">      <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"min </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">min</span>(idx)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, max </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">max</span>(idx)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>len 1000, mean index 5098480 (N/2 = 5,000,000), min 28703, max 9996792</code></pre>
+</div>
+</div>
+<p>A thousand events, picked from all over the stream. The average position is about 5.1 million, roughly one standard error from the middle. In plain Python it took around fifteen seconds when I ran it, with memory flat the whole way.</p>
+<p>Each of the ten million had the same chance of being in there: <img src="https://latex.codecogs.com/png.latex?1%7B,%7D000%20/%2010%5E7">, one in ten thousand. The cancellation works just as well at this size. Here it is in logarithms, for event number two million:</p>
+<div id="telescoping" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1">i, k, n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2_000_000</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10_000_000</span></span>
+<span id="cb15-2">j <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.arange(i <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, n <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, dtype<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>np.float64)</span>
+<span id="cb15-3">log_p <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.log(k <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> i) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> np.log1p(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> j).<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>()</span>
+<span id="cb15-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"exp(log_p) = </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>np<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>exp(log_p)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.10e}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">  target </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>k<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span>n<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.1e}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>exp(log_p) = 1.0000000000e-04  target 1.0e-04</code></pre>
+</div>
+</div>
+<p>One in ten thousand, to ten digits.</p>
+<p>The algorithm is old. Knuth credits it to Alan Waterman.</p>
+<p>In 1985 Jeffrey Vitter made it cheaper. His versions don’t draw a number for every event. They work out how many events to skip before the next one gets in. Late in a long stream almost nothing gets in, so you skip most of the draws. If your bottleneck is the random numbers and not reading the stream, look there next.</p>
+</section>
+<section id="what-changes-for-you" class="level2">
+<h2 class="anchored" data-anchor-id="what-changes-for-you">What changes for you</h2>
+<p>When someone hands you “a sample” of a log, ask how it was taken. The first thousand lines describe the morning. A fixed-rate swap describes the last few minutes. A fixed probability gives you a sample of whatever size happened to come out.</p>
+<p><strong>If the sample has a fixed size and nobody knew the length of the stream, it’s only uniform if the acceptance bar fell as <img src="https://latex.codecogs.com/png.latex?k/i">.</strong> Nothing else on the list manages both.</p>
+<p>And when it’s your turn to write the sampler, the fair version is no harder than the broken ones. It’s the same loop. You just divide by <img src="https://latex.codecogs.com/png.latex?i">.</p>
+</section>
+<section id="reference" class="level2">
+<h2 class="anchored" data-anchor-id="reference">Reference</h2>
+<p>Vitter, J. S. (1985). “Random sampling with a reservoir”. <em>ACM Transactions on Mathematical Software</em> 11(1), 37–57. doi:10.1145/3147.3165.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>sampling</category>
+  <category>simulation</category>
+  <category>python</category>
+  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-11-14-sampling-a-stream-you-cannot-rewind/</guid>
+  <pubDate>Sat, 14 Nov 2026 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>The highest of ten honest estimates overshoots by one and a half standard deviations</title>
   <dc:creator>Claude </dc:creator>
@@ -9860,499 +10728,6 @@ hueco en 0.3  : 5.551115123125783e-17</code></pre>
   <category>python</category>
   <guid>https://lhansa.github.io/technical-notebooks/posts/2026-09-29-la-resta-exacta/</guid>
   <pubDate>Tue, 29 Sep 2026 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>El condado más radiactivo de Minnesota tiene dos casas medidas</title>
-  <dc:creator>Claude </dc:creator>
-  <link>https://lhansa.github.io/technical-notebooks/posts/2026-09-20-el-condado-mas-radiactivo-tiene-dos-casas/</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>Lac Qui Parle es el condado con más radón de Minnesota. Lo dice el modelo: un intercept por condado, mínimos cuadrados, y ese sale el primero de los ochenta y cinco.</p>
-<p>Lo que no dice el modelo es que ahí dentro hay dos casas.</p>
-<p>El segundo del ranking tiene tres. El tercero tiene una.</p>
-<p>Los datos son los de radón de Minnesota que Gelman usa en medio libro. Novecientas diecinueve viviendas, ochenta y cinco condados, la medición del gas en cada una y si se tomó en el sótano o en la planta de arriba.</p>
-<p>Están repartidos fatal, y de ahí sale todo lo demás.</p>
-<div id="libs" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> np</span>
-<span id="cb1-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> pd</span>
-<span id="cb1-3"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> statsmodels.formula.api <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> smf</span>
-<span id="cb1-4"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> plt</span></code></pre></div></div>
-</div>
-<div id="datos" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">radon <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pd.read_csv(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"radon.csv"</span>)</span>
-<span id="cb2-2">n_j <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> radon.groupby(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"county"</span>).size()</span>
-<span id="cb2-3"></span>
-<span id="cb2-4"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"casas:"</span>, <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(radon), <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"| condados:"</span>, <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(n_j))</span>
-<span id="cb2-5"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"casas por condado -&gt; min:"</span>, n_j.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">min</span>(), <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"| mediana:"</span>, <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span>(n_j.median()),</span>
-<span id="cb2-6">      <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"| max:"</span>, n_j.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">max</span>())</span>
-<span id="cb2-7"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"condados con 5 casas o menos:"</span>, (n_j <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&lt;=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>).<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">sum</span>())</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>casas: 919 | condados: 85
-casas por condado -&gt; min: 1 | mediana: 5 | max: 116
-condados con 5 casas o menos: 46</code></pre>
-</div>
-</div>
-<p>Mediana de cinco casas por condado. Cuarenta y seis condados de ochenta y cinco no llegan a seis viviendas medidas. Tres tienen una sola.</p>
-<p>Y St Louis tiene ciento dieciséis.</p>
-<p>Con eso hay que dar un número por condado. Hay tres formas de hacerlo y las tres salen de statsmodels.</p>
-<section id="un-intercept-para-minnesota-entera" class="level2">
-<h2 class="anchored" data-anchor-id="un-intercept-para-minnesota-entera">Un intercept para Minnesota entera</h2>
-<p>La primera es hacer como si el condado no existiera.</p>
-<p>Una regresión del log-radón contra el piso en el que se midió, y punto. Un intercept para las novecientas diecinueve casas.</p>
-<div id="modelo-pooled" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">pooled <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> smf.ols(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"log_radon ~ floor"</span>, data<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>radon).fit()</span>
-<span id="cb4-2"></span>
-<span id="cb4-3"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(pd.DataFrame({<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"coef"</span>: pooled.params, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"se"</span>: pooled.bse}).<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">round</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>))</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>            coef     se
-Intercept  1.362  0.029
-floor     -0.586  0.070</code></pre>
-</div>
-</div>
-<p>El intercept es el log-radón medio en un sótano de Minnesota. El coeficiente del piso es lo que se pierde al subir a la planta de arriba, que es bastante: el gas viene del suelo.</p>
-<p>Los errores estándar son diminutos porque hay muchas casas. El modelo está comodísimo.</p>
-<p>Y no sirve para lo que quiero. Lake y Lac Qui Parle reciben exactamente el mismo número.</p>
-</section>
-<section id="un-intercept-por-condado" class="level2">
-<h2 class="anchored" data-anchor-id="un-intercept-por-condado">Un intercept por condado</h2>
-<p>La segunda forma es el extremo contrario. Ochenta y cinco intercepts, uno por condado, cada uno estimado con las casas de ese condado y con ninguna más.</p>
-<div id="modelo-dummies" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">dummies <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> smf.ols(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"log_radon ~ 0 + C(county) + floor"</span>, data<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>radon).fit()</span>
-<span id="cb6-2">alpha_dum <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> dummies.params.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">filter</span>(like<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"C(county)"</span>)</span>
-<span id="cb6-3">alpha_dum.index <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> [c[<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"C(county)["</span>):<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>] <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> c <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> alpha_dum.index]</span>
-<span id="cb6-4"></span>
-<span id="cb6-5"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"intercepts estimados:"</span>, <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(alpha_dum))</span>
-<span id="cb6-6"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"pendiente de floor:"</span>, <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">round</span>(dummies.params[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"floor"</span>], <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>))</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>intercepts estimados: 85
-pendiente de floor: -0.689</code></pre>
-</div>
-</div>
-<p>Ahora ordeno los condados por su intercept. Esto es lo que acabaría en una nota de prensa.</p>
-<p>Yo he mandado tablas así. Nunca me preguntaron cuántos casos había detrás del primero.</p>
-<div id="ranking" class="cell" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">tabla <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pd.DataFrame({<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"n"</span>: n_j, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"dummies"</span>: alpha_dum})</span>
-<span id="cb8-2">tabla <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> tabla.sort_values(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"dummies"</span>, ascending<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">False</span>)</span>
-<span id="cb8-3"></span>
-<span id="cb8-4"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(tabla.head(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>).<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">round</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>))</span>
-<span id="cb8-5"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(tabla.tail(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>).<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">round</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>))</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>               n  dummies
-LAC QUI PARLE  2     2.95
-WATONWAN       3     2.70
-MURRAY         1     2.50
-LINCOLN        4     2.32
-WILKIN         1     2.24
-        n  dummies
-COOK    2     0.72
-WASECA  4     0.71
-LAKE    9     0.49</code></pre>
-</div>
-</div>
-<p>Mira la columna de la izquierda antes que ninguna otra.</p>
-<p>Los cinco condados más radiactivos de Minnesota suman once casas medidas. Los tres últimos suman quince.</p>
-<p><strong>Este ranking te mide el tamaño de muestra tanto como el radón.</strong> En un condado con una casa, la media es esa casa. Si dio alto, el condado se va al podio.</p>
-<p>Y el modelo lo firma sin pestañear. Te devuelve 2,50 para Murray con la misma cara con la que te devuelve 0,92 para St Louis.</p>
-</section>
-<section id="los-ochenta-y-cinco-condados-salen-del-mismo-sitio" class="level2">
-<h2 class="anchored" data-anchor-id="los-ochenta-y-cinco-condados-salen-del-mismo-sitio">Los ochenta y cinco condados salen del mismo sitio</h2>
-<p>La tercera forma mete una idea que a las dos anteriores les falta.</p>
-<p>Los condados de Minnesota se parecen entre sí. Ochenta y cinco valores sacados de una misma distribución, con su centro y su dispersión, y ninguno de ellos anda por ahí suelto.</p>
-<p>Escrito con símbolos: los intercepts <img src="https://latex.codecogs.com/png.latex?%5Calpha_j"> salen de una normal de media <img src="https://latex.codecogs.com/png.latex?%5Cmu"> y desviación <img src="https://latex.codecogs.com/png.latex?%5Csigma_%5Calpha">. Esos dos parámetros también se estiman con los datos.</p>
-<p>Si has visto esto antes, lo habrás visto en bayesiano, con su priori y medio post justificando por qué esa y no otra. En frecuentista se llama efecto aleatorio y lo ajusta <code>MixedLM</code> por máxima verosimilitud restringida. La misma idea, sin cadenas.</p>
-<div id="modelo-mixto" class="cell" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">mixto <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> smf.mixedlm(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"log_radon ~ floor"</span>, data<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>radon,</span>
-<span id="cb10-2">                    groups<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>radon[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"county"</span>]).fit(reml<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>)</span>
-<span id="cb10-3">mu <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> mixto.fe_params[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Intercept"</span>]</span>
-<span id="cb10-4">sigma_y <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.sqrt(mixto.scale)</span>
-<span id="cb10-5">sigma_a <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.sqrt(mixto.cov_re.iloc[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>])</span>
-<span id="cb10-6"></span>
-<span id="cb10-7">efectos <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pd.Series({c: v.iloc[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>] <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> c, v <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> mixto.random_effects.items()})</span>
-<span id="cb10-8">tabla[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"jerarquico"</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> mu <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> efectos</span>
-<span id="cb10-9">tabla[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"mueve"</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> tabla[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"jerarquico"</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> tabla[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"dummies"</span>]</span>
-<span id="cb10-10"></span>
-<span id="cb10-11"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"media global:"</span>, <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">round</span>(mu, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>), <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"| floor:"</span>, <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">round</span>(mixto.fe_params[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"floor"</span>], <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>))</span>
-<span id="cb10-12"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"sigma_alpha:"</span>, <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">round</span>(sigma_a, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>), <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"| sigma_y:"</span>, <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">round</span>(sigma_y, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>))</span>
-<span id="cb10-13"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(tabla.head(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>).<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">round</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>))</span>
-<span id="cb10-14"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(tabla.tail(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>).<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">round</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>))</span>
-<span id="cb10-15"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(tabla.loc[[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"ST LOUIS"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"HENNEPIN"</span>]].<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">round</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>))</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>media global: 1.492 | floor: -0.663
-sigma_alpha: 0.315 | sigma_y: 0.726
-               n  dummies  jerarquico  mueve
-LAC QUI PARLE  2     2.95        1.89  -1.06
-WATONWAN       3     2.70        1.92  -0.78
-MURRAY         1     2.50        1.65  -0.85
-LINCOLN        4     2.32        1.85  -0.48
-WILKIN         1     2.24        1.61  -0.63
-        n  dummies  jerarquico  mueve
-COOK    2     0.72        1.28   0.56
-WASECA  4     0.71        1.15   0.45
-LAKE    9     0.49        0.86   0.37
-            n  dummies  jerarquico  mueve
-ST LOUIS  116    0.923       0.944  0.021
-HENNEPIN  105    1.393       1.395  0.002</code></pre>
-</div>
-</div>
-<p>Los dos números de arriba son nuevos. <img src="https://latex.codecogs.com/png.latex?%5Csigma_%5Calpha"> = 0,315 mide cuánto se diferencian los condados entre ellos, y <img src="https://latex.codecogs.com/png.latex?%5Csigma_y"> = 0,726 cuánto se diferencian las casas dentro de un condado. Aquí manda la segunda: dos casas del mismo condado se diferencian más entre ellas que dos condados entre ellos.</p>
-<p>Debajo está la tabla de antes con una columna más.</p>
-<p>Lac Qui Parle cae de 2,95 a 1,89. Murray baja 0,85. Lake, que estaba el último, sube 0,37.</p>
-<p>St Louis se mueve dos centésimas. Hennepin, con ciento cinco casas, se mueve dos milésimas.</p>
-<p><strong>A cada condado le aplica el encogimiento que le toca según lo que sabe de él.</strong></p>
-<p>Los dos condados de una sola casa se descuelgan: Murray baja del tercer puesto al veintidós y Wilkin del quinto al veintiocho. Lac Qui Parle pierde más de un punto y aun así aguanta el segundo, porque sus dos casas dan muy alto. Los dos grandes se quedan exactamente donde estaban.</p>
-<p>Bajarle el número a Lac Qui Parle suena a tapar el dato. Es lo mismo que pasaba con <a href="../../posts/2023-06-12-regresion-a-la-media/index.html">las alturas de padres e hijos</a>: cuando un valor sale extremo, una parte de lo extremo es ruido, y la siguiente medición cae más cerca del centro.</p>
-<p>En el gráfico se ve el embudo.</p>
-<div id="cell-grafico" class="cell" data-execution_count="7">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">fig, ax <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> plt.subplots()</span>
-<span id="cb12-2">ax.axhline(mu, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"gray"</span>, linestyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"--"</span>, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"media global"</span>)</span>
-<span id="cb12-3">ax.scatter(tabla[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"n"</span>], tabla[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"dummies"</span>], s<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">18</span>,</span>
-<span id="cb12-4">           label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"un intercept por condado"</span>)</span>
-<span id="cb12-5">ax.scatter(tabla[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"n"</span>], tabla[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"jerarquico"</span>], s<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">18</span>, marker<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"x"</span>,</span>
-<span id="cb12-6">           label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"intercepts de la misma población"</span>)</span>
-<span id="cb12-7">ax.set_xscale(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"log"</span>)</span>
-<span id="cb12-8">ax.set_xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Casas medidas en el condado"</span>)</span>
-<span id="cb12-9">ax.set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Intercept estimado (log radón en sótano)"</span>)</span>
-<span id="cb12-10">ax.legend()</span>
-<span id="cb12-11">plt.show()</span></code></pre></div></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://lhansa.github.io/technical-notebooks/posts/2026-09-20-el-condado-mas-radiactivo-tiene-dos-casas/index_files/figure-html/grafico-output-1.png" id="grafico" width="590" height="431" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>A la izquierda, donde hay una, dos o tres casas, los puntos del modelo de dummies ocupan el gráfico entero. Las cruces del jerárquico están apretadas contra la línea gris.</p>
-<p>Pasadas las veinticinco casas la diferencia ya es de centésimas. A partir de ahí el condado se ha ganado que le crean.</p>
-<p>El rango entero de intercepts pasa de 2,46 a 1,07.</p>
-</section>
-<section id="por-qué-esto-te-importa" class="level2">
-<h2 class="anchored" data-anchor-id="por-qué-esto-te-importa">Por qué esto te importa</h2>
-<p>Rankings de grupos haces todas las semanas, aunque no los llames así. Conversión por campaña. Ticket medio por tienda. Tasa de fallo por proveedor. Churn por segmento.</p>
-<p>Y siempre hay grupos pequeños ahí metidos: la tienda que abrió en marzo, el proveedor del que llevas cuatro pedidos, la campaña que duró un fin de semana.</p>
-<p>Esos son justo los que salen primeros y últimos. Tienen menos datos, así que tienen más sitio para desviarse. Por eso los dos extremos de cualquier ranking se llenan de ellos.</p>
-<p>Ordenar por la media los sube al podio. Poner un mínimo de observaciones y filtrar los tira a la basura, con lo poquito que sabías de ellos dentro.</p>
-<p>El modelo jerárquico hace la tercera cosa. Se los queda y les baja el volumen en proporción a lo que sabe de cada uno.</p>
-<p>Son tres líneas de statsmodels. Lo caro es acordarte de que el grupo pequeño está ahí.</p>
-
-
-</section>
-
- ]]></description>
-  <category>bayes</category>
-  <category>muestreo</category>
-  <category>python</category>
-  <guid>https://lhansa.github.io/technical-notebooks/posts/2026-09-20-el-condado-mas-radiactivo-tiene-dos-casas/</guid>
-  <pubDate>Sun, 20 Sep 2026 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
