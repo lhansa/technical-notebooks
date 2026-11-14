@@ -28,7 +28,6 @@ If a method is fair, every position from 1 to 50 should end up in the sample wit
 
 ```{python}
 #| label: libs
-import time
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -62,7 +61,7 @@ Nobody does this on purpose. But `head -n 1000` on a log file is exactly this, a
 You want later events to get a chance. So you fill the sample with the first five, and from then on each new event flips a coin. Heads, it replaces one of the five at random.
 
 ```{python}
-#| label: fixed-coin
+#| label: replace-sim
 def run_replace(accept_prob, n, k, reps, rng):
     """Fill with the first k; item i > k replaces a random slot with prob accept_prob(i)."""
     sample = np.tile(np.arange(1, k + 1), (reps, 1))
@@ -72,7 +71,12 @@ def run_replace(accept_prob, n, k, reps, rng):
         slot = rng.integers(0, k, size=reps)
         sample[rows[accept], slot[accept]] = i
     return sample
+```
 
+The same function will come back later with a different acceptance rule. For now, a coin.
+
+```{python}
+#| label: fixed-coin
 def theory_coin(i):
     # i > k: accepted with 1/2, then survives each later step with prob 1 - 1/(2k)
     if i > K:
@@ -121,7 +125,7 @@ The bar drops as the stream goes on. Event 6 gets in with probability $5/6$. Eve
 
 That falling bar is what fixes the coin. Late events still get in, just less often. And early events face fewer evictions as the stream goes on. Those two effects cancel.
 
-Take event $i$, with $i > k$. It enters with probability $k/i$. At every later step $j$, a newcomer gets in with probability $k/j$ and picks one of the $k$ slots, so event $i$ gets evicted with probability $1/j$. It survives that step with probability $(j-1)/j$. Multiply it all out to the end of the stream:
+Take event $i$, with $i > k$. It enters with probability $k/i$. At every later step $j$, a newcomer gets in with probability $k/j$. It picks one of the $k$ slots at random. So event $i$ gets evicted with probability $1/j$, and survives with probability $(j-1)/j$. Multiply it all out to the end of the stream:
 
 $$\frac{k}{i} \cdot \frac{i}{i+1} \cdot \frac{i+1}{i+2} \cdots \frac{N-1}{N} = \frac{k}{N}$$
 
@@ -192,14 +196,12 @@ def stream_of(n):
         yield i
 
 rng_demo = np.random.default_rng(7)
-t0 = time.perf_counter()
 items, idx = reservoir_sample(stream_of(10_000_000), 1000, rng_demo)
-elapsed = time.perf_counter() - t0
-print(f"len {len(items)}, time {elapsed:.1f}s, mean index {np.mean(idx):.0f} (N/2 = 5,000,000), "
+print(f"len {len(items)}, mean index {np.mean(idx):.0f} (N/2 = 5,000,000), "
       f"min {min(idx)}, max {max(idx)}")
 ```
 
-A thousand events, picked from all over the stream. The average position is about 5.1 million, roughly one standard error from the middle. In plain Python it takes about a second and a half per million events, with memory flat the whole way.
+A thousand events, picked from all over the stream. The average position is about 5.1 million, roughly one standard error from the middle. In plain Python it took around fifteen seconds when I ran it, with memory flat the whole way.
 
 Each of the ten million had the same chance of being in there: $1{,}000 / 10^7$, one in ten thousand. The cancellation works just as well at this size. Here it is in logarithms, for event number two million:
 
