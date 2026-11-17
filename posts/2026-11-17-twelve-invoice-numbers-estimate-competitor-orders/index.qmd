@@ -32,7 +32,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 ```
 
-The loop below draws twelve different numbers between 1 and 5,000 for every row at once. It's Floyd's algorithm: draw a number, and if the row already has it, take the top of the current range instead.
+I draw twelve different numbers between 1 and 5,000, 100,000 times. Floyd's algorithm does it for every row at once.
 
 ```{python}
 #| label: samples
@@ -45,7 +45,12 @@ for i, j in enumerate(range(N - k + 1, N + 1)):
     t = np.random.randint(1, j + 1, size=n_samples)
     dup = (samples[:, :i] == t[:, None]).any(axis=1)
     samples[:, i] = np.where(dup, j, t)
+```
 
+A quick check that every row holds twelve different numbers in range.
+
+```{python}
+#| label: samples-check
 repeats = (np.diff(np.sort(samples, axis=1), axis=1) == 0).any(axis=1).sum()
 print(samples.shape, samples.min(), samples.max())
 print(f"rows with repeats: {repeats}")
@@ -176,7 +181,13 @@ Statisticians call this the German tank problem, after the serial numbers on cap
 
 Sequential numbers are all over the place. Invoice numbers, order numbers in a confirmation email, user IDs in a URL, support ticket numbers. Each one is a sample from a series, and a dozen of them is enough to size it.
 
-Check the two assumptions before you believe the number. If the competitor restarts the count every January, you've estimated this year's invoices. If their numbering skips, or starts at 10,000 to look bigger, the estimate inherits that. And if your twelve invoices all come from the spring, you've estimated how far they'd got by the spring. An invoice also counts as an order only if they bill each order on its own.
+Check the two assumptions before you believe the number.
+
+If the competitor restarts the count every January, you've estimated this year's invoices. If their numbering skips, or starts at 10,000 to look bigger, the estimate inherits that.
+
+If your twelve invoices all come from the spring, you've estimated how far they'd got by the spring.
+
+And an invoice is an order only if they bill each order on its own.
 
 There's a version for a series whose first number you don't know. I've left that out, along with how to put an upper bound on the total. Both need more than one addition.
 
