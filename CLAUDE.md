@@ -37,10 +37,54 @@ ahí** hasta que elijas uno. Después, el agente `laboratorio` escribe y ejecuta
 es un cuaderno, y `hilos` busca enlaces a posts viejos y saca temas para los siguientes. La
 redacción no se delega: la hace el hilo principal. Ya escrito, `rigor` comprueba en frío si lo que
 dice es verdad y `oido` si suena a manual. La skill `publicar` cierra: render, `_freeze/`, rama,
-commit, PR y los issues de los temas derivados.
+commit, PR y, cuando toca, el issue del tema derivado.
 
 Las piezas están en `.claude/`. Contienen procedimiento, no reglas: las reglas del blog viven en
 este fichero y solo aquí.
+
+## Issues de temas y calendario
+
+Desde noviembre de 2026 la prioridad es **cerrar los issues de temas abiertos**, no abrir más.
+
+Un **issue de tema** es un issue abierto con la etiqueta `idea-post`, o sin etiqueta y con el
+título empezando por `[idea]` o `Post:`. No cuentan los `[semana]`, los `[aviso]` viejos ni los de
+mantenimiento, como el #79.
+
+**Los agentes no abren issues.** Las únicas excepciones:
+
+- el `[semana]` de cada lunes;
+- el sub-issue del tema que él elige en el semanal, cuando no existe ya como issue: se cierra con su
+  post esa misma semana;
+- en modo normal, un issue derivado por post (abajo).
+
+Lo que antes iba en un issue `[aviso]` va ahora como comentario: en el sub-issue del día si lo hay,
+si no en el semanal, y si tampoco hay semanal, solo en el mensaje final de la rutina.
+
+### Los dos modos
+
+El lunes, antes de abrir el semanal, se cuentan los issues de temas abiertos. El modo sale de ahí,
+se escribe en el semanal en una línea `Modo: cierre` o `Modo: normal` y vale toda la semana.
+
+**Modo cierre: 10 o más issues de temas abiertos.**
+
+- Se publican igual tres posts: martes, jueves y sábado.
+- Martes y jueves salen de issues abiertos: los dos más antiguos que no estén ya cubiertos por un
+  post publicado. Los elige `temas` el lunes y van como sub-issues del semanal desde ese momento,
+  sin esperar a que él conteste.
+- El lunes `temas` sigue proponiendo cinco fichas. Él elige **una**, para el sábado.
+- Un issue de tema que un post publicado ya cubre se cierra como `completed`, con un comentario
+  que enlaza el post.
+- `publicar` no abre issues derivados. Los temas que saque `hilos` van como texto en el PR.
+
+**Modo normal: menos de 10.**
+
+- El lunes, cinco fichas y él elige tres, como siempre.
+- `publicar` abre **un** issue derivado por post, el mejor de los que saque `hilos`. Tres a la
+  semana.
+- El lunes siguiente esos issues derivados van dentro de las cinco fichas; el resto se completa con
+  temas nuevos.
+- Cuando él contesta, los issues derivados que estaban entre las fichas y no eligió se cierran como
+  `not_planned` (won't fix), con el comentario `Tema rechazado en el [semana] AAAA-Wxx.`
 
 ## La voz
 

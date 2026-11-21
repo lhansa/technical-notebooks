@@ -1,6 +1,6 @@
 ---
 name: lunes
-description: Recoge los tres temas que él ha elegido en el issue semanal, sean fichas de `temas` o temas suyos, pasa los suyos por hilos sin bloquear y deja listo el cuerpo de cada sub-issue. Úsala cuando él haya contestado en el semanal. No elige, no filtra y no abre issues.
+description: Recoge los temas que él ha elegido en el issue semanal (tres en modo normal, uno en modo cierre), sean fichas de `temas` o temas suyos, pasa los suyos por hilos sin bloquear y deja listo el cuerpo de cada sub-issue. Úsala cuando él haya contestado en el semanal. No elige, no filtra y no abre issues.
 allowed-tools: Read, Grep, Glob, Bash, Agent, mcp__github__list_issues, mcp__github__issue_read, mcp__github__search_issues
 ---
 
@@ -8,8 +8,15 @@ Lee `CLAUDE.md` antes de nada, y luego `.claude/skills/temas/SKILL.md`: los camp
 los que vas a mover.
 
 El lunes `temas` propone cinco fichas y van tal cual al issue `[semana]`. Nadie las filtra. Él lee,
-elige tres y contesta con un comentario. A veces uno de los tres no es de las fichas: es un tema
-que se le ha ocurrido a él.
+elige y contesta con un comentario. A veces lo que elige no es de las fichas: es un tema que se le
+ha ocurrido a él.
+
+Cuántos elige depende del modo, que está en la línea `Modo:` del cuerpo del semanal (las reglas, en
+`CLAUDE.md`, **Issues de temas y calendario**). Si no hay línea `Modo:`, es modo normal.
+
+- **Modo normal:** tres, para martes, jueves y sábado.
+- **Modo cierre:** uno, para el sábado. Martes y jueves salen del backlog y ya cuelgan del semanal;
+  no son cosa tuya.
 
 Tu trabajo empieza cuando ha contestado. Recoges lo que ha dicho y lo dejas listo para los
 sub-issues. No eliges nada ni opinas sobre lo que ha elegido.
@@ -38,7 +45,9 @@ Si todavía no ha contestado, no haces nada. Lo dices en una línea y paras.
 
 ## 2. Cómo contesta
 
-Tres líneas, en el orden de publicación: martes, jueves y sábado. Cada línea es un número de ficha
+En modo cierre, una línea: la del sábado. Si escribe más, cuenta la primera y lo dices.
+
+En modo normal, tres líneas, en el orden de publicación: martes, jueves y sábado. Cada línea es un número de ficha
 o un tema suyo, en texto libre:
 
 ```
@@ -50,7 +59,8 @@ Por qué la media de los ratios no es el ratio de las medias
 Las líneas del tipo "la 4 ya lo sabía" no son elección. Son el feedback que lee `temas` la semana
 siguiente, y aquí no las tocas.
 
-Si hay menos de tres, salen los que haya y lo dices. Si hay más, cuentan los tres primeros.
+En modo normal, si hay menos de tres, salen los que haya y lo dices. Si hay más, cuentan los tres
+primeros.
 
 Si una línea no se entiende, no la adivines: un número que no está entre las fichas, o una frase
 que no sabes si es un tema o un comentario. La dejas fuera y dices por qué. Es mejor un sub-issue
@@ -58,7 +68,8 @@ de menos que uno con el tema equivocado.
 
 ## 3. Las fichas
 
-Un número lleva su ficha tal cual, con todos sus campos. No se vuelve a verificar nada: la
+Un número lleva su ficha tal cual, con todos sus campos, incluida la línea `Issue: #N` si la tiene:
+es lo que le dice a `semana` que ese issue ya existe y no hay que abrir otro. No se vuelve a verificar nada: la
 referencia la comprobó `temas`, y lo que diga el post lo comprobará `rigor` sobre el borrador.
 
 ## 4. Los temas suyos
@@ -82,7 +93,7 @@ fijo:
 ```
 ### <Título>
 Publicación: <martes | jueves | sábado> AAAA-MM-DD
-Origen: <ficha N de `temas` | tema propio>
+Origen: <ficha N de `temas` | ficha N de `temas`, issue #M | tema propio>
 
 <La ficha entera, con sus campos.>
   o bien
@@ -101,11 +112,12 @@ w=2026-W40   # la del título
 date -d "$(date -d "${w%-W*}-01-04 -$(( $(date -d "${w%-W*}-01-04" +%u) - 1 )) days" +%F) +$(( (10#${w#*-W} - 1) * 7 + 1 )) days" +%F
 ```
 
-Eso da el martes; el jueves y el sábado son dos y cuatro días después. Si el título no lleva
+Eso da el martes; el jueves y el sábado son dos y cuatro días después. En modo cierre, el único
+bloque es el del sábado. Si el título no lleva
 semana, no inventes fechas: dilo y para.
 
 Debajo de los bloques, una línea por cada cosa que no ha entrado y por qué: una línea ambigua, un
-número que no existe, o que eligió menos de tres.
+número que no existe, o que eligió menos de los que tocaban.
 
 ## Lo que no haces
 

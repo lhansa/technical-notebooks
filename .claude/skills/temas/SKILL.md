@@ -1,6 +1,6 @@
 ---
 name: temas
-description: Propone cinco temas para posts del blog, cada uno con una referencia primaria real, su ejemplo concreto y una línea de dónde te lo encuentras trabajando con datos. Úsala el lunes: las fichas van tal cual al issue semanal y él elige tres. No elige ni escribe posts.
+description: Propone cinco temas para posts del blog, cada uno con una referencia primaria real, su ejemplo concreto y una línea de dónde te lo encuentras trabajando con datos. También cuenta los issues de temas abiertos para fijar el modo de la semana y, en modo cierre, elige los dos issues del backlog de martes y jueves. Úsala el lunes: las fichas van tal cual al issue semanal. No elige las fichas ni escribe posts.
 allowed-tools: Read, Grep, Glob, Bash, WebSearch, WebFetch, mcp__github__list_issues, mcp__github__issue_read, mcp__github__search_issues
 ---
 
@@ -16,6 +16,17 @@ no cabe, por muy poco conocido que sea.
 
 Tampoco valen los de siempre contados igual. Un LLM tiende a proponer el teorema central del
 límite, la paradoja de Simpson y el sesgo de supervivencia, con el ejemplo de manual.
+
+## 0. El modo de la semana
+
+Antes que nada, lee en `CLAUDE.md` la sección **Issues de temas y calendario**. Con `list_issues`,
+abiertos, cuenta los issues de temas tal como los define ahí. Pagina hasta el final: no cuentes
+sobre una página.
+
+- **10 o más: modo cierre.** Haces el punto 6, el backlog, además de las cinco fichas.
+- **Menos de 10: modo normal.** Algunas de las cinco fichas salen de issues derivados (punto 5).
+
+El número y el modo van en tu salida. `semana` los copia al semanal.
 
 ## 1. El mapa de lo que ya sabe
 
@@ -36,6 +47,10 @@ dentro de una serie ya abierta solo vale si dice algo que la serie no dijo.
 Code](…)_`. Los que llevan el pie los abrió el pipeline: temas derivados de `hilos` o sub-issues de
 un semanal. Esos no cierran nada; si un tema derivado es bueno, lo puedes proponer. Una idea suya ya
 apuntada no se vuelve a proponer, aunque la referencia sea otra.
+
+Y una regla nueva: **una ficha nueva no repite un tema que ya está en un issue abierto**, lo
+abriera quien lo abriera. Los issues abiertos salen por el backlog o por los derivados, no
+duplicados como ficha.
 
 **Los issues `[semana]` anteriores, con sus comentarios.** Etiqueta `semana`, abiertos y cerrados.
 Lee el cuerpo y luego los comentarios con `issue_read` y `get_comments`. Lo elegido ya está escrito
@@ -59,7 +74,7 @@ American Statistician*, *Biometrika*, *JASA*, *Statistical Science*, *Technometr
 *PNAS*, documentación técnica de numpy o de IEEE 754, libros de referencia. Las "paradojas" con
 nombre propio y las notas cortas de dos o tres páginas suelen ser buen terreno.
 
-Reparte. Cinco temas de inferencia bayesiana son una semana tirada. Él elige tres, y con cinco del
+Reparte. Cinco temas de inferencia bayesiana son una semana tirada. Él elige tres (una en modo cierre), y con cinco del
 mismo campo no tiene dónde elegir. Dale material: **al menos tres campos distintos entre las cinco
 fichas.**
 
@@ -102,7 +117,7 @@ una coja.
 ## 5. Las fichas
 
 Cinco, numeradas. Cada una con estos campos, en este orden, porque el issue semanal y los sub-issues
-los leen así:
+los leen así. Las que salen de un issue llevan además una décima línea al final, `Issue: #N`:
 
 - **Título.** En inglés, que es el idioma en que sale el post, y en la forma del blog: afirmación o
   pregunta concreta. "The textbook variance formula breaks in floating point", no "Numerical
@@ -119,6 +134,43 @@ los leen así:
   Cuaderno solo si la simulación demuestra algo que la prosa no puede.
 - **Solape.** Los posts o issues más cercanos, con su ruta o número, o "ninguno cercano". Es lo que
   él ve antes de elegir, así que compruébalo leyendo los posts, no solo los títulos.
+
+### Las fichas que salen de un issue (solo en modo normal)
+
+En modo normal, primero van los issues derivados pendientes: abiertos, con la etiqueta `idea-post`,
+con una línea `Derivado de:` en el cuerpo, y cuyo número no aparece como `Issue: #N` en ningún
+`[semana]` anterior. Los abre `publicar`, uno por post, así que suelen ser tres. Si hay más, los
+tres más antiguos.
+
+Cada uno se convierte en ficha completa, con los nueve campos y `Issue: #N` al final. El título es
+el del issue. La referencia la buscas igual que para las demás, con una excepción: si no encuentras
+una primaria confirmada, la ficha **no se tira**, porque el issue ya existe y él tiene que decidir
+sobre él. Pon `Referencia: no encontrada` y sigue.
+
+Las fichas que faltan hasta cinco son temas nuevos, como siempre. La regla de los tres campos
+distintos vale para las cinco juntas, si se puede; si los derivados la rompen, dilo en las líneas
+finales.
+
+En modo cierre no hay fichas de issues: las cinco son nuevas.
+
+## 6. El backlog (solo en modo cierre)
+
+Martes y jueves se publican issues abiertos. Tú eliges cuáles.
+
+Los candidatos son los issues de temas abiertos que **no** cuelgan de un `[semana]` abierto. Los que
+cuelgan de un semanal cerrado sí son candidatos: son posts que se quedaron sin escribir. Ordénalos
+del más antiguo al más nuevo, por número.
+
+Recorre la lista en ese orden. Para cada uno, mira si un post publicado ya lo cubre: lee el título y
+el cuerpo, y compáralo con el mapa del punto 1, entrando a leer el post si dudas. Cubierto quiere
+decir que el post cuenta lo mismo, no que roce el tema.
+
+- Si está cubierto, apúntalo para cerrar, con la ruta del post que lo cubre, y sigue con el
+  siguiente.
+- Si no, es candidato. Los dos primeros candidatos son martes y jueves, en ese orden.
+
+Si un issue no es un tema sino otra cosa (una tarea, una pregunta), no lo cuentes ni lo cierres:
+sáltalo y dilo.
 
 ## La vara, con ejemplos
 
@@ -158,13 +210,31 @@ Fíjate en que varias ya rozan el corpus: Freedman con
 
 ## Qué entregas
 
-Las cinco fichas, y debajo dos líneas: qué zonas descartaste por el mapa (corpus, ideas, "ya lo
-sabía") y cuántos campos distintos cubren las cinco.
+Arriba, una línea con el modo y el recuento:
+
+```
+Modo: <cierre | normal> (<N> issues de temas abiertos)
+```
+
+Luego las cinco fichas, y debajo dos líneas: qué zonas descartaste por el mapa (corpus, ideas, "ya
+lo sabía") y cuántos campos distintos cubren las cinco.
+
+En modo cierre, debajo de todo, el backlog con este formato fijo:
+
+```
+Backlog:
+martes: #A <título>
+jueves: #B <título>
+Cerrar por cubiertos:
+#C <título>: <ruta del post>
+```
+
+Si no hay nada que cerrar, la sección `Cerrar por cubiertos:` va con `ninguno`.
 
 Si él pide más porque ninguna le convence, repites el proceso con el mapa ampliado:
 las cinco de antes cuentan como ya propuestas.
 
 ## Lo que no haces
 
-No eliges las tres. No abres el issue `[semana]`. No escribes posts. No comentas en issues. Eso lo
-hacen otros, con tu salida delante.
+No eliges entre las fichas. No abres el issue `[semana]`, no cierras issues y no comentas en
+ellos. No escribes posts. Eso lo hacen otros, con tu salida delante.
